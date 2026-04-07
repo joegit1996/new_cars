@@ -1,0 +1,38 @@
+.section {
+  display: flex;
+  flex-direction: column;
+}
+
+.heading {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--neutral_900);
+  margin-bottom: 8px;
+}
+
+.feed {
+  display: flex;
+  flex-direction: column;
+}
+
+.skeletonCard {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--neutral_100);
+}
+
+.skeletonContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.empty {
+  padding: 32px 0;
+  text-align: center;
+  color: var(--neutral_500);
+  font-size: 14px;
+}
