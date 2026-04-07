@@ -1,5 +1,6 @@
-import { getBrandBySlug, getTrimById, getVariantById } from "@/data";
+import { getBrandBySlug, getTrimById, getModelById, getVariantById } from "@/data";
 import { notFound } from "next/navigation";
+import DetailsPage from "../DetailsPage";
 
 export default async function VariantPage({ params }: { params: Promise<{ slug: string; trimId: string; variantId: string }> }) {
   const { slug, trimId, variantId } = await params;
@@ -8,11 +9,14 @@ export default async function VariantPage({ params }: { params: Promise<{ slug: 
   const variant = getVariantById(trimId, variantId);
   if (!brand || !trim || !variant) notFound();
 
-  // Placeholder for Task 8
+  const model = getModelById(trim.modelId);
+
   return (
-    <div style={{ padding: "24px 16px", maxWidth: 700, margin: "0 auto" }}>
-      <h1>{variant.name}</h1>
-      <p>Variant details page coming in Task 8 - KWD {variant.price.toLocaleString()}</p>
-    </div>
+    <DetailsPage
+      brand={brand}
+      trim={trim}
+      modelName={model?.name || ""}
+      initialVariantId={variantId}
+    />
   );
 }

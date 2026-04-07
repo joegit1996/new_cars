@@ -1,0 +1,58 @@
+.page {
+  width: 100%;
+}
+
+.galleryWrap {
+  width: 100%;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.galleryWrap.fade {
+  opacity: 0.5;
+}
+
+.container {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.selectorWrap {
+  margin-bottom: 4px;
+}
+
+.breadcrumbWrap {
+  margin-bottom: 0;
+}
+
+.trimName {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--neutral_900);
+  margin: 0;
+}
+
+.variantName {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--neutral_600);
+  margin: 0;
+}
+
+.price {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--prim_500);
+  margin: 0;
+}
+
+.colorsWrap {
+  margin-top: 4px;
+}
+
+.specsWrap {
+  margin-top: 16px;
+}

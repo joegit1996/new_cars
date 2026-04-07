@@ -1,0 +1,39 @@
+.scrollContainer {
+  overflow-x: auto;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  margin: 0 -16px;
+  padding: 0 16px;
+}
+
+.scrollContainer::-webkit-scrollbar {
+  display: none;
+}
+
+.row {
+  display: flex;
+  gap: 8px;
+  padding: 4px 0;
+  white-space: nowrap;
+}
+
+.chip {
+  flex-shrink: 0;
+  padding: 8px 16px;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  border: 1px solid var(--neutral_100);
+  background: #ffffff;
+  color: var(--neutral_700);
+  transition: background 0.2s ease-in-out, color 0.2s ease-in-out,
+    border-color 0.2s ease-in-out;
+}
+
+.chip.active {
+  background: var(--prim_500);
+  color: #ffffff;
+  border-color: var(--prim_500);
+}

@@ -1,0 +1,33 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.swatch {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--neutral_200);
+  cursor: pointer;
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  transition: outline-color 0.2s ease-in-out;
+  padding: 0;
+}
+
+.swatch.active {
+  outline-color: var(--prim_500);
+}
+
+.colorName {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--neutral_600);
+}
