@@ -36,7 +36,7 @@
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  transition: 0.2s ease-in-out;
+  transition: border-color 0.2s ease-in-out, color 0.2s ease-in-out;
   overflow: hidden;
 }
 
@@ -72,4 +72,16 @@
 
 .chipSelected:hover {
   border-color: var(--prim_500);
+}
+
+/* ─── Mobile ──────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .chip {
+    padding: 6px 14px;
+    font-size: 14px;
+  }
+
+  .scrollContainer {
+    gap: 10px;
+  }
 }

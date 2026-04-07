@@ -15,6 +15,8 @@ interface FilterPanelProps {
   onFiltersChange: (filters: Partial<Filters>) => void;
   availableModels?: Model[];
   selectedModelIds?: string[];
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
 const BODY_TYPE_OPTIONS: { value: BodyType; label: string }[] = [
@@ -122,6 +124,8 @@ export default function FilterPanel({
   onFiltersChange,
   availableModels = [],
   selectedModelIds = [],
+  isOpen = false,
+  onClose,
 }: FilterPanelProps) {
   const update = (partial: Partial<Filters>) => {
     onFiltersChange({ ...filters, ...partial });
@@ -198,7 +202,14 @@ export default function FilterPanel({
   const showVariants = (filters.trimIds?.length ?? 0) > 0 && availableVariants.length > 0;
 
   return (
-    <aside className={styles.panel}>
+    <>
+      {onClose && (
+        <div
+          className={`${styles.mobileOverlay} ${isOpen ? styles.mobileOverlayVisible : ""}`}
+          onClick={onClose}
+        />
+      )}
+      <aside className={`${styles.panel} ${isOpen ? styles.panelOpen : ""}`}>
       <div className={styles.header}>
         <div className={styles.headerLeft}>
           <h2 className={styles.title}>Filters</h2>
@@ -316,5 +327,6 @@ export default function FilterPanel({
         </AccordionSection>
       </div>
     </aside>
+    </>
   );
 }

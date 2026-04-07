@@ -37,11 +37,15 @@
   font-weight: 500;
   color: var(--prim_500);
   cursor: pointer;
-  transition: 0.2s ease-in-out;
+  transition: color 0.2s ease-in-out;
 }
 
 .compareLink:hover {
   color: var(--prim_600);
+}
+
+.compareLinkText {
+  display: inline;
 }
 
 .badge {
@@ -57,4 +61,26 @@
   font-size: 12px;
   font-weight: 700;
   line-height: 1;
+}
+
+/* ─── Tablet ──────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .header {
+    height: 60px;
+  }
+}
+
+/* ─── Mobile ──────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .header {
+    height: 56px;
+  }
+
+  .logo {
+    font-size: 18px;
+  }
+
+  .compareLinkText {
+    display: none;
+  }
 }

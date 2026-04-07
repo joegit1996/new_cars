@@ -123,7 +123,7 @@
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(255, 255, 255, 0.4) 50%,
+    rgba(255, 255, 255, 0.6) 50%,
     transparent 100%
   );
   animation: shimmer 1.5s linear infinite;
@@ -154,7 +154,7 @@
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(255, 255, 255, 0.4) 50%,
+    rgba(255, 255, 255, 0.6) 50%,
     transparent 100%
   );
   animation: shimmer 1.5s linear infinite;
@@ -176,5 +176,43 @@
   }
   100% {
     transform: translateX(calc(100% + 100px));
+  }
+}
+
+/* ─── Tablet ──────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .skeletonCard {
+    width: 280px;
+  }
+}
+
+/* ─── Mobile ──────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .header {
+    padding: 0 16px;
+  }
+
+  .carouselContainer {
+    padding: 0 16px;
+  }
+
+  .skeletonContainer {
+    padding: 0 16px;
+  }
+
+  .skeletonCard {
+    width: 260px;
+  }
+
+  /* Hide navigation arrows on mobile */
+  .carouselContainer :global(.swiper-button-prev),
+  .carouselContainer :global(.swiper-button-next) {
+    display: none;
+  }
+
+  /* Ensure pagination dots are visible */
+  .carouselContainer :global(.swiper-pagination) {
+    display: flex;
+    justify-content: center;
   }
 }

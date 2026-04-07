@@ -20,12 +20,12 @@
 .clearBtn {
   background: none;
   border: 1px solid var(--neutral_300);
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 8px 16px;
   font-size: 14px;
   color: var(--neutral_600);
   cursor: pointer;
-  transition: 0.2s ease-in-out;
+  transition: border-color 0.2s ease-in-out, color 0.2s ease-in-out;
 }
 
 .clearBtn:hover {
@@ -67,7 +67,7 @@
   border-radius: 12px;
   padding: 12px 32px;
   text-decoration: none;
-  transition: 0.2s ease-in-out;
+  transition: background-color 0.2s ease-in-out;
 }
 
 .browseLink:hover {
@@ -79,7 +79,7 @@
   margin-top: 32px;
   padding: 24px;
   background: var(--neutral_50);
-  border-radius: 12px;
+  border-radius: 8px;
   border: 1px solid var(--neutral_100);
 }
 
@@ -100,16 +100,18 @@
 .select {
   padding: 10px 16px;
   border: 1px solid var(--neutral_300);
-  border-radius: 8px;
+  border-radius: 12px;
   font-size: 14px;
   color: var(--neutral_700);
   background: #ffffff;
   min-width: 180px;
   cursor: pointer;
+  transition: border-color 0.2s ease-in-out;
 }
 
-.select:focus {
-  outline: none;
+.select:focus-visible {
+  outline: 2px solid var(--prim_500);
+  outline-offset: 2px;
   border-color: var(--prim_500);
 }
 
@@ -119,14 +121,40 @@
   font-weight: 700;
   font-size: 14px;
   border: none;
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 10px 20px;
   cursor: pointer;
-  transition: 0.2s ease-in-out;
+  transition: background-color 0.2s ease-in-out;
   text-decoration: none;
   display: inline-block;
 }
 
 .goBtn:hover {
   background: var(--prim_600);
+}
+
+/* ─── Mobile ──────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .page {
+    padding: 16px 12px 80px;
+  }
+
+  .title {
+    font-size: 20px;
+  }
+
+  .selectorRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .select {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .goBtn {
+    width: 100%;
+    text-align: center;
+  }
 }

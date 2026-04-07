@@ -30,6 +30,12 @@
   flex-direction: row;
   gap: 8px;
   overflow-x: auto;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.thumbnailStrip::-webkit-scrollbar {
+  display: none;
 }
 
 .thumbnail {

@@ -64,10 +64,20 @@
   --shades_100: #000000;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+}
+
+/* Global focus ring for accessibility */
+*:focus-visible {
+  outline: 2px solid var(--prim_500);
+  outline-offset: 2px;
 }
 
 body {

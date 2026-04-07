@@ -11,10 +11,12 @@ import FilterPanel from "@/components/Filters/FilterPanel";
 import ListingsFeed from "@/components/ListingsFeed/ListingsFeed";
 import { useFilters } from "@/hooks/useFilters";
 import { useComparison } from "@/context/ComparisonContext";
+import styles from "./page.module.css";
 
 export default function Home() {
   const [selectedBrandId, setSelectedBrandId] = useState<string | null>(null);
   const [selectedModelIds, setSelectedModelIds] = useState<string[]>([]);
+  const [filterPanelOpen, setFilterPanelOpen] = useState(false);
 
   const selectedBrand = brands.find((b) => b.id === selectedBrandId);
 
@@ -104,10 +106,25 @@ export default function Home() {
     (filters.exteriorColors && filters.exteriorColors.length > 0) ||
     (filters.features && filters.features.length > 0);
 
+  // Count active filters for the badge
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    if (filters.trimIds) count += filters.trimIds.length;
+    if (filters.variantIds) count += filters.variantIds.length;
+    if (filters.priceRange) count += 1;
+    if (filters.bodyTypes) count += filters.bodyTypes.length;
+    if (filters.fuelTypes) count += filters.fuelTypes.length;
+    if (filters.transmissions) count += filters.transmissions.length;
+    if (filters.drivetrains) count += filters.drivetrains.length;
+    if (filters.exteriorColors) count += filters.exteriorColors.length;
+    if (filters.features) count += filters.features.length;
+    return count;
+  }, [filters]);
+
   const availableModels = selectedBrand ? selectedBrand.models : [];
 
   return (
-    <div style={{ maxWidth: 1200, margin: "0 auto", padding: "24px 16px" }}>
+    <div className={styles.page}>
       <BrandSelector
         brands={brands}
         selectedBrandId={selectedBrandId}
@@ -130,19 +147,14 @@ export default function Home() {
         />
       )}
 
-      <div
-        style={{
-          display: "flex",
-          gap: 24,
-          marginTop: 24,
-          alignItems: "flex-start",
-        }}
-      >
+      <div className={styles.mainLayout}>
         <FilterPanel
           filters={filters}
           onFiltersChange={setFilter}
           availableModels={availableModels}
           selectedModelIds={selectedModelIds}
+          isOpen={filterPanelOpen}
+          onClose={() => setFilterPanelOpen(false)}
         />
 
         <ListingsFeed
@@ -154,6 +166,21 @@ export default function Home() {
           onSortChange={handleSortChange}
         />
       </div>
+
+      {/* Mobile filter toggle button */}
+      <button
+        className={styles.filterToggle}
+        type="button"
+        onClick={() => setFilterPanelOpen(!filterPanelOpen)}
+      >
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M2 4H16M5 9H13M7 14H11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+        </svg>
+        Filters
+        {activeFilterCount > 0 && (
+          <span className={styles.filterToggleBadge}>{activeFilterCount}</span>
+        )}
+      </button>
     </div>
   );
 }

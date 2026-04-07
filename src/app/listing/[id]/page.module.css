@@ -232,7 +232,7 @@
   align-items: center;
   gap: 6px;
   background: var(--neutral_50);
-  border-radius: 12px;
+  border-radius: 20px;
   padding: 8px 16px;
   font-size: 14px;
   font-weight: 500;
@@ -440,9 +440,9 @@
   margin: 0;
 }
 
-/* ─── Responsive ────────────────────────────────────────── */
+/* ─── Responsive: Tablet ────────────────────────────────── */
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .hero {
     flex-direction: column;
   }
@@ -455,11 +455,44 @@
     flex: 1 1 100%;
   }
 
+  .similarGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ─── Responsive: Mobile ────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .page {
+    padding: 16px 12px 48px;
+    gap: 24px;
+  }
+
+  .title {
+    font-size: 20px;
+  }
+
+  .price {
+    font-size: 28px;
+  }
+
   .featuresGrid {
     grid-template-columns: 1fr;
   }
 
   .similarGrid {
     grid-template-columns: 1fr;
+  }
+
+  .collapsibleTitle {
+    font-size: 18px;
+  }
+
+  .collapsibleBody {
+    padding: 0 16px 16px;
+  }
+
+  .collapsibleHeader {
+    padding: 14px 16px;
   }
 }

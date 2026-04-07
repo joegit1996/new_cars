@@ -72,7 +72,7 @@
   cursor: pointer;
   padding: 4px 8px;
   margin-top: 6px;
-  transition: 0.2s ease-in-out;
+  transition: color 0.2s ease-in-out;
 }
 
 .removeButton:hover {
@@ -168,17 +168,57 @@
 .toggleBtn {
   background: none;
   border: 2px solid var(--neutral_300);
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 8px 16px;
   font-size: 14px;
   font-weight: 500;
   color: var(--neutral_700);
   cursor: pointer;
-  transition: 0.2s ease-in-out;
+  transition: border-color 0.2s ease-in-out, color 0.2s ease-in-out, background-color 0.2s ease-in-out;
 }
 
 .toggleBtnActive {
   border-color: var(--prim_500);
   color: var(--prim_500);
   background: var(--prim_50);
+}
+
+/* ─── Tablet / Mobile ─────────────────────────────────── */
+@media (max-width: 1024px) {
+  .labelCol {
+    width: 140px;
+    min-width: 140px;
+  }
+
+  .carCol {
+    min-width: 180px;
+  }
+}
+
+@media (max-width: 768px) {
+  .stickyHeader {
+    top: 56px;
+  }
+
+  .labelCol {
+    width: 140px;
+    min-width: 140px;
+    font-size: 13px;
+  }
+
+  .carCol {
+    min-width: 160px;
+  }
+
+  .carImage {
+    height: 80px;
+  }
+
+  .carTitle {
+    font-size: 13px;
+  }
+
+  .carPrice {
+    font-size: 16px;
+  }
 }
