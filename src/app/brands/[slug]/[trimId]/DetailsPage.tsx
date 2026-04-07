@@ -105,6 +105,21 @@ export default function DetailsPage({
           />
         </div>
 
+        <div className={styles.heroSpecs}>
+          {[
+            { label: "Horsepower", value: `${activeVariant.specs.horsepower} HP` },
+            { label: "0-100 km/h", value: activeVariant.specs.zeroToHundred },
+            { label: "Engine", value: activeVariant.specs.engine },
+            { label: "Transmission", value: activeVariant.specs.transmission },
+            { label: "Drivetrain", value: activeVariant.specs.drivetrain },
+          ].map((stat) => (
+            <div key={stat.label} className={styles.heroStat}>
+              <span className={styles.heroStatValue}>{stat.value}</span>
+              <span className={styles.heroStatLabel}>{stat.label}</span>
+            </div>
+          ))}
+        </div>
+
         <div className={styles.specsWrap}>
           <SpecsSection specs={activeVariant.specs} />
         </div>

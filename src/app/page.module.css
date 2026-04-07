@@ -11,8 +11,27 @@
   overflow: hidden;
 }
 
-.title {
-  margin-bottom: 24px;
+.hero {
+  margin-bottom: 32px;
+}
+
+.heroTitle {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--neutral_900);
+  margin: 0 0 8px 0;
+}
+
+.heroSubtitle {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--neutral_500);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.brandCount {
+  color: var(--neutral_400);
 }
 
 .grid {
@@ -24,11 +43,5 @@
 @media (min-width: 640px) {
   .grid {
     grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-@media (min-width: 1024px) {
-  .grid {
-    grid-template-columns: repeat(4, 1fr);
   }
 }

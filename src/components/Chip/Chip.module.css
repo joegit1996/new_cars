@@ -2,8 +2,10 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 16px;
-  min-height: 44px;
+  padding: 8px 12px;
+  min-height: 36px;
+  white-space: nowrap;
+  flex-shrink: 0;
   border-radius: 100px;
   border: 1px solid var(--neutral_100);
   background: #ffffff;
@@ -58,4 +60,11 @@
   font-size: 16px;
   line-height: 1;
   cursor: pointer;
+}
+
+@media (min-width: 640px) {
+  .chip {
+    padding: 8px 16px;
+    min-height: 44px;
+  }
 }

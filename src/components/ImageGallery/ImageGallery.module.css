@@ -21,6 +21,8 @@
 
 @media (min-width: 640px) {
   .gallery {
+    max-width: 700px;
+    margin: 0 auto;
     max-height: 450px;
   }
 

@@ -24,6 +24,7 @@ type FilterKey = keyof FilterState;
 interface FilterConfig {
   key: FilterKey;
   label: string;
+  sheetTitle: string;
   options: { label: string; value: unknown }[];
 }
 
@@ -37,12 +38,14 @@ const PRICE_RANGES: { label: string; value: [number, number] }[] = [
 const FILTER_CONFIGS: FilterConfig[] = [
   {
     key: "priceRange",
-    label: "Price Range",
+    label: "Price",
+    sheetTitle: "Price Range",
     options: PRICE_RANGES.map((r) => ({ label: r.label, value: r.value })),
   },
   {
     key: "year",
     label: "Year",
+    sheetTitle: "Year",
     options: [
       { label: "2024", value: 2024 },
       { label: "2025", value: 2025 },
@@ -50,7 +53,8 @@ const FILTER_CONFIGS: FilterConfig[] = [
   },
   {
     key: "bodyType",
-    label: "Body Type",
+    label: "Body",
+    sheetTitle: "Body Type",
     options: [
       { label: "Sedan", value: "Sedan" },
       { label: "SUV", value: "SUV" },
@@ -60,7 +64,8 @@ const FILTER_CONFIGS: FilterConfig[] = [
   },
   {
     key: "engineType",
-    label: "Engine Type",
+    label: "Engine",
+    sheetTitle: "Engine Type",
     options: [
       { label: "Gasoline", value: "Gasoline" },
       { label: "Diesel", value: "Diesel" },
@@ -71,7 +76,8 @@ const FILTER_CONFIGS: FilterConfig[] = [
   },
   {
     key: "drivetrain",
-    label: "Drivetrain",
+    label: "Drive",
+    sheetTitle: "Drivetrain",
     options: [
       { label: "FWD", value: "FWD" },
       { label: "RWD", value: "RWD" },
@@ -80,7 +86,8 @@ const FILTER_CONFIGS: FilterConfig[] = [
   },
   {
     key: "transmission",
-    label: "Transmission",
+    label: "Gearbox",
+    sheetTitle: "Transmission",
     options: [
       { label: "Automatic", value: "Automatic" },
       { label: "Manual", value: "Manual" },
@@ -164,7 +171,7 @@ export default function FilterRow({ filters, onFilterChange }: FilterRowProps) {
         <BottomSheet
           isOpen={openFilter !== null}
           onClose={() => setOpenFilter(null)}
-          title={activeConfig.label}
+          title={activeConfig.sheetTitle}
         >
           <div className={styles.options}>
             {activeConfig.options.map((option) => {
