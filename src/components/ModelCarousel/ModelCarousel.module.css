@@ -1,0 +1,180 @@
+.section {
+  margin-top: 32px;
+  animation: slideInRight 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(40px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.header {
+  padding: 0 24px;
+  margin-bottom: 20px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--neutral_900);
+  margin: 0 0 4px 0;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: var(--neutral_500);
+  margin: 0;
+}
+
+/* Swiper container */
+.carouselContainer {
+  padding: 0 24px;
+  position: relative;
+}
+
+.carouselContainer :global(.swiper) {
+  overflow: visible;
+  padding-bottom: 40px;
+}
+
+.carouselContainer :global(.swiper-slide) {
+  width: auto;
+}
+
+/* Custom navigation arrows */
+.carouselContainer :global(.swiper-button-prev),
+.carouselContainer :global(.swiper-button-next) {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1px solid var(--neutral_100);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  top: calc(50% - 20px);
+}
+
+.carouselContainer :global(.swiper-button-prev)::after,
+.carouselContainer :global(.swiper-button-next)::after {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--neutral_700);
+}
+
+.carouselContainer :global(.swiper-button-disabled) {
+  opacity: 0.35;
+}
+
+/* Pagination dots */
+.carouselContainer :global(.swiper-pagination) {
+  bottom: 0 !important;
+}
+
+.carouselContainer :global(.swiper-pagination-bullet) {
+  width: 8px;
+  height: 8px;
+  background: var(--neutral_300);
+  opacity: 1;
+  transition: background 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+
+.carouselContainer :global(.swiper-pagination-bullet-active) {
+  background: var(--prim_500);
+  transform: scale(1.2);
+}
+
+/* Skeleton loading */
+.skeletonContainer {
+  display: flex;
+  gap: 20px;
+  padding: 0 24px;
+  overflow: hidden;
+}
+
+.skeletonCard {
+  width: 320px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid var(--neutral_100);
+  flex-shrink: 0;
+}
+
+.skeletonImage {
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  background: var(--neutral_100);
+  position: relative;
+  overflow: hidden;
+}
+
+.skeletonImage::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    transparent 100%
+  );
+  animation: shimmer 1.5s linear infinite;
+}
+
+.skeletonInfo {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.skeletonLine {
+  height: 16px;
+  border-radius: 4px;
+  background: var(--neutral_100);
+  position: relative;
+  overflow: hidden;
+}
+
+.skeletonLine::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    transparent 100%
+  );
+  animation: shimmer 1.5s linear infinite;
+}
+
+.skeletonLineShort {
+  composes: skeletonLine;
+  width: 60%;
+}
+
+.skeletonLineMedium {
+  composes: skeletonLine;
+  width: 80%;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(calc(100% + 100px));
+  }
+}
