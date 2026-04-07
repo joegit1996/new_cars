@@ -1,0 +1,132 @@
+.panel {
+  position: sticky;
+  top: 80px;
+  max-height: calc(100vh - 96px);
+  overflow-y: auto;
+  width: 280px;
+  min-width: 280px;
+  background: #fff;
+  border-right: 1px solid var(--neutral_100);
+  display: flex;
+  flex-direction: column;
+}
+
+.panel::-webkit-scrollbar {
+  width: 4px;
+}
+
+.panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.panel::-webkit-scrollbar-thumb {
+  background: var(--neutral_200);
+  border-radius: 2px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  border-bottom: 1px solid var(--neutral_100);
+  position: sticky;
+  top: 0;
+  background: #fff;
+  z-index: 1;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--neutral_900);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background: var(--prim_500);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.clearAll {
+  background: none;
+  border: none;
+  color: var(--prim_500);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: 0.2s ease-in-out;
+}
+
+.clearAll:hover {
+  background: var(--prim_50);
+}
+
+.sections {
+  display: flex;
+  flex-direction: column;
+}
+
+.section {
+  border-bottom: 1px solid var(--neutral_100);
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  transition: background 0.2s ease-in-out;
+}
+
+.sectionHeader:hover {
+  background: var(--neutral_50);
+}
+
+.sectionLabel {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--neutral_900);
+}
+
+.chevron {
+  width: 16px;
+  height: 16px;
+  color: var(--neutral_400);
+  transition: transform 0.2s ease-in-out;
+  flex-shrink: 0;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+.sectionContent {
+  overflow: hidden;
+  transition: height 0.2s ease-in-out;
+}
+
+.sectionContentInner {
+  padding: 0 16px 14px;
+}

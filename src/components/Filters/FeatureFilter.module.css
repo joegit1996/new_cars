@@ -1,0 +1,52 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.subSection {
+  border-bottom: 1px solid var(--neutral_100);
+}
+
+.subSection:last-child {
+  border-bottom: none;
+}
+
+.subHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  cursor: pointer;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+}
+
+.subLabel {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--neutral_700);
+}
+
+.subChevron {
+  width: 14px;
+  height: 14px;
+  color: var(--neutral_400);
+  transition: transform 0.2s ease-in-out;
+  flex-shrink: 0;
+}
+
+.subChevronOpen {
+  transform: rotate(180deg);
+}
+
+.subContent {
+  overflow: hidden;
+  transition: height 0.2s ease-in-out;
+}
+
+.subContentInner {
+  padding: 0 0 8px 0;
+}

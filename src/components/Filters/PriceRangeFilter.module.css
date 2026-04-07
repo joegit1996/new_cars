@@ -1,0 +1,117 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.rangeDisplay {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--neutral_800);
+  text-align: center;
+}
+
+.sliderContainer {
+  position: relative;
+  height: 20px;
+  margin: 0 10px;
+}
+
+.track {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 4px;
+  transform: translateY(-50%);
+  background: var(--neutral_200);
+  border-radius: 2px;
+}
+
+.activeTrack {
+  position: absolute;
+  top: 50%;
+  height: 4px;
+  transform: translateY(-50%);
+  background: var(--prim_500);
+  border-radius: 2px;
+}
+
+.rangeInput {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  pointer-events: none;
+  margin: 0;
+}
+
+.rangeInput::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid var(--prim_500);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  pointer-events: all;
+  position: relative;
+  z-index: 2;
+}
+
+.rangeInput::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid var(--prim_500);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  pointer-events: all;
+}
+
+.rangeInput::-webkit-slider-runnable-track {
+  height: 4px;
+  background: transparent;
+}
+
+.rangeInput::-moz-range-track {
+  height: 4px;
+  background: transparent;
+  border: none;
+}
+
+.inputRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.textInput {
+  flex: 1;
+  padding: 8px 10px;
+  border: 1px solid var(--neutral_100);
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--neutral_800);
+  background: #fff;
+  text-align: center;
+  transition: border-color 0.2s ease-in-out;
+  outline: none;
+}
+
+.textInput:focus {
+  border-color: var(--prim_500);
+}
+
+.inputSeparator {
+  font-size: 14px;
+  color: var(--neutral_400);
+  flex-shrink: 0;
+}
