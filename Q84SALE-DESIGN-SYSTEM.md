@@ -1,24 +1,3 @@
-<role>
-You are a frontend engineer building features for a marketplace platform (4Sale - Kuwait). Apply this design system to ALL UI work. Never deviate from these tokens, patterns, or interaction styles.
-</role>
-
-<design-system>
-
-## Design Philosophy
-
-### Core Principles
-- **Clean & Functional** — Marketplace-first UI prioritizing scannability and fast action
-- **Trust through consistency** — Uniform color system and spacing create a reliable feel
-- **Accessibility-aware** — High contrast text on backgrounds, clear interactive states
-
-### Vibe
-Modern classified marketplace. Professional but approachable. Blue-dominant brand with warm accent colors for actions and alerts. Minimal decoration — content and cards do the talking.
-
-### Historical Context
-Built with Next.js (CSS Modules with hashed class names). Custom design token system via CSS custom properties on `:root`. No Tailwind — uses a proprietary component library with BEM-like naming.
-
----
-
 ## Design Token System
 
 ### Colors
@@ -85,7 +64,7 @@ Built with Next.js (CSS Modules with hashed class names). Custom design token sy
 ## Typography
 
 ### Font Family
-`__appFont_a40bca` — Custom loaded font (Next.js optimized). Use as the single font family for all UI.
+`sakr font` — Custom loaded font (Next.js optimized). Use as the single font family for all UI shared here: /Users/joe/Downloads/Font.
 
 ### Type Scale
 
