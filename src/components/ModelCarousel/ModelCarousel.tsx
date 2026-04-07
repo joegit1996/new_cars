@@ -1,10 +1,16 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { Model } from "@/types";
 import Chip from "@/components/Chip/Chip";
-import CardStack from "@/components/CardStack/CardStack";
+import { CardStack, CardStackItem } from "@/components/ui/card-stack";
 import styles from "./ModelCarousel.module.css";
+
+type ModelCard = CardStackItem & {
+  modelId: string;
+  image: string;
+  startingPrice: number;
+};
 
 interface ModelCarouselProps {
   models: Model[];
@@ -35,34 +41,58 @@ export default function ModelCarousel({
     [selectedModelIds, onSelectionChange]
   );
 
-  const renderCard = (model: Model, isActive: boolean) => {
-    const isSelected = selectedModelIds.includes(model.id);
-    return (
-      <div
-        className={`${styles.modelCard} ${isSelected ? styles.selected : ""}`}
-        onClick={(e) => {
-          e.stopPropagation();
-          toggleModel(model.id);
-        }}
-      >
-        <img
-          src={model.image}
-          alt={model.name}
-          className={styles.modelImage}
-        />
-        <div className={styles.modelInfo}>
-          <h3 className={styles.modelName}>{model.name}</h3>
-          <p className={styles.modelPrice}>
-            From KWD {model.startingPrice.toLocaleString()}
-          </p>
+  const cardItems: ModelCard[] = useMemo(
+    () =>
+      models.map((m) => ({
+        id: m.id,
+        title: m.name,
+        imageSrc: m.image,
+        modelId: m.id,
+        image: m.image,
+        startingPrice: m.startingPrice,
+      })),
+    [models]
+  );
+
+  const renderCard = useCallback(
+    (item: ModelCard, state: { active: boolean }) => {
+      const isSelected = selectedModelIds.includes(item.modelId);
+      return (
+        <div
+          className={`${styles.modelCard} ${isSelected ? styles.selected : ""}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleModel(item.modelId);
+          }}
+        >
+          <img
+            src={item.image}
+            alt={item.title}
+            className={styles.modelImage}
+            draggable={false}
+          />
+          <div className={styles.modelInfo}>
+            <h3 className={styles.modelName}>{item.title}</h3>
+            <p className={styles.modelPrice}>
+              From KWD {item.startingPrice.toLocaleString()}
+            </p>
+          </div>
         </div>
-      </div>
-    );
-  };
+      );
+    },
+    [selectedModelIds, toggleModel]
+  );
 
   return (
     <div className={styles.wrapper}>
-      <CardStack items={models} renderCard={renderCard} showDots />
+      <CardStack
+        items={cardItems}
+        renderCard={renderCard}
+        cardWidth={400}
+        cardHeight={260}
+        showDots
+        loop={false}
+      />
 
       {selectedModelIds.length > 0 && (
         <div className={styles.selectedChips}>
