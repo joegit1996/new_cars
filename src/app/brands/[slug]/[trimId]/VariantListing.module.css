@@ -3,6 +3,7 @@
   margin: 0 auto;
   padding: 24px 16px;
   background-color: var(--neutral_50);
+  overflow: hidden;
 }
 
 .title {

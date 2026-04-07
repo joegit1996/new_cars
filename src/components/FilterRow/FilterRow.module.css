@@ -19,6 +19,7 @@
 
 .option {
   padding: 10px 20px;
+  min-height: 44px;
   border-radius: 8px;
   border: 1px solid var(--neutral_200);
   background: #ffffff;

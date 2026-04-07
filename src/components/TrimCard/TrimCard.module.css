@@ -54,6 +54,9 @@
   font-weight: 700;
   color: var(--neutral_900);
   margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .model {
@@ -61,6 +64,9 @@
   font-weight: 400;
   color: var(--neutral_500);
   margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .price {

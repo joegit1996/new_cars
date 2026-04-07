@@ -1,12 +1,14 @@
 .main {
   min-height: 100vh;
   background-color: var(--neutral_50);
+  overflow-x: hidden;
 }
 
 .container {
   max-width: 700px;
   margin: 0 auto;
   padding: 24px 16px;
+  overflow: hidden;
 }
 
 .title {

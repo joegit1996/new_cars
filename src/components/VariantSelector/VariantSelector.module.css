@@ -20,8 +20,9 @@
 .chip {
   flex-shrink: 0;
   padding: 8px 16px;
+  min-height: 44px;
   border-radius: 100px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
   font-family: inherit;
   cursor: pointer;

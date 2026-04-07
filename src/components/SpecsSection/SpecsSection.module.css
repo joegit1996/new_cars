@@ -44,6 +44,9 @@
   font-size: 14px;
   font-weight: 700;
   color: var(--neutral_900);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 @media (min-width: 640px) {
