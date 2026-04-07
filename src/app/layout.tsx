@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import Header from "@/components/Header/Header";
 
 export const metadata: Metadata = {
   title: "4Sale - New Cars Showroom",
@@ -13,7 +14,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <Header />
+        <main style={{ paddingTop: 0 }}>{children}</main>
+      </body>
     </html>
   );
 }
