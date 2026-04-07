@@ -1,0 +1,138 @@
+- generic [active] [ref=e1]:
+  - main [ref=e2]:
+    - generic [ref=e3]:
+      - heading "Mercedes-Benz" [level=1] [ref=e4]
+      - region "Card carousel" [ref=e6]:
+        - generic [ref=e7]:
+          - generic [ref=e9] [cursor=pointer]:
+            - img "C-Class" [ref=e10]
+            - generic [ref=e11]:
+              - heading "C-Class" [level=3] [ref=e12]
+              - paragraph [ref=e13]: From KWD 12,500
+          - generic [ref=e15] [cursor=pointer]:
+            - img "E-Class" [ref=e16]
+            - generic [ref=e17]:
+              - heading "E-Class" [level=3] [ref=e18]
+              - paragraph [ref=e19]: From KWD 17,800
+          - generic [ref=e21] [cursor=pointer]:
+            - img "S-Class" [ref=e22]
+            - generic [ref=e23]:
+              - heading "S-Class" [level=3] [ref=e24]
+              - paragraph [ref=e25]: From KWD 29,500
+          - generic [ref=e27] [cursor=pointer]:
+            - img "GLC" [ref=e28]
+            - generic [ref=e29]:
+              - heading "GLC" [level=3] [ref=e30]
+              - paragraph [ref=e31]: From KWD 16,200
+        - tablist "Card navigation" [ref=e32]:
+          - tab "Go to card 1" [selected] [ref=e33] [cursor=pointer]
+          - tab "Go to card 2" [ref=e34] [cursor=pointer]
+          - tab "Go to card 3" [ref=e35] [cursor=pointer]
+          - tab "Go to card 4" [ref=e36] [cursor=pointer]
+      - generic [ref=e38]:
+        - button "Price Range" [ref=e39] [cursor=pointer]:
+          - generic [ref=e40]: Price Range
+        - button "Year" [ref=e41] [cursor=pointer]:
+          - generic [ref=e42]: Year
+        - button "Body Type" [ref=e43] [cursor=pointer]:
+          - generic [ref=e44]: Body Type
+        - button "Engine Type" [ref=e45] [cursor=pointer]:
+          - generic [ref=e46]: Engine Type
+        - button "Drivetrain" [ref=e47] [cursor=pointer]:
+          - generic [ref=e48]: Drivetrain
+        - button "Transmission" [ref=e49] [cursor=pointer]:
+          - generic [ref=e50]: Transmission
+      - generic [ref=e52]:
+        - heading "Trims" [level=2] [ref=e53]
+        - generic [ref=e54]:
+          - link "C 200 C 200 C-Class From KWD 12,500 1.5L Turbo ·RWD ·204 HP" [ref=e55] [cursor=pointer]:
+            - /url: /brands/mercedes-benz/trim-mb-cclass-c200
+            - img "C 200" [ref=e57]
+            - generic [ref=e58]:
+              - heading "C 200" [level=4] [ref=e59]
+              - paragraph [ref=e60]: C-Class
+              - paragraph [ref=e61]: From KWD 12,500
+              - generic [ref=e62]:
+                - generic [ref=e63]: 1.5L Turbo
+                - generic [ref=e64]: ·RWD
+                - generic [ref=e65]: ·204 HP
+          - link "C 300 C 300 C-Class From KWD 14,900 2.0L Turbo ·RWD ·258 HP" [ref=e66] [cursor=pointer]:
+            - /url: /brands/mercedes-benz/trim-mb-cclass-c300
+            - img "C 300" [ref=e68]
+            - generic [ref=e69]:
+              - heading "C 300" [level=4] [ref=e70]
+              - paragraph [ref=e71]: C-Class
+              - paragraph [ref=e72]: From KWD 14,900
+              - generic [ref=e73]:
+                - generic [ref=e74]: 2.0L Turbo
+                - generic [ref=e75]: ·RWD
+                - generic [ref=e76]: ·258 HP
+          - link "E 200 E 200 E-Class From KWD 17,800 2.0L Turbo ·RWD ·204 HP" [ref=e77] [cursor=pointer]:
+            - /url: /brands/mercedes-benz/trim-mb-eclass-e200
+            - img "E 200" [ref=e79]
+            - generic [ref=e80]:
+              - heading "E 200" [level=4] [ref=e81]
+              - paragraph [ref=e82]: E-Class
+              - paragraph [ref=e83]: From KWD 17,800
+              - generic [ref=e84]:
+                - generic [ref=e85]: 2.0L Turbo
+                - generic [ref=e86]: ·RWD
+                - generic [ref=e87]: ·204 HP
+          - link "E 300 E 300 E-Class From KWD 20,500 2.0L Turbo ·RWD ·258 HP" [ref=e88] [cursor=pointer]:
+            - /url: /brands/mercedes-benz/trim-mb-eclass-e300
+            - img "E 300" [ref=e90]
+            - generic [ref=e91]:
+              - heading "E 300" [level=4] [ref=e92]
+              - paragraph [ref=e93]: E-Class
+              - paragraph [ref=e94]: From KWD 20,500
+              - generic [ref=e95]:
+                - generic [ref=e96]: 2.0L Turbo
+                - generic [ref=e97]: ·RWD
+                - generic [ref=e98]: ·258 HP
+          - link "S 450 S 450 S-Class From KWD 29,500 3.0L Inline-6 Turbo ·RWD ·367 HP" [ref=e99] [cursor=pointer]:
+            - /url: /brands/mercedes-benz/trim-mb-sclass-s450
+            - img "S 450" [ref=e101]
+            - generic [ref=e102]:
+              - heading "S 450" [level=4] [ref=e103]
+              - paragraph [ref=e104]: S-Class
+              - paragraph [ref=e105]: From KWD 29,500
+              - generic [ref=e106]:
+                - generic [ref=e107]: 3.0L Inline-6 Turbo
+                - generic [ref=e108]: ·RWD
+                - generic [ref=e109]: ·367 HP
+          - link "S 500 S 500 S-Class From KWD 34,500 3.0L Inline-6 Turbo ·4MATIC ·435 HP" [ref=e110] [cursor=pointer]:
+            - /url: /brands/mercedes-benz/trim-mb-sclass-s500
+            - img "S 500" [ref=e112]
+            - generic [ref=e113]:
+              - heading "S 500" [level=4] [ref=e114]
+              - paragraph [ref=e115]: S-Class
+              - paragraph [ref=e116]: From KWD 34,500
+              - generic [ref=e117]:
+                - generic [ref=e118]: 3.0L Inline-6 Turbo
+                - generic [ref=e119]: ·4MATIC
+                - generic [ref=e120]: ·435 HP
+          - link "GLC 200 GLC 200 GLC From KWD 16,200 2.0L Turbo ·RWD ·204 HP" [ref=e121] [cursor=pointer]:
+            - /url: /brands/mercedes-benz/trim-mb-glc-glc200
+            - img "GLC 200" [ref=e123]
+            - generic [ref=e124]:
+              - heading "GLC 200" [level=4] [ref=e125]
+              - paragraph [ref=e126]: GLC
+              - paragraph [ref=e127]: From KWD 16,200
+              - generic [ref=e128]:
+                - generic [ref=e129]: 2.0L Turbo
+                - generic [ref=e130]: ·RWD
+                - generic [ref=e131]: ·204 HP
+          - link "GLC 300 4MATIC GLC 300 4MATIC GLC From KWD 19,500 2.0L Turbo ·4MATIC ·258 HP" [ref=e132] [cursor=pointer]:
+            - /url: /brands/mercedes-benz/trim-mb-glc-glc300
+            - img "GLC 300 4MATIC" [ref=e134]
+            - generic [ref=e135]:
+              - heading "GLC 300 4MATIC" [level=4] [ref=e136]
+              - paragraph [ref=e137]: GLC
+              - paragraph [ref=e138]: From KWD 19,500
+              - generic [ref=e139]:
+                - generic [ref=e140]: 2.0L Turbo
+                - generic [ref=e141]: ·4MATIC
+                - generic [ref=e142]: ·258 HP
+  - button "Open Next.js Dev Tools" [ref=e148] [cursor=pointer]:
+    - img [ref=e149]
+  - alert [ref=e152]

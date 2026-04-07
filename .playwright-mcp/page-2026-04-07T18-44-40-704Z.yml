@@ -1,0 +1,121 @@
+- generic [active] [ref=e1]:
+  - main [ref=e2]:
+    - generic [ref=e3]:
+      - heading "Toyota" [level=1] [ref=e4]
+      - region "Card carousel" [ref=e6]:
+        - generic [ref=e7]:
+          - generic [ref=e9] [cursor=pointer]:
+            - img "Camry" [ref=e10]
+            - generic [ref=e11]:
+              - heading "Camry" [level=3] [ref=e12]
+              - paragraph [ref=e13]: From KWD 7,800
+          - generic [ref=e15] [cursor=pointer]:
+            - img "Land Cruiser" [ref=e16]
+            - generic [ref=e17]:
+              - heading "Land Cruiser" [level=3] [ref=e18]
+              - paragraph [ref=e19]: From KWD 22,500
+          - generic [ref=e21] [cursor=pointer]:
+            - img "Corolla" [ref=e22]
+            - generic [ref=e23]:
+              - heading "Corolla" [level=3] [ref=e24]
+              - paragraph [ref=e25]: From KWD 5,900
+        - tablist "Card navigation" [ref=e26]:
+          - tab "Go to card 1" [ref=e27] [cursor=pointer]
+          - tab "Go to card 2" [selected] [ref=e28] [cursor=pointer]
+          - tab "Go to card 3" [ref=e29] [cursor=pointer]
+      - generic [ref=e31]:
+        - button "Price Range" [ref=e32] [cursor=pointer]:
+          - generic [ref=e33]: Price Range
+        - button "Year" [ref=e34] [cursor=pointer]:
+          - generic [ref=e35]: Year
+        - button "Body Type" [ref=e36] [cursor=pointer]:
+          - generic [ref=e37]: Body Type
+        - button "Engine Type" [ref=e38] [cursor=pointer]:
+          - generic [ref=e39]: Engine Type
+        - button "Drivetrain" [ref=e40] [cursor=pointer]:
+          - generic [ref=e41]: Drivetrain
+        - button "Transmission" [ref=e42] [cursor=pointer]:
+          - generic [ref=e43]: Transmission
+      - generic [ref=e45]:
+        - heading "Trims" [level=2] [ref=e46]
+        - generic [ref=e47]:
+          - link "LE LE Camry From KWD 7,800 2.5L 4-Cylinder ·FWD ·203 HP" [ref=e48] [cursor=pointer]:
+            - /url: /brands/toyota/trim-toyota-camry-le
+            - img "LE" [ref=e50]
+            - generic [ref=e51]:
+              - heading "LE" [level=4] [ref=e52]
+              - paragraph [ref=e53]: Camry
+              - paragraph [ref=e54]: From KWD 7,800
+              - generic [ref=e55]:
+                - generic [ref=e56]: 2.5L 4-Cylinder
+                - generic [ref=e57]: ·FWD
+                - generic [ref=e58]: ·203 HP
+          - link "SE SE Camry From KWD 8,500 2.5L 4-Cylinder ·FWD ·203 HP" [ref=e59] [cursor=pointer]:
+            - /url: /brands/toyota/trim-toyota-camry-se
+            - img "SE" [ref=e61]
+            - generic [ref=e62]:
+              - heading "SE" [level=4] [ref=e63]
+              - paragraph [ref=e64]: Camry
+              - paragraph [ref=e65]: From KWD 8,500
+              - generic [ref=e66]:
+                - generic [ref=e67]: 2.5L 4-Cylinder
+                - generic [ref=e68]: ·FWD
+                - generic [ref=e69]: ·203 HP
+          - link "GXR GXR Land Cruiser From KWD 22,500 3.5L V6 Twin-Turbo ·AWD ·409 HP" [ref=e70] [cursor=pointer]:
+            - /url: /brands/toyota/trim-toyota-lc-gxr
+            - img "GXR" [ref=e72]
+            - generic [ref=e73]:
+              - heading "GXR" [level=4] [ref=e74]
+              - paragraph [ref=e75]: Land Cruiser
+              - paragraph [ref=e76]: From KWD 22,500
+              - generic [ref=e77]:
+                - generic [ref=e78]: 3.5L V6 Twin-Turbo
+                - generic [ref=e79]: ·AWD
+                - generic [ref=e80]: ·409 HP
+          - link "VXR VXR Land Cruiser From KWD 27,000 3.5L V6 Twin-Turbo ·AWD ·409 HP" [ref=e81] [cursor=pointer]:
+            - /url: /brands/toyota/trim-toyota-lc-vxr
+            - img "VXR" [ref=e83]
+            - generic [ref=e84]:
+              - heading "VXR" [level=4] [ref=e85]
+              - paragraph [ref=e86]: Land Cruiser
+              - paragraph [ref=e87]: From KWD 27,000
+              - generic [ref=e88]:
+                - generic [ref=e89]: 3.5L V6 Twin-Turbo
+                - generic [ref=e90]: ·AWD
+                - generic [ref=e91]: ·409 HP
+          - link "GR Sport GR Sport Land Cruiser From KWD 30,500 3.5L V6 Twin-Turbo ·AWD ·409 HP" [ref=e92] [cursor=pointer]:
+            - /url: /brands/toyota/trim-toyota-lc-grsp
+            - img "GR Sport" [ref=e94]
+            - generic [ref=e95]:
+              - heading "GR Sport" [level=4] [ref=e96]
+              - paragraph [ref=e97]: Land Cruiser
+              - paragraph [ref=e98]: From KWD 30,500
+              - generic [ref=e99]:
+                - generic [ref=e100]: 3.5L V6 Twin-Turbo
+                - generic [ref=e101]: ·AWD
+                - generic [ref=e102]: ·409 HP
+          - link "XLi XLi Corolla From KWD 5,900 1.6L 4-Cylinder ·FWD ·132 HP" [ref=e103] [cursor=pointer]:
+            - /url: /brands/toyota/trim-toyota-corolla-xli
+            - img "XLi" [ref=e105]
+            - generic [ref=e106]:
+              - heading "XLi" [level=4] [ref=e107]
+              - paragraph [ref=e108]: Corolla
+              - paragraph [ref=e109]: From KWD 5,900
+              - generic [ref=e110]:
+                - generic [ref=e111]: 1.6L 4-Cylinder
+                - generic [ref=e112]: ·FWD
+                - generic [ref=e113]: ·132 HP
+          - link "GLi GLi Corolla From KWD 6,800 2.0L 4-Cylinder ·FWD ·168 HP" [ref=e114] [cursor=pointer]:
+            - /url: /brands/toyota/trim-toyota-corolla-gli
+            - img "GLi" [ref=e116]
+            - generic [ref=e117]:
+              - heading "GLi" [level=4] [ref=e118]
+              - paragraph [ref=e119]: Corolla
+              - paragraph [ref=e120]: From KWD 6,800
+              - generic [ref=e121]:
+                - generic [ref=e122]: 2.0L 4-Cylinder
+                - generic [ref=e123]: ·FWD
+                - generic [ref=e124]: ·168 HP
+  - button "Open Next.js Dev Tools" [ref=e130] [cursor=pointer]:
+    - img [ref=e131]
+  - alert [ref=e134]

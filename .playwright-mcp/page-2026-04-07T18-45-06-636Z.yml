@@ -1,0 +1,82 @@
+- generic [active] [ref=e1]:
+  - button "Open Next.js Dev Tools" [ref=e130] [cursor=pointer]:
+    - img [ref=e131]
+  - alert [ref=e134]
+  - generic [ref=e238]:
+    - navigation "Breadcrumb" [ref=e239]:
+      - list [ref=e240]:
+        - listitem [ref=e241]:
+          - link "Toyota" [ref=e242] [cursor=pointer]:
+            - /url: /brands/toyota
+        - listitem [ref=e243]:
+          - generic [ref=e244]: ">"
+          - generic [ref=e245]: Land Cruiser
+        - listitem [ref=e246]:
+          - generic [ref=e247]: ">"
+          - generic [ref=e248]: GXR
+    - heading "GXR" [level=1] [ref=e249]
+    - paragraph [ref=e250]: 9 variants available
+    - generic [ref=e251]:
+      - link "Land Cruiser GXR V6 Land Cruiser GXR V6 KWD 22,500 3.5L V6 Twin-Turbo -- AWD -- 409 HP" [ref=e252] [cursor=pointer]:
+        - /url: /brands/toyota/trim-toyota-lc-gxr/var-toyota-lc-gxr-v6
+        - img "Land Cruiser GXR V6" [ref=e254]
+        - generic [ref=e255]:
+          - heading "Land Cruiser GXR V6" [level=4] [ref=e256]
+          - paragraph [ref=e257]: KWD 22,500
+          - paragraph [ref=e258]: 3.5L V6 Twin-Turbo -- AWD -- 409 HP
+      - link "Land Cruiser GXR V6 7-Seater Land Cruiser GXR V6 7-Seater KWD 23,200 3.5L V6 Twin-Turbo -- AWD -- 409 HP" [ref=e259] [cursor=pointer]:
+        - /url: /brands/toyota/trim-toyota-lc-gxr/var-toyota-lc-gxr-v6-7seat
+        - img "Land Cruiser GXR V6 7-Seater" [ref=e261]
+        - generic [ref=e262]:
+          - heading "Land Cruiser GXR V6 7-Seater" [level=4] [ref=e263]
+          - paragraph [ref=e264]: KWD 23,200
+          - paragraph [ref=e265]: 3.5L V6 Twin-Turbo -- AWD -- 409 HP
+      - link "Land Cruiser GXR Diesel Land Cruiser GXR Diesel KWD 23,800 3.3L V6 Twin-Turbo Diesel -- AWD -- 309 HP" [ref=e266] [cursor=pointer]:
+        - /url: /brands/toyota/trim-toyota-lc-gxr/var-toyota-lc-gxr-diesel
+        - img "Land Cruiser GXR Diesel" [ref=e268]
+        - generic [ref=e269]:
+          - heading "Land Cruiser GXR Diesel" [level=4] [ref=e270]
+          - paragraph [ref=e271]: KWD 23,800
+          - paragraph [ref=e272]: 3.3L V6 Twin-Turbo Diesel -- AWD -- 309 HP
+      - link "Land Cruiser GXR V6 Basic Land Cruiser GXR V6 Basic KWD 21,000 4.0L V6 -- AWD -- 271 HP" [ref=e273] [cursor=pointer]:
+        - /url: /brands/toyota/trim-toyota-lc-gxr/var-toyota-lc-gxr-v6-basic
+        - img "Land Cruiser GXR V6 Basic" [ref=e275]
+        - generic [ref=e276]:
+          - heading "Land Cruiser GXR V6 Basic" [level=4] [ref=e277]
+          - paragraph [ref=e278]: KWD 21,000
+          - paragraph [ref=e279]: 4.0L V6 -- AWD -- 271 HP
+      - link "Land Cruiser GXR V6 Mid Land Cruiser GXR V6 Mid KWD 23,000 4.0L V6 -- AWD -- 271 HP" [ref=e280] [cursor=pointer]:
+        - /url: /brands/toyota/trim-toyota-lc-gxr/var-toyota-lc-gxr-v6-mid
+        - img "Land Cruiser GXR V6 Mid" [ref=e282]
+        - generic [ref=e283]:
+          - heading "Land Cruiser GXR V6 Mid" [level=4] [ref=e284]
+          - paragraph [ref=e285]: KWD 23,000
+          - paragraph [ref=e286]: 4.0L V6 -- AWD -- 271 HP
+      - link "Land Cruiser GXR Diesel Mid Land Cruiser GXR Diesel Mid KWD 24,500 3.3L V6 Twin-Turbo Diesel -- AWD -- 309 HP" [ref=e287] [cursor=pointer]:
+        - /url: /brands/toyota/trim-toyota-lc-gxr/var-toyota-lc-gxr-diesel-mid
+        - img "Land Cruiser GXR Diesel Mid" [ref=e289]
+        - generic [ref=e290]:
+          - heading "Land Cruiser GXR Diesel Mid" [level=4] [ref=e291]
+          - paragraph [ref=e292]: KWD 24,500
+          - paragraph [ref=e293]: 3.3L V6 Twin-Turbo Diesel -- AWD -- 309 HP
+      - link "Land Cruiser GXR Twin-Turbo High Land Cruiser GXR Twin-Turbo High KWD 25,500 3.5L V6 Twin-Turbo -- AWD -- 409 HP" [ref=e294] [cursor=pointer]:
+        - /url: /brands/toyota/trim-toyota-lc-gxr/var-toyota-lc-gxr-tt-high
+        - img "Land Cruiser GXR Twin-Turbo High" [ref=e296]
+        - generic [ref=e297]:
+          - heading "Land Cruiser GXR Twin-Turbo High" [level=4] [ref=e298]
+          - paragraph [ref=e299]: KWD 25,500
+          - paragraph [ref=e300]: 3.5L V6 Twin-Turbo -- AWD -- 409 HP
+      - link "Land Cruiser GXR Diesel High Land Cruiser GXR Diesel High KWD 26,000 3.3L V6 Twin-Turbo Diesel -- AWD -- 309 HP" [ref=e301] [cursor=pointer]:
+        - /url: /brands/toyota/trim-toyota-lc-gxr/var-toyota-lc-gxr-diesel-high
+        - img "Land Cruiser GXR Diesel High" [ref=e303]
+        - generic [ref=e304]:
+          - heading "Land Cruiser GXR Diesel High" [level=4] [ref=e305]
+          - paragraph [ref=e306]: KWD 26,000
+          - paragraph [ref=e307]: 3.3L V6 Twin-Turbo Diesel -- AWD -- 309 HP
+      - link "Land Cruiser GXR Twin-Turbo Platinum Land Cruiser GXR Twin-Turbo Platinum KWD 28,000 3.5L V6 Twin-Turbo -- AWD -- 409 HP" [ref=e308] [cursor=pointer]:
+        - /url: /brands/toyota/trim-toyota-lc-gxr/var-toyota-lc-gxr-tt-platinum
+        - img "Land Cruiser GXR Twin-Turbo Platinum" [ref=e310]
+        - generic [ref=e311]:
+          - heading "Land Cruiser GXR Twin-Turbo Platinum" [level=4] [ref=e312]
+          - paragraph [ref=e313]: KWD 28,000
+          - paragraph [ref=e314]: 3.5L V6 Twin-Turbo -- AWD -- 409 HP
