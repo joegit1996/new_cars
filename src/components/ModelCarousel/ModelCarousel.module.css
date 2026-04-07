@@ -1,0 +1,50 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.modelCard {
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 3px solid transparent;
+  transition: border-color 0.2s ease-in-out;
+  background: #ffffff;
+}
+
+.selected {
+  border-color: var(--prim_500);
+}
+
+.modelImage {
+  width: 100%;
+  height: 70%;
+  object-fit: cover;
+}
+
+.modelInfo {
+  padding: 12px 16px;
+  background: #ffffff;
+}
+
+.modelName {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--neutral_900);
+}
+
+.modelPrice {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--neutral_500);
+  margin-top: 4px;
+}
+
+.selectedChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}

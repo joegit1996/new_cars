@@ -1,0 +1,61 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  outline: none;
+  user-select: none;
+  overflow: hidden;
+  padding: 20px 0;
+}
+
+.stage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform-style: preserve-3d;
+}
+
+.card {
+  position: absolute;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  transform-style: preserve-3d;
+  will-change: transform, opacity;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  background: #ffffff;
+}
+
+.card:hover {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.dots {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: none;
+  background-color: var(--neutral_300);
+  cursor: pointer;
+  padding: 0;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.dot:hover {
+  background-color: var(--neutral_500);
+}
+
+.dotActive {
+  background-color: var(--prim_500);
+  transform: scale(1.25);
+}
