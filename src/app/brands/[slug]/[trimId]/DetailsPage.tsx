@@ -27,7 +27,7 @@ export default function DetailsPage({
   );
 
   const activeVariant = useMemo(
-    () => trim.variants.find((v) => v.id === activeVariantId) || trim.variants[0],
+    () => trim.variants.find((v) => v.id === activeVariantId) ?? trim.variants[0] ?? null,
     [trim.variants, activeVariantId]
   );
 
@@ -36,6 +36,16 @@ export default function DetailsPage({
   );
 
   const [transitioning, setTransitioning] = useState(false);
+
+  if (!activeVariant) {
+    return (
+      <div className={styles.page}>
+        <div className={styles.container}>
+          <p>Variant not found</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleVariantChange = (variantId: string) => {
     setTransitioning(true);
@@ -96,7 +106,7 @@ export default function DetailsPage({
         </div>
 
         <div className={styles.specsWrap}>
-          <SpecsSection specs={activeVariant?.specs || ({} as any)} />
+          <SpecsSection specs={activeVariant.specs} />
         </div>
       </div>
     </div>

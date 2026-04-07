@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { Trim } from "@/types";
-import { getModelById } from "@/data";
 import styles from "./TrimCard.module.css";
 
 interface TrimCardProps {

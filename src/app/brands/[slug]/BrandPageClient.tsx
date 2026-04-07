@@ -46,7 +46,7 @@ function trimMatchesFilters(trim: Trim, filters: FilterState): boolean {
       if (variant.specs.drivetrain !== filters.drivetrain) return false;
     }
     if (filters.transmission !== undefined) {
-      if (variant.specs.transmission !== filters.transmission) return false;
+      if (!variant.specs.transmission.toLowerCase().includes(filters.transmission.toLowerCase())) return false;
     }
     return true;
   });
