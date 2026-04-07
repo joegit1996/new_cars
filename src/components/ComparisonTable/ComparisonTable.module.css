@@ -1,0 +1,184 @@
+.wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 600px;
+}
+
+/* Sticky header */
+.stickyHeader {
+  position: sticky;
+  top: 64px;
+  background: #ffffff;
+  z-index: 10;
+  border-bottom: 1px solid var(--neutral_100);
+}
+
+.headerRow td {
+  vertical-align: top;
+  padding: 16px 12px;
+}
+
+.labelCol {
+  width: 200px;
+  min-width: 200px;
+  position: sticky;
+  left: 0;
+  background: var(--neutral_50);
+  z-index: 5;
+}
+
+.carCol {
+  min-width: 200px;
+  text-align: center;
+}
+
+.carImage {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.carTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--neutral_900);
+  margin-top: 8px;
+}
+
+.carVariant {
+  font-size: 12px;
+  color: var(--neutral_500);
+  margin-top: 2px;
+}
+
+.carPrice {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--neutral_900);
+  margin-top: 6px;
+}
+
+.removeButton {
+  background: none;
+  border: none;
+  color: var(--neutral_400);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 4px 8px;
+  margin-top: 6px;
+  transition: 0.2s ease-in-out;
+}
+
+.removeButton:hover {
+  color: var(--prim_500);
+}
+
+/* Section headers */
+.sectionHeader {
+  cursor: pointer;
+  user-select: none;
+}
+
+.sectionHeader td {
+  padding: 12px;
+  background: var(--neutral_50);
+  border-top: 1px solid var(--neutral_100);
+}
+
+.sectionTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--neutral_900);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chevron {
+  display: inline-block;
+  transition: transform 0.2s ease-in-out;
+  font-size: 12px;
+}
+
+.chevronOpen {
+  transform: rotate(90deg);
+}
+
+/* Data rows */
+.dataRow td {
+  padding: 10px 12px;
+  font-size: 14px;
+  color: var(--neutral_700);
+  border-bottom: 1px solid var(--neutral_100);
+}
+
+.dataRow:nth-child(even) td {
+  background: var(--neutral_50);
+}
+
+.dataRow:nth-child(even) td.labelCol {
+  background: var(--neutral_100);
+}
+
+.dataRow td.labelCol {
+  font-weight: 500;
+  color: var(--neutral_800);
+  background: var(--neutral_50);
+  position: sticky;
+  left: 0;
+  z-index: 5;
+}
+
+.dataRow:nth-child(even) td.labelCol {
+  background: #edf0f5;
+}
+
+.bestValue {
+  font-weight: 700;
+  background: var(--success_50) !important;
+}
+
+.check {
+  color: var(--success_500);
+  font-weight: 700;
+}
+
+.dash {
+  color: var(--neutral_300);
+}
+
+.savings {
+  color: var(--success_500);
+  font-weight: 700;
+}
+
+/* Toggle */
+.toggleBar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+}
+
+.toggleBtn {
+  background: none;
+  border: 2px solid var(--neutral_300);
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--neutral_700);
+  cursor: pointer;
+  transition: 0.2s ease-in-out;
+}
+
+.toggleBtnActive {
+  border-color: var(--prim_500);
+  color: var(--prim_500);
+  background: var(--prim_50);
+}

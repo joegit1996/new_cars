@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Header from "@/components/Header/Header";
 import { ComparisonProvider } from "@/context/ComparisonContext";
+import ComparisonBar from "@/components/ComparisonBar/ComparisonBar";
 
 export const metadata: Metadata = {
   title: "4Sale - New Cars Showroom",
@@ -19,6 +20,7 @@ export default function RootLayout({
         <Header />
         <ComparisonProvider>
           <main style={{ paddingTop: 0 }}>{children}</main>
+          <ComparisonBar />
         </ComparisonProvider>
       </body>
     </html>

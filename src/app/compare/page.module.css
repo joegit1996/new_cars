@@ -1,0 +1,132 @@
+.page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 16px 100px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--neutral_900);
+}
+
+.clearBtn {
+  background: none;
+  border: 1px solid var(--neutral_300);
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  color: var(--neutral_600);
+  cursor: pointer;
+  transition: 0.2s ease-in-out;
+}
+
+.clearBtn:hover {
+  border-color: var(--neutral_500);
+  color: var(--neutral_800);
+}
+
+/* Empty state */
+.emptyState {
+  text-align: center;
+  padding: 80px 24px;
+}
+
+.emptyIcon {
+  font-size: 64px;
+  color: var(--neutral_300);
+  margin-bottom: 16px;
+}
+
+.emptyTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--neutral_800);
+  margin-bottom: 8px;
+}
+
+.emptyText {
+  font-size: 14px;
+  color: var(--neutral_500);
+  margin-bottom: 24px;
+}
+
+.browseLink {
+  display: inline-block;
+  background: var(--prim_500);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 16px;
+  border-radius: 12px;
+  padding: 12px 32px;
+  text-decoration: none;
+  transition: 0.2s ease-in-out;
+}
+
+.browseLink:hover {
+  background: var(--prim_600);
+}
+
+/* Add another vehicle section */
+.addSection {
+  margin-top: 32px;
+  padding: 24px;
+  background: var(--neutral_50);
+  border-radius: 12px;
+  border: 1px solid var(--neutral_100);
+}
+
+.addSectionTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--neutral_900);
+  margin-bottom: 16px;
+}
+
+.selectorRow {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.select {
+  padding: 10px 16px;
+  border: 1px solid var(--neutral_300);
+  border-radius: 8px;
+  font-size: 14px;
+  color: var(--neutral_700);
+  background: #ffffff;
+  min-width: 180px;
+  cursor: pointer;
+}
+
+.select:focus {
+  outline: none;
+  border-color: var(--prim_500);
+}
+
+.goBtn {
+  background: var(--prim_500);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 14px;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: 0.2s ease-in-out;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.goBtn:hover {
+  background: var(--prim_600);
+}
