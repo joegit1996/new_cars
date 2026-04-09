@@ -1,6 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
-  <rect x="4" y="4" width="112" height="112" rx="4" fill="#B12B28" stroke="#C5A94E" stroke-width="3"/>
-  <text x="60" y="40" text-anchor="middle" font-family="serif" font-weight="bold" font-size="14" fill="#C5A94E">PORSCHE</text>
-  <circle cx="60" cy="72" r="22" fill="none" stroke="#C5A94E" stroke-width="2"/>
-  <path d="M52 62 L52 82 M60 58 L60 86 M68 62 L68 82" stroke="#C5A94E" stroke-width="2"/>
-</svg>
