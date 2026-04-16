@@ -1,10 +1,16 @@
 "use client";
 
+import { useState } from "react";
+
 interface PlaceholderImageProps {
   className?: string;
   aspectRatio?: string;
   label?: string;
   bodyType?: string;
+  /** Controls the car silhouette size. "sm" = 33%, "md" = 50%, "lg" = 65% of container width */
+  silhouetteSize?: "sm" | "md" | "lg";
+  /** When provided, renders a real image instead of the SVG silhouette */
+  imageUrl?: string;
 }
 
 function SedanSilhouette() {
@@ -186,7 +192,7 @@ function VanSilhouette() {
   );
 }
 
-const silhouetteMap: Record<string, () => React.JSX.Element> = {
+export const silhouetteMap: Record<string, () => React.JSX.Element> = {
   Sedan: SedanSilhouette,
   SUV: SUVSilhouette,
   Hatchback: HatchbackSilhouette,
@@ -196,12 +202,25 @@ const silhouetteMap: Record<string, () => React.JSX.Element> = {
   Van: VanSilhouette,
 };
 
+const sizeClasses = {
+  sm: "w-1/3",
+  md: "w-1/2",
+  lg: "w-2/3",
+} as const;
+
+const PLACEHOLDER_PATH = "/images/placeholder-car.svg";
+
 export default function PlaceholderImage({
   className = "",
   aspectRatio = "16/9",
   label,
   bodyType,
+  silhouetteSize = "sm",
+  imageUrl,
 }: PlaceholderImageProps) {
+  const [imgError, setImgError] = useState(false);
+  const [imgLoaded, setImgLoaded] = useState(false);
+  const hasRealImage = imageUrl && imageUrl !== PLACEHOLDER_PATH && !imgError;
   const SilhouetteComponent = silhouetteMap[bodyType ?? "Sedan"] ?? SedanSilhouette;
 
   return (
@@ -209,18 +228,42 @@ export default function PlaceholderImage({
       className={`relative flex items-center justify-center bg-[#E2E8F0] overflow-hidden ${className}`}
       style={{ aspectRatio }}
     >
-      <svg
-        viewBox="0 0 120 60"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        className="w-1/3 h-auto opacity-30"
-      >
-        <SilhouetteComponent />
-      </svg>
-      {label && (
-        <span className="absolute bottom-2 inset-inline-start-2 text-xs font-light text-[#64748B]">
-          {label}
-        </span>
+      {hasRealImage ? (
+        <>
+          {/* SVG fallback shown while image loads */}
+          {!imgLoaded && (
+            <svg
+              viewBox="0 0 120 60"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className={`${sizeClasses[silhouetteSize]} h-auto opacity-30 absolute`}
+            >
+              <SilhouetteComponent />
+            </svg>
+          )}
+          <img
+            ref={(el) => {
+              if (el && el.complete && el.naturalWidth > 0 && !imgLoaded) {
+                setImgLoaded(true);
+              }
+            }}
+            src={imageUrl}
+            alt={label || "Car"}
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${imgLoaded ? "opacity-100" : "opacity-0"}`}
+            onLoad={() => setImgLoaded(true)}
+            onError={() => setImgError(true)}
+            loading="lazy"
+          />
+        </>
+      ) : (
+        <svg
+          viewBox="0 0 120 60"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className={`${sizeClasses[silhouetteSize]} h-auto opacity-30`}
+        >
+          <SilhouetteComponent />
+        </svg>
       )}
     </div>
   );

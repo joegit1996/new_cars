@@ -42,7 +42,7 @@ function TrimCard({
   brandName: string;
   index: number;
 }) {
-  const { toggleItem, isInCompare, items } = useCompare();
+  const { toggleItem, isInCompare } = useCompare();
   const inCompare = isInCompare(trim.id);
 
   return (
@@ -166,7 +166,7 @@ function TrimsContent({ modelId }: { modelId: string }) {
     () => getTrimsByModel(modelId),
     [modelId],
   );
-  const { items } = useCompare();
+  const { totalCount } = useCompare();
 
   if (!model || !brand) {
     return (
@@ -183,7 +183,7 @@ function TrimsContent({ modelId }: { modelId: string }) {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F8FAFC]">
-      <Navbar compareCount={items.length} />
+      <Navbar compareCount={totalCount} />
 
       <main className="flex-1 max-w-4xl mx-auto w-full px-4 md:px-6 pt-6 pb-24 md:pb-10">
         {/* Breadcrumb -- desktop */}
@@ -246,7 +246,7 @@ function TrimsContent({ modelId }: { modelId: string }) {
       </main>
 
       <Footer />
-      <MobileTabBar compareCount={items.length} />
+      <MobileTabBar compareCount={totalCount} />
     </div>
   );
 }

@@ -1,10 +1,17 @@
 "use client";
 
-import { useState, useRef, useMemo } from "react";
+import { useState, useRef, useMemo, useEffect } from "react";
 import EmbedLink from "@/components/EmbedLink";
 import { motion, useInView } from "framer-motion";
 import { ArrowRight, ChevronLeft, ChevronRight, SlidersHorizontal } from "lucide-react";
+import dynamic from "next/dynamic";
 import { Component as EtheralShadow } from "@/components/ui/etheral-shadow";
+import { BeamsBackground } from "@/components/ui/beams-background";
+
+const CarModel3D = dynamic(() => import("@/components/CarModel3D"), {
+  ssr: false,
+  loading: () => null,
+});
 
 import { CompareProvider, useCompare } from "@/context/CompareContext";
 import Navbar from "@/components/Navbar";
@@ -12,6 +19,7 @@ import MobileTabBar from "@/components/MobileTabBar";
 import Footer from "@/components/Footer";
 import ModelCard from "@/components/ModelCard";
 import PlaceholderImage from "@/components/PlaceholderImage";
+import { silhouetteMap } from "@/components/PlaceholderImage";
 import { BodyTypeIcon } from "@/components/BodyTypeIcon";
 
 import { brands, models, lifestyleCollections } from "@/data/mock-data";
@@ -64,13 +72,13 @@ function SectionTitle({
       <div>
         <h2 className="text-2xl md:text-3xl font-bold text-[#1E293B]">{title}</h2>
         {subtitle && (
-          <p className="mt-1 text-sm text-[#64748B]">{subtitle}</p>
+          <p className="mt-1 text-sm text-[#64748B] dim-subtitle">{subtitle}</p>
         )}
       </div>
       {href && (
         <EmbedLink
           href={href}
-          className="shrink-0 flex items-center gap-1 text-sm font-medium text-[#1A56DB] hover:underline"
+          className="shrink-0 flex items-center gap-1 text-sm font-medium text-[#1A56DB] hover:underline dim-link"
         >
           {linkLabel || "View All"} <ArrowRight className="w-4 h-4" />
         </EmbedLink>
@@ -83,8 +91,93 @@ function SectionTitle({
 
 function HeroSection() {
   return (
+    <BeamsBackground className="h-[100svh] min-h-0" intensity="medium">
+      {/* 3D Model -- positioned below the text area */}
+      <div className="absolute top-[38%] md:top-[28%] bottom-[24%] md:bottom-0 left-[8%] right-[8%] md:left-0 md:right-0 z-[5]">
+        <CarModel3D className="w-full h-full" />
+      </div>
+
+      {/* Content overlay */}
+      <div className="relative z-10 flex flex-col h-[100svh] pointer-events-none">
+        {/* Top text with scrim so it never collides with the model */}
+        <div className="pt-24 md:pt-28 px-4 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1, duration: 0.7, ease: "easeOut" }}
+          >
+            <span className="block text-3xl md:text-4xl lg:text-5xl font-light tracking-wide text-white/90">
+              Find Your Perfect
+            </span>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25, duration: 0.7, ease: "easeOut" }}
+          >
+            <span className="block text-6xl md:text-7xl lg:text-[8rem] lg:leading-[0.9] font-bold tracking-tight text-[#60A5FA]">
+              New Car
+            </span>
+          </motion.div>
+          <motion.p
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.45, duration: 0.7, ease: "easeOut" }}
+            className="mt-5 md:mt-6 text-sm md:text-base font-light tracking-[0.15em] uppercase text-white/60 max-w-lg mx-auto"
+          >
+            Browse, compare &amp; configure across every brand in Kuwait
+          </motion.p>
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.55, duration: 0.7, ease: "easeOut" }}
+            className="mt-6 pointer-events-auto md:hidden"
+          >
+            <EmbedLink
+              href="/browse"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-[#1A56DB] text-white text-sm font-medium rounded-xl hover:bg-[#1544B0] transition-colors"
+            >
+              Browse All Cars <ArrowRight className="w-4 h-4" />
+            </EmbedLink>
+          </motion.div>
+        </div>
+
+        {/* Spacer pushes stats to bottom */}
+        <div className="flex-1" />
+
+        {/* Bottom stats */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6, duration: 0.6, ease: "easeOut" }}
+          className="w-full max-w-3xl mx-auto px-4 pb-8 md:pb-10"
+        >
+          <div className="flex flex-col items-center gap-3 md:flex-row md:justify-center md:gap-12 py-4 border-t border-white/10">
+            {[
+              { value: "45+", label: "Brands" },
+              { value: "300+", label: "Models" },
+              { value: "Daily", label: "Updated" },
+            ].map((stat) => (
+              <div key={stat.label} className="flex items-center gap-2 md:gap-3">
+                <span className="text-xl md:text-2xl font-bold text-white">
+                  {stat.value}
+                </span>
+                <span className="text-xs md:text-sm text-white/40 uppercase tracking-wider">
+                  {stat.label}
+                </span>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+      </div>
+    </BeamsBackground>
+  );
+}
+
+/* ---------- Old Hero (revert by swapping back) ----------
+function HeroSection() {
+  return (
     <section className="relative overflow-hidden bg-[#0F1B2D]">
-      {/* Ethereal shadow background */}
       <div className="absolute inset-0">
         <EtheralShadow
           color="rgba(26, 86, 219, 0.6)"
@@ -92,89 +185,32 @@ function HeroSection() {
           noise={{ opacity: 0.6, scale: 0.5 }}
         />
       </div>
-
       <div className="relative max-w-7xl mx-auto px-4 md:px-6 py-16 md:py-24">
         <div className="grid md:grid-cols-2 gap-8 items-center">
           <div>
-            <motion.h1
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, ease: "easeOut" }}
-              className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight"
-            >
-              Find Your Perfect{" "}
-              <span className="text-[#60A5FA]">New Car</span>
+            <motion.h1 initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: "easeOut" }} className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
+              Find Your Perfect{" "}<span className="text-[#60A5FA]">New Car</span>
             </motion.h1>
-
-            <motion.p
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.15, ease: "easeOut" }}
-              className="mt-4 text-lg md:text-xl text-white/70 max-w-lg"
-            >
+            <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.15, ease: "easeOut" }} className="mt-4 text-lg md:text-xl text-white/70 max-w-lg">
               Browse, compare, and configure across every brand in Kuwait
             </motion.p>
-
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
-              className="mt-8 flex flex-wrap gap-4"
-            >
-              <EmbedLink
-                href="/browse"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-[#1A56DB] text-white font-medium rounded-xl hover:bg-[#1544B0] transition-colors"
-              >
-                Browse All Cars
-                <ArrowRight className="w-4 h-4" />
-              </EmbedLink>
-              <EmbedLink
-                href="/compare"
-                className="inline-flex items-center gap-2 px-6 py-3 border-2 border-white/30 text-white font-medium rounded-xl hover:border-white/60 transition-colors"
-              >
-                Compare Cars
-              </EmbedLink>
+            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }} className="mt-8 flex flex-wrap gap-4">
+              <EmbedLink href="/browse" className="inline-flex items-center gap-2 px-6 py-3 bg-[#1A56DB] text-white font-medium rounded-xl hover:bg-[#1544B0] transition-colors">Browse All Cars<ArrowRight className="w-4 h-4" /></EmbedLink>
+              <EmbedLink href="/compare" className="inline-flex items-center gap-2 px-6 py-3 border-2 border-white/30 text-white font-medium rounded-xl hover:border-white/60 transition-colors">Compare Cars</EmbedLink>
             </motion.div>
-
-            {/* Stats bar */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.5 }}
-              className="mt-12 flex flex-wrap gap-6 md:gap-10"
-            >
-              {[
-                { value: "45+", label: "Brands" },
-                { value: "300+", label: "Models" },
-                { value: "Daily", label: "Updated" },
-              ].map((stat) => (
-                <div key={stat.label} className="flex items-center gap-3">
-                  <span className="text-2xl md:text-3xl font-bold text-white">
-                    {stat.value}
-                  </span>
-                  <span className="text-sm text-white/50 uppercase tracking-wider">
-                    {stat.label}
-                  </span>
-                </div>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6, delay: 0.5 }} className="mt-12 flex flex-wrap gap-6 md:gap-10">
+              {[{ value: "45+", label: "Brands" },{ value: "300+", label: "Models" },{ value: "Daily", label: "Updated" }].map((stat) => (
+                <div key={stat.label} className="flex items-center gap-3"><span className="text-2xl md:text-3xl font-bold text-white">{stat.value}</span><span className="text-sm text-white/50 uppercase tracking-wider">{stat.label}</span></div>
               ))}
             </motion.div>
           </div>
-
-          {/* Right column - featured car */}
           <div className="hidden md:block">
             <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
-              <div className="rounded-xl overflow-hidden mb-3">
-                <PlaceholderImage aspectRatio="16/10" label="Featured Model" bodyType="SUV" />
-              </div>
+              <div className="rounded-xl overflow-hidden mb-3"><PlaceholderImage aspectRatio="16/10" label="Featured Model" bodyType="SUV" imageUrl="/images/cars/toyota-lc.jpg" /></div>
               <p className="text-xs text-white/50 uppercase tracking-wider">New Arrival</p>
               <p className="text-lg font-bold text-white mt-0.5">Toyota Land Cruiser</p>
               <p className="text-sm text-[#F59E0B] font-bold mt-1">Starting from 22,000 KWD</p>
-              <EmbedLink
-                href="/model/toyota-lc"
-                className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-white/80 hover:text-white transition-colors"
-              >
-                View Details <ArrowRight className="w-3.5 h-3.5" />
-              </EmbedLink>
+              <EmbedLink href="/model/toyota-lc" className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-white/80 hover:text-white transition-colors">View Details <ArrowRight className="w-3.5 h-3.5" /></EmbedLink>
             </div>
           </div>
         </div>
@@ -182,89 +218,394 @@ function HeroSection() {
     </section>
   );
 }
+---------- End Old Hero ---------- */
 
 // ---------- Featured Brands ----------
 
+const brandGradients: Record<string, string> = {
+  mercedes:
+    "radial-gradient(ellipse at 30% 20%, #2d3748 0%, #1a202c 50%, #0d1117 100%)",
+  bmw: "radial-gradient(ellipse at 30% 20%, #1e3a5f 0%, #142850 50%, #0a1628 100%)",
+  toyota:
+    "radial-gradient(ellipse at 30% 20%, #7f1d1d 0%, #581c1c 50%, #2d0e0e 100%)",
+  porsche:
+    "radial-gradient(ellipse at 30% 20%, #6b2020 0%, #4a1515 50%, #2a0d0d 100%)",
+};
+
 function FeaturedBrands() {
   const featuredBrands = useMemo(() => brands.filter((b) => b.featured), []);
+  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
+  const [mobileActiveIdx, setMobileActiveIdx] = useState(0);
+  const mobileScrollRef = useRef<HTMLDivElement>(null);
+  const mobileCarouselViewRef = useRef<HTMLDivElement>(null);
+  const cardsEntranceRef = useRef<HTMLDivElement>(null);
+  const cardsVisible = useInView(cardsEntranceRef, { once: true, margin: "-60px" });
+
+  /* -- Dim page on card hover (desktop only) -- */
+  const [isCardsHovered, setIsCardsHovered] = useState(false);
+  const hasReachedSection = useRef(false);
+  useEffect(() => {
+    if (cardsVisible) hasReachedSection.current = true;
+
+    const root = document.getElementById("page-root");
+    if (!root) return;
+
+    const hasHover = window.matchMedia("(hover: hover)").matches;
+
+    if (hasHover && hasReachedSection.current) {
+      root.style.transition =
+        "background-color 0.6s cubic-bezier(0, 0, 0.2, 1)";
+      if (isCardsHovered) {
+        root.style.backgroundColor = "#0F1B2D";
+        root.classList.remove("page-light");
+      } else {
+        root.style.backgroundColor = "#F8FAFC";
+        root.classList.add("page-light");
+      }
+    } else {
+      root.style.backgroundColor = "#F8FAFC";
+      root.classList.add("page-light");
+    }
+
+    return () => {
+      root.style.backgroundColor = "";
+      root.classList.remove("page-light");
+    };
+  }, [isCardsHovered, cardsVisible]);
 
   if (featuredBrands.length === 0) return null;
 
+  const getRow = (idx: number) => Math.floor(idx / 2);
+
+  const getCardWidth = (idx: number): string => {
+    if (hoveredIdx === null) return "calc(50% - 12px)";
+    if (getRow(idx) !== getRow(hoveredIdx)) return "calc(50% - 12px)";
+    return idx === hoveredIdx ? "calc(55% - 12px)" : "calc(45% - 12px)";
+  };
+
+  const scrollRaf = useRef<number>(0);
+  const handleMobileScroll = () => {
+    if (scrollRaf.current) return;
+    scrollRaf.current = requestAnimationFrame(() => {
+      scrollRaf.current = 0;
+      const el = mobileScrollRef.current;
+      if (!el) return;
+      const card = el.firstElementChild as HTMLElement | null;
+      if (!card) return;
+      const cardW = card.offsetWidth;
+      const gap = 16;
+      const centerOffset = (el.offsetWidth - cardW) / 2;
+      const idx = Math.round((el.scrollLeft + centerOffset) / (cardW + gap));
+      setMobileActiveIdx(
+        Math.max(0, Math.min(idx, featuredBrands.length - 1))
+      );
+    });
+  };
+
+  const scrollToCard = (idx: number) => {
+    const el = mobileScrollRef.current;
+    if (!el) return;
+    const card = el.firstElementChild as HTMLElement | null;
+    if (!card) return;
+    const cardW = card.offsetWidth;
+    const gap = 16;
+    const centerOffset = (el.offsetWidth - cardW) / 2;
+    el.scrollTo({
+      left: idx * (cardW + gap) - centerOffset,
+      behavior: "smooth",
+    });
+  };
+
+  /* ---------- Brand logo shared between desktop & mobile ---------- */
+  const BrandLogo = ({ brandId, name, logoUrl, size = 44 }: { brandId: string; name: string; logoUrl?: string; size?: number }) => {
+    const [imgError, setImgError] = useState(false);
+    const hasLogo = logoUrl && !imgError;
+    return (
+      <div
+        className="rounded-full flex items-center justify-center shrink-0 border border-white/20 shadow-lg overflow-hidden"
+        style={{
+          width: size,
+          height: size,
+          backgroundColor: hasLogo ? "#FFFFFF" : (brandColors[brandId] || "#64748B"),
+        }}
+      >
+        {hasLogo ? (
+          <img
+            src={logoUrl}
+            alt={`${name} logo`}
+            className="w-[70%] h-[70%] object-contain"
+            onError={() => setImgError(true)}
+          />
+        ) : (
+          <span
+            className="text-white font-bold"
+            style={{ fontSize: size * 0.28 }}
+          >
+            {name.substring(0, 2).toUpperCase()}
+          </span>
+        )}
+      </div>
+    );
+  };
+
   return (
-    <AnimatedSection className="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-12">
-      <SectionTitle
-        title="Featured Brands"
-        subtitle="Authorized dealers with exclusive offers"
-      />
-      <div className="overflow-hidden -mr-4 md:-mr-6">
-        <div className="flex gap-3 overflow-x-auto pb-2 pr-4 md:pr-6 pt-1 styled-scrollbar">
-          {featuredBrands.map((brand) => {
+    <section
+      className="py-10 md:py-16 min-h-dvh md:min-h-0 flex flex-col md:block overflow-x-hidden"
+    >
+      <div className="max-w-7xl mx-auto px-4 md:px-6 w-full flex-1 flex flex-col md:block">
+        <h2
+          className="text-3xl md:text-[2.75rem] font-bold leading-tight text-[#1E293B] mb-6 md:mb-12"
+        >
+          Featured Brands
+        </h2>
+
+        {/* ---- Desktop: 2-col flex with hover expand/shrink ---- */}
+        <div
+          ref={cardsEntranceRef}
+          className="hidden md:flex flex-wrap gap-6 transition-all duration-[800ms] ease-out"
+          style={{
+            opacity: cardsVisible ? 1 : 0,
+            transform: cardsVisible ? "translateY(0)" : "translateY(32px)",
+          }}
+          onMouseEnter={() => setIsCardsHovered(true)}
+          onMouseLeave={() => setIsCardsHovered(false)}
+        >
+          {featuredBrands.map((brand, idx) => {
             const topModel = getModelsByBrand(brand.id)[0];
+            const isHovered = hoveredIdx === idx;
+            const SilhouetteIcon =
+              silhouetteMap[topModel?.bodyType || "Sedan"] ||
+              silhouetteMap["Sedan"];
+
             return (
               <EmbedLink
                 key={brand.id}
                 href={`/brand/${brand.id}`}
-                className="group shrink-0 w-[220px] md:w-[240px] bg-white rounded-xl border border-[#E2E8F0] p-4 hover:border-[#CBD5E1] hover:shadow-md transition-all"
+                className="group relative overflow-hidden rounded-2xl block"
+                style={{
+                  width: getCardWidth(idx),
+                  height: "clamp(380px, 40vw, 580px)",
+                  transition: "width 0.6s cubic-bezier(0, 0, 0.2, 1)",
+                  background:
+                    brandGradients[brand.id] || brandGradients.mercedes,
+                }}
+                onMouseEnter={() => setHoveredIdx(idx)}
+                onMouseLeave={() => setHoveredIdx(null)}
               >
-                <div className="flex items-center gap-3 mb-3">
-                  <div
-                    className="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
-                    style={{ backgroundColor: brandColors[brand.id] || "#64748B" }}
-                  >
-                    <span className="text-white font-medium text-xs">
-                      {brand.name.substring(0, 2).toUpperCase()}
-                    </span>
-                  </div>
-                  <div className="min-w-0">
-                    <span className="text-sm font-semibold text-[#1E293B] truncate block">
-                      {brand.name}
-                    </span>
-                    <span className="text-[11px] text-[#94A3B8]">
+                {/* Car image */}
+                <div
+                  className="absolute inset-0 transition-transform duration-[800ms] ease-out"
+                  style={{
+                    transform: isHovered ? "scale(1.08)" : "scale(1)",
+                  }}
+                >
+                  {topModel?.imageUrl ? (
+                    <img
+                      src={topModel.imageUrl}
+                      alt={`${brand.name} ${topModel.name}`}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <svg
+                      viewBox="0 0 120 60"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="absolute bottom-[18%] left-1/2 -translate-x-1/2 w-[70%] h-auto"
+                      style={{
+                        opacity: 0.07,
+                        filter: "brightness(0) invert(1)",
+                      }}
+                    >
+                      <SilhouetteIcon />
+                    </svg>
+                  )}
+                </div>
+
+                {/* Top gradient */}
+                <div className="absolute top-0 inset-x-0 h-[30%] bg-gradient-to-b from-black/60 via-black/25 to-transparent z-[5]" />
+
+                {/* Bottom gradient */}
+                <div className="absolute bottom-0 inset-x-0 h-[40%] bg-gradient-to-t from-black/70 via-black/35 to-transparent z-[5]" />
+
+                {/* Brand logo + name */}
+                <div className="absolute top-6 left-6 z-10 flex items-center gap-3">
+                  <BrandLogo brandId={brand.id} name={brand.name} logoUrl={brand.logoUrl} size={48} />
+                  <h3 className="text-[2rem] lg:text-[2.5rem] font-bold text-white italic leading-none">
+                    {brand.name}
+                  </h3>
+                </div>
+
+                {/* Bottom content */}
+                <div className="absolute bottom-0 inset-x-0 p-6 z-10">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-[11px] font-medium text-white/90 bg-white/[0.12] backdrop-blur-sm px-2.5 py-1 rounded-md">
                       {brand.modelCount} models
                     </span>
                   </div>
-                </div>
 
-                {brand.tagline && (
-                  <p className="text-xs text-[#64748B] leading-relaxed line-clamp-2 mb-3">
-                    {brand.tagline}
-                  </p>
-                )}
+                  <div className="flex items-end justify-between gap-4">
+                    <p className="text-sm text-white/50 line-clamp-1">
+                      {brand.tagline || `Explore the ${brand.name} lineup`}
+                    </p>
 
-                {topModel && (
-                  <div className="rounded-lg overflow-hidden bg-[#F8FAFC] mb-3">
-                    <PlaceholderImage
-                      aspectRatio="16/9"
-                      label={topModel.name}
-                      bodyType={topModel.bodyType}
-                    />
+                    <span className="shrink-0 flex items-center gap-1.5 text-sm font-medium text-white">
+                      <span
+                        className="overflow-hidden whitespace-nowrap transition-all duration-500"
+                        style={{
+                          maxWidth: isHovered ? "80px" : "0px",
+                          opacity: isHovered ? 1 : 0,
+                        }}
+                      >
+                        Explore
+                      </span>
+                      <ArrowRight className="w-4 h-4" />
+                    </span>
                   </div>
-                )}
-
-                <span className="inline-flex items-center gap-1 text-xs font-medium text-[#64748B] group-hover:text-[#1A56DB] group-hover:gap-1.5 transition-all">
-                  View brand <ArrowRight className="w-3 h-3" />
-                </span>
+                </div>
               </EmbedLink>
             );
           })}
         </div>
+
+        {/* ---- Mobile: Full-screen swipeable carousel ---- */}
+        <div ref={mobileCarouselViewRef} className="md:hidden flex-1 flex flex-col min-h-0">
+          <div
+            ref={mobileScrollRef}
+            onScroll={handleMobileScroll}
+            className="flex-1 flex gap-4 overflow-x-auto snap-x snap-mandatory items-stretch"
+            style={{ scrollbarWidth: "none" }}
+          >
+            {featuredBrands.map((brand) => {
+              const topModel = getModelsByBrand(brand.id)[0];
+              const SilhouetteIcon =
+                silhouetteMap[topModel?.bodyType || "Sedan"] ||
+                silhouetteMap["Sedan"];
+
+              return (
+                <EmbedLink
+                  key={brand.id}
+                  href={`/brand/${brand.id}`}
+                  className="shrink-0 snap-center relative overflow-hidden rounded-2xl block self-stretch [scroll-snap-stop:always]"
+                  style={{
+                    width: "100%",
+                    background:
+                      brandGradients[brand.id] || brandGradients.mercedes,
+                  }}
+                >
+                  {/* Car image */}
+                  <div className="absolute inset-0">
+                    {topModel?.imageUrl ? (
+                      <img
+                        src={topModel.imageUrl}
+                        alt={`${brand.name} ${topModel.name}`}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <svg
+                          viewBox="0 0 120 60"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="w-4/5 h-auto"
+                          style={{
+                            opacity: 0.06,
+                            filter: "brightness(0) invert(1)",
+                          }}
+                        >
+                          <SilhouetteIcon />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Top gradient */}
+                  <div className="absolute top-0 inset-x-0 h-[25%] bg-gradient-to-b from-black/50 to-transparent z-[5]" />
+
+                  {/* Bottom gradient */}
+                  <div className="absolute bottom-0 inset-x-0 h-[50%] bg-gradient-to-t from-black/80 via-black/40 to-transparent z-[5]" />
+
+                  {/* Brand logo + name */}
+                  <div className="absolute top-5 left-5 z-10 flex items-center gap-3">
+                    <BrandLogo brandId={brand.id} name={brand.name} logoUrl={brand.logoUrl} size={40} />
+                    <h3 className="text-3xl font-bold text-white italic leading-none">
+                      {brand.name}
+                    </h3>
+                  </div>
+
+                  {/* Bottom content */}
+                  <div className="absolute bottom-0 inset-x-0 p-5 z-10">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-[11px] font-medium text-white/90 bg-white/[0.12] backdrop-blur-sm px-2.5 py-1 rounded-md">
+                        {brand.modelCount} models
+                      </span>
+                    </div>
+
+                    {brand.tagline && (
+                      <p className="text-sm text-white/50 mb-4">
+                        {brand.tagline}
+                      </p>
+                    )}
+
+                    <div className="flex items-center justify-center gap-2 bg-white/[0.08] backdrop-blur-sm rounded-xl py-3.5 text-sm font-medium text-white border border-white/[0.08]">
+                      Explore <ArrowRight className="w-4 h-4" />
+                    </div>
+                  </div>
+                </EmbedLink>
+              );
+            })}
+          </div>
+
+          {/* Pagination dots */}
+          <div className="flex items-center justify-center gap-2 py-4">
+            {featuredBrands.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => scrollToCard(idx)}
+                className="h-2 rounded-full transition-all duration-300"
+                style={{
+                  width: idx === mobileActiveIdx ? "24px" : "8px",
+                  backgroundColor:
+                    idx === mobileActiveIdx
+                      ? "#0F1B2D"
+                      : "#94A3B8",
+                }}
+                aria-label={`Go to brand ${idx + 1}`}
+              />
+            ))}
+          </div>
+        </div>
       </div>
-    </AnimatedSection>
+    </section>
   );
 }
 
 // ---------- Browse by Brand ----------
 
-const brandColors: Record<string, string> = {
-  mercedes: "#1E293B",
-  bmw: "#1A56DB",
-  toyota: "#EF4444",
-  lexus: "#1E293B",
-  porsche: "#B91C1C",
-  changan: "#1A56DB",
-  haval: "#DC2626",
-  mg: "#EF4444",
-};
+import { brandColors } from "@/data/helpers";
+
+function BrowseByBrandLogo({ brand }: { brand: typeof brands[0] }) {
+  const [imgError, setImgError] = useState(false);
+  const hasLogo = brand.logoUrl && !imgError;
+  return (
+    <div
+      className="w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform"
+      style={{ backgroundColor: hasLogo ? "#FFFFFF" : (brandColors[brand.id] || "#64748B") }}
+    >
+      {hasLogo ? (
+        <img
+          src={brand.logoUrl}
+          alt={`${brand.name} logo`}
+          className="w-[70%] h-[70%] object-contain"
+          onError={() => setImgError(true)}
+        />
+      ) : (
+        <span className="text-white font-bold text-lg md:text-xl">
+          {brand.name.substring(0, 2).toUpperCase()}
+        </span>
+      )}
+    </div>
+  );
+}
 
 function BrowseByBrand() {
   return (
@@ -282,14 +623,7 @@ function BrowseByBrand() {
             href={`/brand/${brand.id}`}
             className="group flex flex-col items-center gap-2 p-4 md:p-5 bg-white rounded-lg border border-[#E2E8F0] hover:border-[#1A56DB] hover:shadow-lg transition-all"
           >
-            <div
-              className="w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform"
-              style={{ backgroundColor: brandColors[brand.id] || "#64748B" }}
-            >
-              <span className="text-white font-bold text-lg md:text-xl">
-                {brand.name.substring(0, 2).toUpperCase()}
-              </span>
-            </div>
+            <BrowseByBrandLogo brand={brand} />
             <span className="text-sm font-bold text-[#1E293B] text-center leading-tight">
               {brand.name}
             </span>
@@ -398,6 +732,7 @@ function PopularModels() {
                   model={{
                     id: model.id,
                     name: model.name,
+                    brandId: model.brandId,
                     brandName: brand?.name || "",
                     bodyType: model.bodyType,
                     startingPrice: model.startingPrice,
@@ -407,6 +742,7 @@ function PopularModels() {
                     trimCount: model.trimCount,
                     isNew: model.isNew,
                     isUpdated: model.isUpdated,
+                    imageUrl: model.imageUrl,
                   }}
                   onCompare={(id) =>
                     addItem({
@@ -603,6 +939,7 @@ function WhatsNew() {
                   model={{
                     id: model.id,
                     name: model.name,
+                    brandId: model.brandId,
                     brandName: brand?.name || "",
                     bodyType: model.bodyType,
                     startingPrice: model.startingPrice,
@@ -612,6 +949,7 @@ function WhatsNew() {
                     trimCount: model.trimCount,
                     isNew: model.isNew,
                     isUpdated: model.isUpdated,
+                    imageUrl: model.imageUrl,
                   }}
                   onCompare={(id) =>
                     addItem({
@@ -759,11 +1097,11 @@ function ExploreByLifestyle() {
 // ---------- Main Page Content (needs CompareProvider above) ----------
 
 function HomePageContent() {
-  const { items } = useCompare();
+  const { totalCount } = useCompare();
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F8FAFC]">
-      <Navbar compareCount={items.length} />
+    <div id="page-root" className="min-h-screen flex flex-col bg-slate-950">
+      <Navbar compareCount={totalCount} />
 
       <main className="flex-1 pb-20 md:pb-0">
         <HeroSection />
@@ -777,7 +1115,7 @@ function HomePageContent() {
       </main>
 
       <Footer />
-      <MobileTabBar activeTab="home" compareCount={items.length} />
+      <MobileTabBar activeTab="home" compareCount={totalCount} />
     </div>
   );
 }

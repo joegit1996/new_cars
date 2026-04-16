@@ -46,6 +46,34 @@ export enum EquipmentCategory {
   Interior = "Interior",
 }
 
+export interface BrandStat {
+  label: string;
+  value: string;
+}
+
+export interface BrandServiceLink {
+  title: string;
+  description: string;
+  icon: string;
+  href: string;
+}
+
+export interface BrandEditorial {
+  heroGradient: string;
+  story: string;
+  heritage: {
+    title: string;
+    description: string;
+    founded: string;
+    milestone: string;
+  };
+  stats: BrandStat[];
+  innovationTitle: string;
+  innovationDescription: string;
+  sustainability?: string;
+  serviceLinks: BrandServiceLink[];
+}
+
 export interface Brand {
   id: string;
   name: string;
@@ -53,6 +81,7 @@ export interface Brand {
   modelCount: number;
   featured?: boolean;
   tagline?: string;
+  editorial?: BrandEditorial;
 }
 
 export interface Model {
@@ -67,6 +96,8 @@ export interface Model {
   isUpdated: boolean;
   specsSummary: ModelSpecsSummary;
   imageUrl: string;
+  segmentOrder?: number;
+  modelFamily?: string;
 }
 
 export interface ModelSpecsSummary {
@@ -88,6 +119,8 @@ export interface Trim {
   variants: TrimVariant[];
   specs: Spec;
   equipment: Equipment[];
+  leadFormUrl?: string;
+  websiteUrl?: string;
 }
 
 export interface TrimVariant {
@@ -172,3 +205,40 @@ export type SortBy =
   | "newest"
   | "popular"
   | "horsepower";
+
+export interface SearchEntry {
+  modelId: string;
+  trimId: string;
+  brandId: string;
+  brandName: string;
+  modelName: string;
+  trimName: string;
+  price: number;
+  imageUrl: string;
+  bodyType: string;
+  searchText: string;
+}
+
+export interface MinMax {
+  min: number;
+  max: number;
+}
+
+export interface ModelAggregateSpecs {
+  priceRange: MinMax;
+  hpRange: MinMax;
+  torqueRange: MinMax;
+  fuelTypes: FuelType[];
+  transmissions: TransmissionType[];
+  driveTypes: DriveType[];
+  seatingRange: MinMax;
+  displacementRange: MinMax;
+  dimensionRanges: {
+    length: MinMax;
+    width: MinMax;
+    height: MinMax;
+    wheelbase: MinMax;
+  };
+  equipmentMap: Record<string, "standard" | "some" | "none">;
+  trimCount: number;
+}

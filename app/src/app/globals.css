@@ -85,6 +85,10 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+html, body {
+  overflow-x: clip;
+}
+
 body {
   background: var(--color-background);
   color: var(--color-foreground);
@@ -128,10 +132,40 @@ body {
   background: rgba(148, 163, 184, 0.8);
 }
 
-/* Smooth scroll */
-html {
-  scroll-behavior: smooth;
+/* Page background transition — dark by default, light after scrolling past hero+brands */
+#page-root h2,
+#page-root .dim-subtitle,
+#page-root .dim-link {
+  transition: color 0.6s cubic-bezier(0, 0, 0.2, 1);
 }
+
+/* Dark state (default) — override Tailwind dark text to light */
+#page-root:not(.page-light) h2 {
+  color: #FFFFFF;
+}
+
+#page-root:not(.page-light) .dim-subtitle {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+#page-root:not(.page-light) .dim-link {
+  color: #93C5FD;
+}
+
+/* Brand marquee */
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-marquee {
+  animation: marquee 40s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee {
+    animation: none;
+  }
+}
+
 
 /* Embedded mode (default): hide chrome before React hydrates */
 /* Only show Navbar/Footer/TabBar when is-standalone class is present */
@@ -229,5 +263,17 @@ html:not(.is-standalone) nav[class*="fixed bottom-0"] {
   }
   html {
     font-family: "Sakr Pro", system-ui, sans-serif;
+  }
+}
+
+/* Full-screen scroll FX layout */
+.fx-content-grid {
+  grid-template-columns: 1fr 1.3fr 1fr;
+}
+@media (max-width: 768px) {
+  .fx-content-grid {
+    grid-template-columns: 1fr;
+    row-gap: 3vh;
+    place-items: center;
   }
 }

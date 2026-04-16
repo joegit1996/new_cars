@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
 import { brands } from "../../../data/mock-data";
+import BrandShowcasePage from "./BrandShowcaseClient";
 
 export function generateStaticParams() {
   return brands.map((b) => ({ id: b.id }));
@@ -11,5 +11,5 @@ export default async function BrandPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  redirect(`/browse?brand=${id}`);
+  return <BrandShowcasePage brandId={id} />;
 }

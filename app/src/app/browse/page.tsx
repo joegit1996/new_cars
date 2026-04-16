@@ -41,6 +41,7 @@ function modelToCardData(m: Model): ModelData {
   return {
     id: m.id,
     name: m.name,
+    brandId: m.brandId,
     brandName: brand?.name ?? "",
     bodyType: m.bodyType,
     startingPrice: m.startingPrice,
@@ -50,6 +51,7 @@ function modelToCardData(m: Model): ModelData {
     trimCount: m.trimCount,
     isNew: m.isNew,
     isUpdated: m.isUpdated,
+    imageUrl: m.imageUrl,
   };
 }
 
@@ -538,7 +540,7 @@ function BrowsePageContent() {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex flex-col">
-      <Navbar compareCount={compare.items.length} />
+      <Navbar compareCount={compare.totalCount} />
 
       {/* Brand Hero -- full-width, only on brand pages */}
       {brandObj && <BrandHero brandName={brandObj.name} brandId={brandObj.id} />}
@@ -841,7 +843,7 @@ function BrowsePageContent() {
       )}
 
       <Footer />
-      <MobileTabBar activeTab="search" compareCount={compare.items.length} />
+      <MobileTabBar activeTab="search" compareCount={compare.totalCount} />
     </div>
   );
 }

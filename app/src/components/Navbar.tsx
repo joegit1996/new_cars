@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Search, Scale, Heart, User, Menu, X } from "lucide-react";
 import { useIsEmbedded } from "../hooks/useIsEmbedded";
+import GlobalSearch, { MobileGlobalSearch } from "./GlobalSearch";
 
 interface NavbarProps {
   compareCount?: number;
@@ -25,14 +26,7 @@ export default function Navbar({ compareCount = 0 }: NavbarProps) {
 
         {/* Search Bar */}
         <div className="flex-1 max-w-xl mx-8">
-          <div className="relative">
-            <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#64748B]" />
-            <input
-              type="text"
-              placeholder="Search brands, models, or body types..."
-              className="w-full ps-10 pe-4 py-2.5 bg-white rounded-full text-sm text-[#1E293B] placeholder:text-[#64748B] focus:outline-none focus:ring-2 focus:ring-[#1A56DB]"
-            />
-          </div>
+          <GlobalSearch />
         </div>
 
         {/* Action Icons */}
@@ -67,7 +61,7 @@ export default function Navbar({ compareCount = 0 }: NavbarProps) {
           onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
           aria-label="Search"
         >
-          <Search className="w-5 h-5" />
+          {mobileSearchOpen ? <X className="w-5 h-5" /> : <Search className="w-5 h-5" />}
         </button>
 
         {/* Hamburger */}
@@ -81,19 +75,7 @@ export default function Navbar({ compareCount = 0 }: NavbarProps) {
       </nav>
 
       {/* Mobile Search Overlay */}
-      {mobileSearchOpen && (
-        <div className="md:hidden px-4 pb-3">
-          <div className="relative">
-            <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#64748B]" />
-            <input
-              type="text"
-              placeholder="Search brands, models..."
-              autoFocus
-              className="w-full ps-10 pe-4 py-2.5 bg-white rounded-full text-sm text-[#1E293B] placeholder:text-[#64748B] focus:outline-none focus:ring-2 focus:ring-[#1A56DB]"
-            />
-          </div>
-        </div>
-      )}
+      <MobileGlobalSearch open={mobileSearchOpen} onClose={() => setMobileSearchOpen(false)} />
 
       {/* Mobile Menu Dropdown */}
       {mobileMenuOpen && (

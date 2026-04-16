@@ -1,25 +1,35 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, Suspense } from "react";
 import { Search, ArrowLeft } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 import EmbedLink from "../../components/EmbedLink";
 import { motion, AnimatePresence } from "framer-motion";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import MobileTabBar from "../../components/MobileTabBar";
-import ModelCard from "../../components/ModelCard";
 import PlaceholderImage from "../../components/PlaceholderImage";
 import { CompareProvider } from "../../context/CompareContext";
-import { searchModels, getBrandById } from "../../data/helpers";
+import { searchTrims, getBrandById } from "../../data/helpers";
 import { brands, models } from "../../data/mock-data";
+import type { BodyType } from "../../data/types";
+import ModelCard from "../../components/ModelCard";
 
 function SearchPageContent() {
-  const [query, setQuery] = useState("");
-  const [recentSearches] = useState(["Land Cruiser", "BMW X5", "SUV"]);
+  const searchParams = useSearchParams();
+  const initialQuery = searchParams.get("q") || "";
+  const [query, setQuery] = useState(initialQuery);
+  const [recentSearches] = useState(["Land Cruiser", "BMW X5", "V8", "AWD"]);
+
+  // Sync from URL param on mount / param change
+  useEffect(() => {
+    const q = searchParams.get("q");
+    if (q && q !== query) setQuery(q);
+  }, [searchParams]);
 
   const results = useMemo(() => {
     if (query.length < 2) return [];
-    return searchModels(query);
+    return searchTrims(query);
   }, [query]);
 
   const popularModels = useMemo(
@@ -39,7 +49,7 @@ function SearchPageContent() {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search brands, models, or body types..."
+            placeholder="Search brands, models, specs, features..."
             autoFocus
             className="w-full ps-12 pe-4 py-4 bg-white border border-[#E2E8F0] rounded-2xl text-base text-[#1E293B] placeholder:text-[#94A3B8] focus:outline-none focus:ring-2 focus:ring-[#1A56DB] focus:border-transparent shadow-sm"
           />
@@ -120,7 +130,7 @@ function SearchPageContent() {
                         className="flex items-center gap-3 p-3 bg-white rounded-xl border border-[#E2E8F0] hover:border-[#1A56DB] transition-colors"
                       >
                         <div className="w-16 h-12 rounded-lg overflow-hidden shrink-0">
-                          <PlaceholderImage aspectRatio="4/3" className="w-full h-full" bodyType={model.bodyType} />
+                          <PlaceholderImage aspectRatio="4/3" className="w-full h-full" bodyType={model.bodyType} imageUrl={model.imageUrl} />
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-[10px] text-[#64748B] uppercase tracking-wide">{brand?.name}</p>
@@ -141,6 +151,7 @@ function SearchPageContent() {
                         model={{
                           id: model.id,
                           name: model.name,
+                          brandId: model.brandId,
                           brandName: brand?.name || "",
                           bodyType: model.bodyType,
                           startingPrice: model.startingPrice,
@@ -150,6 +161,7 @@ function SearchPageContent() {
                           trimCount: model.trimCount,
                           isNew: model.isNew,
                           isUpdated: model.isUpdated,
+                          imageUrl: model.imageUrl,
                         }}
                       />
                     );
@@ -167,28 +179,36 @@ function SearchPageContent() {
               <p className="text-sm text-[#64748B] mb-4">
                 {results.length} result{results.length !== 1 ? "s" : ""} for &quot;{query}&quot;
               </p>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {results.map((model) => {
-                  const brand = getBrandById(model.brandId);
-                  return (
-                    <ModelCard
-                      key={model.id}
-                      model={{
-                        id: model.id,
-                        name: model.name,
-                        brandName: brand?.name || "",
-                        bodyType: model.bodyType,
-                        startingPrice: model.startingPrice,
-                        engineRange: model.specsSummary.engineRange,
-                        hpRange: model.specsSummary.hpRange,
-                        fuelType: model.specsSummary.fuelTypes.join(", "),
-                        trimCount: model.trimCount,
-                        isNew: model.isNew,
-                        isUpdated: model.isUpdated,
-                      }}
-                    />
-                  );
-                })}
+              {/* Trim-level results */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {results.map((entry, i) => (
+                  <EmbedLink
+                    key={`${entry.trimId}-${i}`}
+                    href={`/model/${entry.modelId}?trim=${entry.trimId}`}
+                    className="flex items-center gap-3 p-4 bg-white rounded-xl border border-[#E2E8F0] hover:border-[#1A56DB] hover:shadow-md transition-all"
+                  >
+                    <div className="w-20 h-14 rounded-lg overflow-hidden shrink-0 bg-[#F1F5F9]">
+                      <PlaceholderImage
+                        aspectRatio="4/3"
+                        className="w-full h-full"
+                        bodyType={entry.bodyType as BodyType}
+                        imageUrl={entry.imageUrl}
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[10px] text-[#64748B] uppercase tracking-wide">
+                        {entry.brandName}
+                      </p>
+                      <p className="text-sm font-bold text-[#1E293B] truncate">
+                        {entry.modelName}
+                      </p>
+                      <p className="text-xs text-[#64748B] truncate">{entry.trimName}</p>
+                      <p className="text-xs font-bold text-[#F59E0B] mt-0.5">
+                        {entry.price.toLocaleString()} KWD
+                      </p>
+                    </div>
+                  </EmbedLink>
+                ))}
               </div>
             </motion.div>
           ) : (
@@ -227,7 +247,9 @@ function SearchPageContent() {
 export default function SearchPage() {
   return (
     <CompareProvider>
-      <SearchPageContent />
+      <Suspense>
+        <SearchPageContent />
+      </Suspense>
     </CompareProvider>
   );
 }
