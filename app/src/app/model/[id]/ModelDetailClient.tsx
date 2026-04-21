@@ -39,6 +39,7 @@ import {
 import { EquipmentCategory } from "@/data/types";
 import type { Trim, TrimVariant, Equipment } from "@/data/types";
 import PlaceholderImage from "@/components/PlaceholderImage";
+import VideoHero from "@/components/VideoHero";
 import CircularGallery from "@/components/CircularGallery";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -82,78 +83,11 @@ function FadeSection({
 }
 
 // ---------------------------------------------------------------------------
-// Hero Carousel (kept from original)
+// Hero Video (replaces carousel)
 // ---------------------------------------------------------------------------
 
-function HeroCarousel({ trimName, bodyType, imageUrl }: { trimName: string; bodyType: string; imageUrl?: string }) {
-  const [current, setCurrent] = useState(0);
-  const slides = [0, 1, 2];
-  const labels = [`${trimName} - Front`, `${trimName} - Side`, `${trimName} - Rear`];
-  const autoPlayRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const touchStart = useRef(0);
-  const touchEnd = useRef(0);
-
-  const goNext = useCallback(() => {
-    setCurrent((c) => (c === slides.length - 1 ? 0 : c + 1));
-  }, [slides.length]);
-
-  useEffect(() => {
-    autoPlayRef.current = setInterval(goNext, 5000);
-    return () => {
-      if (autoPlayRef.current) clearInterval(autoPlayRef.current);
-    };
-  }, [goNext]);
-
-  const resetAutoPlay = () => {
-    if (autoPlayRef.current) clearInterval(autoPlayRef.current);
-    autoPlayRef.current = setInterval(goNext, 5000);
-  };
-
-  return (
-    <div
-      className="relative w-full overflow-hidden bg-[#F1F5F9]"
-      onTouchStart={(e) => { touchStart.current = e.targetTouches[0].clientX; }}
-      onTouchMove={(e) => { touchEnd.current = e.targetTouches[0].clientX; }}
-      onTouchEnd={() => {
-        const diff = touchStart.current - touchEnd.current;
-        if (diff > 50) { setCurrent((c) => (c === slides.length - 1 ? 0 : c + 1)); resetAutoPlay(); }
-        else if (diff < -50) { setCurrent((c) => (c === 0 ? slides.length - 1 : c - 1)); resetAutoPlay(); }
-      }}
-    >
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={current}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <PlaceholderImage
-            aspectRatio="21/9"
-            className="w-full"
-            label={labels[current]}
-            bodyType={bodyType}
-            silhouetteSize="lg"
-            imageUrl={imageUrl}
-          />
-        </motion.div>
-      </AnimatePresence>
-
-      {/* Dots */}
-      <div className="absolute bottom-3 inset-x-0 flex justify-center gap-2">
-        {slides.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => { setCurrent(i); resetAutoPlay(); }}
-            className={`h-2 rounded-full transition-all duration-300 ${
-              i === current ? "bg-[#1A56DB] w-6" : "bg-[#94A3B8]/40 w-2"
-            }`}
-            aria-label={`Go to slide ${i + 1}`}
-          />
-        ))}
-      </div>
-    </div>
-  );
+function HeroVideo({ heroMedia }: { heroMedia?: { type: "video" | "image"; url: string } }) {
+  return <VideoHero media={heroMedia} />;
 }
 
 // ---------------------------------------------------------------------------
@@ -297,9 +231,11 @@ function ScrollCardsSection({
   trim,
   bodyType,
   imageUrl,
+  images,
 }: {
   model: { name: string; bodyType: string; imageUrl?: string };
   trim: Trim;
+  images?: { front?: string; rear?: string; side?: string; detail?: string; hero?: string };
   bodyType: string;
   imageUrl?: string;
 }) {
@@ -318,7 +254,7 @@ function ScrollCardsSection({
             label=""
             className="w-full md:rounded-2xl"
             silhouetteSize="lg"
-            imageUrl={imageUrl}
+            imageUrl={images?.front ?? imageUrl}
           />
         ),
         color: "#0F172A",
@@ -335,7 +271,7 @@ function ScrollCardsSection({
             label=""
             className="w-full md:rounded-2xl"
             silhouetteSize="lg"
-            imageUrl={imageUrl}
+            imageUrl={images?.detail ?? imageUrl}
           />
         ),
         color: "#FFFFFF",
@@ -352,7 +288,7 @@ function ScrollCardsSection({
             label=""
             className="w-full md:rounded-2xl"
             silhouetteSize="lg"
-            imageUrl={imageUrl}
+            imageUrl={images?.side ?? imageUrl}
           />
         ),
         color: "#F8FAFC",
@@ -371,14 +307,14 @@ function ScrollCardsSection({
             label=""
             className="w-full md:rounded-2xl"
             silhouetteSize="lg"
-            imageUrl={imageUrl}
+            imageUrl={images?.rear ?? imageUrl}
           />
         ),
         color: "#111318",
         textColor: "#FFFFFF",
       },
     ],
-    [trim, model, bodyType]
+    [trim, model, bodyType, images]
   );
 
   return <CardsParallax items={items} />;
@@ -478,7 +414,7 @@ function FeatureHighlights({
   model,
   trim,
 }: {
-  model: { bodyType: string; year: number; specsSummary: { engineRange: string; hpRange: string; fuelTypes: string[] }; imageUrl?: string };
+  model: { bodyType: string; year: number; specsSummary: { engineRange: string; hpRange: string; fuelTypes: string[] }; imageUrl?: string; images?: { front?: string; rear?: string; side?: string; detail?: string; hero?: string } };
   trim: Trim;
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -488,30 +424,36 @@ function FeatureHighlights({
   const dragStartX = useRef(0);
   const dragScrollLeft = useRef(0);
 
+  const imgs = model.images;
   const features = useMemo(() => [
     {
       title: "Performance.",
       description: `${trim.specs.horsepower} hp and ${trim.specs.torque} Nm of torque deliver exhilarating acceleration. 0-100 km/h in just ${trim.specs.zeroToHundred} seconds with a top speed of ${trim.specs.topSpeed} km/h.`,
+      image: imgs?.hero ?? model.imageUrl,
     },
     {
       title: "Drivetrain.",
       description: `${trim.specs.transmission} transmission paired with ${trim.specs.driveType} drive. The ${trim.specs.engineType} engine displaces ${trim.specs.displacement > 0 ? `${trim.specs.displacement}L with ${trim.specs.cylinders} cylinders` : "pure electric power"}.`,
+      image: imgs?.detail ?? model.imageUrl,
     },
     {
       title: "Efficiency.",
       description: trim.specs.fuelEconomyCombined > 0
         ? `Combined fuel economy of ${trim.specs.fuelEconomyCombined} L/100km. City: ${trim.specs.fuelEconomyCity} L/100km, Highway: ${trim.specs.fuelEconomyHighway} L/100km. ${trim.specs.fuelTankLiters}L fuel tank.`
         : "Zero emissions with pure electric power. Efficient energy management for maximum range.",
+      image: imgs?.side ?? model.imageUrl,
     },
     {
       title: "Design.",
       description: `${model.bodyType} body style with ${trim.specs.seatingCapacity} seats. ${trim.specs.lengthMm}mm length, ${trim.specs.widthMm}mm width, and ${trim.specs.wheelbaseMm}mm wheelbase provide a commanding presence.`,
+      image: imgs?.front ?? model.imageUrl,
     },
     {
       title: "Comfort.",
       description: `${trim.specs.trunkVolumeLiters}L of cargo space. Curb weight of ${trim.specs.curbWeightKg}kg ensures a planted, confident ride. ${trim.specs.warranty} warranty coverage included.`,
+      image: imgs?.rear ?? model.imageUrl,
     },
-  ], [trim, model]);
+  ], [trim, model, imgs]);
 
   const updateScrollState = useCallback(() => {
     const el = scrollRef.current;
@@ -621,7 +563,7 @@ function FeatureHighlights({
                 label=""
                 className="w-full h-full !bg-[#111318]"
                 silhouetteSize="md"
-                imageUrl={model.imageUrl}
+                imageUrl={feature.image}
               />
               {/* Dark gradient overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-[#111318] via-[#111318]/60 to-transparent" />
@@ -1345,7 +1287,7 @@ export default function ModelDetailClient({ id }: { id: string }) {
 
         {/* ---- Hero ---- */}
         <div ref={heroRef} className="relative w-full">
-          <HeroCarousel trimName={selectedTrim.name} bodyType={model.bodyType} imageUrl={model.imageUrl} />
+          <HeroVideo heroMedia={brand.heroMedia} />
           <button
             onClick={() => setBookmarked(!bookmarked)}
             className={`absolute top-3 end-3 z-10 w-10 h-10 flex items-center justify-center rounded-full shadow transition-colors ${
@@ -1469,7 +1411,7 @@ export default function ModelDetailClient({ id }: { id: string }) {
         </FadeSection>
 
         {/* ---- Scroll Cards (full-screen stacking) ---- */}
-        <ScrollCardsSection model={model} trim={selectedTrim} bodyType={model.bodyType} imageUrl={model.imageUrl} />
+        <ScrollCardsSection model={model} trim={selectedTrim} bodyType={model.bodyType} imageUrl={model.imageUrl} images={model.images} />
 
         {/* ---- Feature Highlights Carousel (Porsche-style dark cards) ---- */}
         <FadeSection id="section-highlights" className="bg-white">
@@ -1545,7 +1487,7 @@ export default function ModelDetailClient({ id }: { id: string }) {
 
         {/* ---- Gallery ---- */}
         <FadeSection id="section-gallery" className="bg-white">
-          <GallerySection />
+          <GallerySection key={id} />
         </FadeSection>
 
         {/* ---- Pricing & Branches (side by side on desktop) ---- */}

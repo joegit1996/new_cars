@@ -30,6 +30,7 @@ import type { Model } from "@/data/types";
 import { type FilterState, PRICE_MIN, PRICE_MAX } from "@/components/FilterPanel";
 import FilterPanel from "@/components/FilterPanel";
 import PlaceholderImage from "@/components/PlaceholderImage";
+import VideoHero from "@/components/VideoHero";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import MobileTabBar from "@/components/MobileTabBar";
@@ -79,56 +80,12 @@ function FadeSection({
 }
 
 // ---------------------------------------------------------------------------
-// Brand Hero (same as browse page)
+// Brand Hero (video)
 // ---------------------------------------------------------------------------
 
-function BrandHero({ brandName, logoUrl, heroImages }: { brandName: string; logoUrl?: string; heroImages?: string[] }) {
-  const [current, setCurrent] = useState(0);
-  const slides = [0, 1, 2];
-  const labels = [`${brandName} - Lineup`, `${brandName} - Heritage`, `${brandName} - Innovation`];
-  const autoPlayRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const touchStart = useRef(0);
-  const touchEnd = useRef(0);
-
-  const goNext = useCallback(() => {
-    setCurrent((c) => (c === slides.length - 1 ? 0 : c + 1));
-  }, [slides.length]);
-
-  useEffect(() => {
-    autoPlayRef.current = setInterval(goNext, 5000);
-    return () => {
-      if (autoPlayRef.current) clearInterval(autoPlayRef.current);
-    };
-  }, [goNext]);
-
-  const resetAutoPlay = () => {
-    if (autoPlayRef.current) clearInterval(autoPlayRef.current);
-    autoPlayRef.current = setInterval(goNext, 5000);
-  };
-
+function BrandHero({ brandName, logoUrl, heroMedia }: { brandName: string; logoUrl?: string; heroMedia?: { type: "video" | "image"; url: string } }) {
   return (
-    <div
-      className="relative w-full overflow-hidden bg-[#E2E8F0]"
-      onTouchStart={(e) => { touchStart.current = e.targetTouches[0].clientX; }}
-      onTouchMove={(e) => { touchEnd.current = e.targetTouches[0].clientX; }}
-      onTouchEnd={() => {
-        const diff = touchStart.current - touchEnd.current;
-        if (diff > 50) { setCurrent((c) => (c === slides.length - 1 ? 0 : c + 1)); resetAutoPlay(); }
-        else if (diff < -50) { setCurrent((c) => (c === 0 ? slides.length - 1 : c - 1)); resetAutoPlay(); }
-      }}
-    >
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={current}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <PlaceholderImage aspectRatio="21/9" className="w-full" label="" imageUrl={heroImages?.[current % (heroImages?.length || 1)]} />
-        </motion.div>
-      </AnimatePresence>
-
+    <VideoHero media={heroMedia}>
       {/* Brand name overlay */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent flex items-end">
         <div className="px-4 md:px-6 pb-5 md:pb-7 max-w-7xl mx-auto w-full flex items-center gap-4">
@@ -151,21 +108,7 @@ function BrandHero({ brandName, logoUrl, heroImages }: { brandName: string; logo
           </div>
         </div>
       </div>
-
-      {/* Dots */}
-      <div className="absolute bottom-3 inset-x-0 flex justify-center gap-2">
-        {slides.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => { setCurrent(i); resetAutoPlay(); }}
-            className={`h-2 rounded-full transition-all duration-300 ${
-              i === current ? "bg-white w-6" : "bg-white/50 w-2"
-            }`}
-            aria-label={`Go to slide ${i + 1}`}
-          />
-        ))}
-      </div>
-    </div>
+    </VideoHero>
   );
 }
 
@@ -462,12 +405,14 @@ function ModelShowcase({
               exit="exit"
               transition={{ duration: 0.25 }}
             >
-              <h2 className="text-2xl md:text-4xl font-bold text-[#1E293B]">
-                {current.name}
-              </h2>
-              <p className="text-xs md:text-sm text-[#64748B] mt-1 uppercase tracking-widest">
-                {current.bodyType}
-              </p>
+              <EmbedAnchor href={`/model/${current.id}`} className="hover:opacity-80 transition-opacity">
+                <h2 className="text-2xl md:text-4xl font-bold text-[#1E293B]">
+                  {current.name}
+                </h2>
+                <p className="text-xs md:text-sm text-[#64748B] mt-1 uppercase tracking-widest">
+                  {current.bodyType}
+                </p>
+              </EmbedAnchor>
             </motion.div>
           </AnimatePresence>
         </div>
@@ -500,15 +445,17 @@ function ModelShowcase({
                 transition={{ duration: 0.35, ease: "easeInOut" }}
                 className="max-w-3xl mx-auto group/car cursor-pointer overflow-hidden rounded-xl"
               >
-                <div className="transition-transform duration-500 ease-out group-hover/car:scale-105">
-                  <PlaceholderImage
-                    aspectRatio="16/9"
-                    bodyType={current.bodyType}
-                    label={`${brandName} ${current.name}`}
-                    className="w-full"
-                    imageUrl={current.imageUrl}
-                  />
-                </div>
+                <EmbedAnchor href={`/model/${current.id}`}>
+                  <div className="transition-transform duration-500 ease-out group-hover/car:scale-105">
+                    <PlaceholderImage
+                      aspectRatio="16/9"
+                      bodyType={current.bodyType}
+                      label={`${brandName} ${current.name}`}
+                      className="w-full"
+                      imageUrl={current.imageUrl}
+                    />
+                  </div>
+                </EmbedAnchor>
               </motion.div>
             </AnimatePresence>
           </div>
@@ -604,10 +551,21 @@ function FeaturedModelsSection({
   brandId: string;
 }) {
   const featured = useMemo(() => {
-    const highlighted = models.filter((m) => m.isNew || m.isUpdated);
-    const rest = models.filter((m) => !m.isNew && !m.isUpdated);
-    const shuffled = [...rest].sort(() => Math.random() - 0.5);
-    return [...highlighted, ...shuffled].slice(0, 6);
+    const raw = models.filter((m) => m.featured);
+    // Interleave so no two consecutive models share the same modelFamily / image
+    const result: Model[] = [];
+    const remaining = [...raw];
+    while (remaining.length > 0) {
+      const prev = result[result.length - 1];
+      const idx = prev
+        ? remaining.findIndex(
+            (m) => m.modelFamily !== prev.modelFamily && m.imageUrl !== prev.imageUrl
+          )
+        : 0;
+      // If no non-duplicate found, just take the next one
+      result.push(remaining.splice(idx === -1 ? 0 : idx, 1)[0]);
+    }
+    return result;
   }, [models]);
 
   const [isMobile, setIsMobile] = useState(false);
@@ -681,8 +639,11 @@ function FeaturedModelsSection({
                   imageUrl={model.imageUrl}
                 />
               </div>
-              {/* Thin bottom fade for text readability only */}
-              <div className="absolute bottom-0 inset-x-0 h-[25%] bg-gradient-to-t from-[#111318] to-transparent" />
+              {/* Overlays for text readability */}
+              <div className="absolute top-0 inset-x-0 h-[30%] bg-gradient-to-b from-[#111318]/80 to-transparent" />
+              <div className="absolute bottom-0 inset-x-0 h-[45%] bg-gradient-to-t from-[#111318] via-[#111318]/70 to-transparent" />
+              <div className="absolute top-0 left-0 bottom-0 w-[30%] bg-gradient-to-r from-[#111318]/70 to-transparent" />
+              <div className="absolute top-0 right-0 bottom-0 w-[30%] bg-gradient-to-l from-[#111318]/70 to-transparent" />
             </div>
           ),
         };
@@ -945,9 +906,9 @@ function BrandDetailsZone({
   const brand = getBrandById(brandId);
   if (!editorial) return null;
 
-  // Pick representative images from available models
-  const heritageImage = allModels[0]?.imageUrl;
-  const innovationImage = allModels[Math.min(1, allModels.length - 1)]?.imageUrl;
+  // Use dedicated editorial images if available, fall back to model images
+  const heritageImage = brand?.editorialImages?.heritage ?? allModels[0]?.imageUrl;
+  const innovationImage = brand?.editorialImages?.innovation ?? allModels[Math.min(1, allModels.length - 1)]?.imageUrl;
 
   return (
     <div className="border-t border-[#E2E8F0]">
@@ -1161,7 +1122,7 @@ function BrandShowcaseContent({ brandId }: { brandId: string }) {
       <Navbar compareCount={compare.totalCount} />
 
       {/* Brand Hero */}
-      <BrandHero brandName={brand.name} logoUrl={brand.logoUrl} heroImages={allBrandModels.slice(0, 3).map(m => m.imageUrl).filter(Boolean) as string[]} />
+      <BrandHero brandName={brand.name} logoUrl={brand.logoUrl} heroMedia={brand.heroMedia} />
 
       {/* Navigation bar (breadcrumb + back) */}
       <div className="max-w-7xl mx-auto w-full px-4 md:px-6 pt-4">

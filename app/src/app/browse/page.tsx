@@ -14,6 +14,7 @@ import ModelCard, { type ModelData } from "@/components/ModelCard";
 import FilterPanel, { type FilterState, PRICE_MIN, PRICE_MAX } from "@/components/FilterPanel";
 import ComparisonTray, { type ComparisonItem } from "@/components/ComparisonTray";
 import PlaceholderImage from "@/components/PlaceholderImage";
+import VideoHero from "@/components/VideoHero";
 import { EmbedAnchor } from "@/components/EmbedLink";
 import { useIsEmbedded } from "@/hooks/useIsEmbedded";
 import { appendEmbedParam } from "@/hooks/useEmbedHref";
@@ -229,76 +230,12 @@ function Carousel({
 }
 
 // ---------------------------------------------------------------------------
-// Brand Hero
+// Brand Hero (video)
 // ---------------------------------------------------------------------------
 
-function BrandHero({ brandName, brandId }: { brandName: string; brandId: string }) {
-  const [current, setCurrent] = useState(0);
-  const slides = [0, 1, 2];
-  const labels = [`${brandName} - Lineup`, `${brandName} - Heritage`, `${brandName} - Innovation`];
-  const autoPlayRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const touchStart = useRef(0);
-  const touchEnd = useRef(0);
-
-  const goNext = useCallback(() => {
-    setCurrent((c) => (c === slides.length - 1 ? 0 : c + 1));
-  }, [slides.length]);
-
-  useEffect(() => {
-    autoPlayRef.current = setInterval(goNext, 5000);
-    return () => {
-      if (autoPlayRef.current) clearInterval(autoPlayRef.current);
-    };
-  }, [goNext]);
-
-  const resetAutoPlay = () => {
-    if (autoPlayRef.current) clearInterval(autoPlayRef.current);
-    autoPlayRef.current = setInterval(goNext, 5000);
-  };
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStart.current = e.targetTouches[0].clientX;
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    touchEnd.current = e.targetTouches[0].clientX;
-  };
-
-  const handleTouchEnd = () => {
-    const diff = touchStart.current - touchEnd.current;
-    const threshold = 50;
-    if (diff > threshold) {
-      setCurrent((c) => (c === slides.length - 1 ? 0 : c + 1));
-      resetAutoPlay();
-    } else if (diff < -threshold) {
-      setCurrent((c) => (c === 0 ? slides.length - 1 : c - 1));
-      resetAutoPlay();
-    }
-  };
-
+function BrandHero({ brandName, brandId, heroMedia }: { brandName: string; brandId: string; heroMedia?: { type: "video" | "image"; url: string } }) {
   return (
-    <div
-      className="relative w-full overflow-hidden bg-[#E2E8F0]"
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
-    >
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={current}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <PlaceholderImage
-            aspectRatio="21/9"
-            className="w-full"
-            label={labels[current]}
-          />
-        </motion.div>
-      </AnimatePresence>
-
+    <VideoHero media={heroMedia}>
       {/* Brand name overlay */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent flex items-end">
         <div className="px-4 md:px-6 pb-5 md:pb-7 max-w-7xl mx-auto w-full flex items-center gap-4">
@@ -317,24 +254,7 @@ function BrandHero({ brandName, brandId }: { brandName: string; brandId: string 
           </div>
         </div>
       </div>
-
-      {/* Dots */}
-      <div className="absolute bottom-3 inset-x-0 flex justify-center gap-2">
-        {slides.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => {
-              setCurrent(i);
-              resetAutoPlay();
-            }}
-            className={`h-2 rounded-full transition-all duration-300 ${
-              i === current ? "bg-white w-6" : "bg-white/50 w-2"
-            }`}
-            aria-label={`Go to slide ${i + 1}`}
-          />
-        ))}
-      </div>
-    </div>
+    </VideoHero>
   );
 }
 
@@ -543,7 +463,7 @@ function BrowsePageContent() {
       <Navbar compareCount={compare.totalCount} />
 
       {/* Brand Hero -- full-width, only on brand pages */}
-      {brandObj && <BrandHero brandName={brandObj.name} brandId={brandObj.id} />}
+      {brandObj && <BrandHero brandName={brandObj.name} brandId={brandObj.id} heroMedia={brandObj.heroMedia} />}
 
       <main className="flex-1 max-w-7xl mx-auto w-full px-4 md:px-6 pt-4 pb-32">
         {/* Breadcrumb -- desktop only */}

@@ -92,14 +92,14 @@ function SectionTitle({
 function HeroSection() {
   return (
     <BeamsBackground className="h-[100svh] min-h-0" intensity="medium">
-      {/* 3D Model -- positioned below the text area */}
-      <div className="absolute top-[38%] md:top-[28%] bottom-[24%] md:bottom-0 left-[8%] right-[8%] md:left-0 md:right-0 z-[5]">
+      {/* 3D Model -- desktop only, bottom stops above the text zone */}
+      <div className="hidden md:block absolute md:top-[28%] md:bottom-[16%] md:left-0 md:right-0 z-[5]">
         <CarModel3D className="w-full h-full" />
       </div>
 
       {/* Content overlay */}
       <div className="relative z-10 flex flex-col h-[100svh] pointer-events-none">
-        {/* Top text with scrim so it never collides with the model */}
+        {/* Top text -- title only so it stays compact above the car */}
         <div className="pt-24 md:pt-28 px-4 text-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -119,11 +119,32 @@ function HeroSection() {
               New Car
             </span>
           </motion.div>
+        </div>
+
+        {/* Middle zone -- car occupies this space */}
+        <div className="flex-1 flex items-center justify-center px-4 md:px-0">
+          {/* Static hero image -- mobile only (in flow so it never overlaps text) */}
+          <motion.img
+            src="/images/cars/porsche-911-front.jpg"
+            alt="Porsche 911"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.3, duration: 0.8, ease: "easeOut" }}
+            className="md:hidden w-full max-w-sm rounded-2xl object-cover shadow-2xl"
+            style={{
+              maskImage: "linear-gradient(to bottom, black 60%, transparent 100%)",
+              WebkitMaskImage: "linear-gradient(to bottom, black 60%, transparent 100%)",
+            }}
+          />
+        </div>
+
+        {/* Bottom zone -- subtitle, CTA, and stats anchored below the car */}
+        <div className="px-4 pb-8 md:pb-10 text-center">
           <motion.p
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.45, duration: 0.7, ease: "easeOut" }}
-            className="mt-5 md:mt-6 text-sm md:text-base font-light tracking-[0.15em] uppercase text-white/60 max-w-lg mx-auto"
+            className="text-sm md:text-base font-light tracking-[0.15em] uppercase text-white/60 max-w-lg mx-auto"
           >
             Browse, compare &amp; configure across every brand in Kuwait
           </motion.p>
@@ -131,7 +152,7 @@ function HeroSection() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.55, duration: 0.7, ease: "easeOut" }}
-            className="mt-6 pointer-events-auto md:hidden"
+            className="mt-4 pointer-events-auto md:hidden"
           >
             <EmbedLink
               href="/browse"
@@ -140,35 +161,30 @@ function HeroSection() {
               Browse All Cars <ArrowRight className="w-4 h-4" />
             </EmbedLink>
           </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6, duration: 0.6, ease: "easeOut" }}
+            className="w-full max-w-3xl mx-auto mt-5"
+          >
+            <div className="flex flex-col items-center gap-3 md:flex-row md:justify-center md:gap-12 py-4 border-t border-white/10">
+              {[
+                { value: "45+", label: "Brands" },
+                { value: "300+", label: "Models" },
+                { value: "Daily", label: "Updated" },
+              ].map((stat) => (
+                <div key={stat.label} className="flex items-center gap-2 md:gap-3">
+                  <span className="text-xl md:text-2xl font-bold text-white">
+                    {stat.value}
+                  </span>
+                  <span className="text-xs md:text-sm text-white/40 uppercase tracking-wider">
+                    {stat.label}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </motion.div>
         </div>
-
-        {/* Spacer pushes stats to bottom */}
-        <div className="flex-1" />
-
-        {/* Bottom stats */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6, duration: 0.6, ease: "easeOut" }}
-          className="w-full max-w-3xl mx-auto px-4 pb-8 md:pb-10"
-        >
-          <div className="flex flex-col items-center gap-3 md:flex-row md:justify-center md:gap-12 py-4 border-t border-white/10">
-            {[
-              { value: "45+", label: "Brands" },
-              { value: "300+", label: "Models" },
-              { value: "Daily", label: "Updated" },
-            ].map((stat) => (
-              <div key={stat.label} className="flex items-center gap-2 md:gap-3">
-                <span className="text-xl md:text-2xl font-bold text-white">
-                  {stat.value}
-                </span>
-                <span className="text-xs md:text-sm text-white/40 uppercase tracking-wider">
-                  {stat.label}
-                </span>
-              </div>
-            ))}
-          </div>
-        </motion.div>
       </div>
     </BeamsBackground>
   );
@@ -206,7 +222,7 @@ function HeroSection() {
           </div>
           <div className="hidden md:block">
             <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
-              <div className="rounded-xl overflow-hidden mb-3"><PlaceholderImage aspectRatio="16/10" label="Featured Model" bodyType="SUV" imageUrl="/images/cars/toyota-lc.jpg" /></div>
+              <div className="rounded-xl overflow-hidden mb-3"><PlaceholderImage aspectRatio="16/10" label="Featured Model" bodyType="SUV" imageUrl="/images/cars/toyota-lc-front.jpg" /></div>
               <p className="text-xs text-white/50 uppercase tracking-wider">New Arrival</p>
               <p className="text-lg font-bold text-white mt-0.5">Toyota Land Cruiser</p>
               <p className="text-sm text-[#F59E0B] font-bold mt-1">Starting from 22,000 KWD</p>

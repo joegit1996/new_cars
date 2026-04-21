@@ -66,6 +66,7 @@ export default function CircularGallery({ images, filter }: CircularGalleryProps
 
   useEffect(() => {
     setRotation(0);
+    setExpandedIndex(null);
   }, [filter]);
 
   const filtered =

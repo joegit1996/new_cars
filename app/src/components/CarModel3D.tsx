@@ -110,7 +110,7 @@ export default function CarModel3D({
           alpha: true,
           powerPreference: "high-performance",
         }}
-        dpr={isMobile ? 1 : [1, 1.5]}
+        dpr={isMobile ? 1 : [1, 2]}
         camera={{ position: [4, 1.2, 6], fov: 40 }}
         style={{
           background: "transparent",

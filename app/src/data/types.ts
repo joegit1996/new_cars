@@ -74,6 +74,11 @@ export interface BrandEditorial {
   serviceLinks: BrandServiceLink[];
 }
 
+export interface BrandHeroMedia {
+  type: "video" | "image";
+  url: string;
+}
+
 export interface Brand {
   id: string;
   name: string;
@@ -82,6 +87,11 @@ export interface Brand {
   featured?: boolean;
   tagline?: string;
   editorial?: BrandEditorial;
+  heroMedia?: BrandHeroMedia;
+  editorialImages?: {
+    heritage?: string;
+    innovation?: string;
+  };
 }
 
 export interface Model {
@@ -94,8 +104,16 @@ export interface Model {
   trimCount: number;
   isNew: boolean;
   isUpdated: boolean;
+  featured: boolean;
   specsSummary: ModelSpecsSummary;
   imageUrl: string;
+  images?: {
+    front?: string;
+    rear?: string;
+    side?: string;
+    detail?: string;
+    hero?: string;
+  };
   segmentOrder?: number;
   modelFamily?: string;
 }
