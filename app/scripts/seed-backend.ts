@@ -1,21 +1,32 @@
 /**
  * seed-backend.ts
  *
- * Reads ALL mock data from src/data/mock-data.ts and uploads it to the
- * staging backend via the admin import endpoints.
+ * Reads ALL mock data from src/data/mock-data.ts, uploads media files
+ * via the presigned uploader, then imports data to the staging backend.
  *
  * Run with:  npx tsx scripts/seed-backend.ts
  *
- * Endpoints are called in dependency order:
+ * Required env vars for media upload:
+ *   UPLOAD_ADMIN_TOKEN   - admin-console-token JWT
+ *   UPLOAD_CUSTOM_AUTH   - X-Custom-Authorization header value
+ *
+ * Optional env vars:
+ *   SEED_API_KEY         - Bearer token for catalog admin endpoints
+ *   SKIP_UPLOAD          - set to "1" to skip media upload (use cached mapping)
+ *
+ * Steps:
+ *   0. Upload media files to S3 via presigned URLs
  *   1. brands
  *   2. models
  *   3. trims
- *   4. equipment  (parallel with variants and dealers)
+ *   4. equipment
  *   5. trim-variants
  *   6. dealers
- *   7. publish (final)
+ *   7. publish
  */
 
+import * as fs from "fs";
+import * as path from "path";
 import { brands, models, trims, branches } from "../src/data/mock-data";
 
 // ---------------------------------------------------------------------------
@@ -23,9 +34,15 @@ import { brands, models, trims, branches } from "../src/data/mock-data";
 // ---------------------------------------------------------------------------
 
 const API_BASE = "https://staging-services.q84sale.com/api/v1/new-cars-catalog";
+const UPLOAD_API = "https://staging-services.q84sale.com/api/v1/presigned-uploader";
 
-// Set via env var if you need auth; the script will still run without it.
 const API_KEY = process.env.SEED_API_KEY ?? "";
+const UPLOAD_ADMIN_TOKEN = process.env.UPLOAD_ADMIN_TOKEN ?? "";
+const UPLOAD_CUSTOM_AUTH = process.env.UPLOAD_CUSTOM_AUTH ?? "";
+const SKIP_UPLOAD = process.env.SKIP_UPLOAD === "1";
+
+const PUBLIC_DIR = path.resolve(__dirname, "..", "public");
+const MEDIA_MAP_FILE = path.resolve(__dirname, "media-url-map.json");
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -80,7 +97,6 @@ async function postImport(
 
       const text = await res.text();
 
-      // Retry on 502/503/504
       if (res.status >= 502 && res.status <= 504 && attempt < MAX_RETRIES) {
         console.warn(`[SEED] Received ${res.status}, retrying in ${RETRY_DELAY_MS}ms (attempt ${attempt}/${MAX_RETRIES})...`);
         await sleep(RETRY_DELAY_MS);
@@ -132,6 +148,37 @@ async function postImport(
   return null;
 }
 
+/** Post large payloads in chunks to avoid overwhelming the backend */
+async function postImportBatched(
+  endpoint: string,
+  payload: unknown[],
+  label: string,
+  batchSize = 200,
+): Promise<BatchResult> {
+  const total: BatchResult = { created: 0, updated: 0, failed: 0 };
+  const totalBatches = Math.ceil(payload.length / batchSize);
+
+  for (let i = 0; i < payload.length; i += batchSize) {
+    const chunk = payload.slice(i, i + batchSize);
+    const batchNum = Math.floor(i / batchSize) + 1;
+    const batchLabel = `${label} [batch ${batchNum}/${totalBatches}]`;
+    const result = await postImport(endpoint, chunk, batchLabel);
+    if (result) {
+      total.created += result.created ?? 0;
+      total.updated += result.updated ?? 0;
+      total.failed += result.failed ?? 0;
+    } else {
+      total.failed += chunk.length;
+    }
+    // Delay between batches to let the backend breathe
+    if (i + batchSize < payload.length) {
+      await sleep(2000);
+    }
+  }
+
+  return total;
+}
+
 function slugify(text: string): string {
   return text
     .toLowerCase()
@@ -139,9 +186,231 @@ function slugify(text: string): string {
     .replace(/(^-|-$)/g, "");
 }
 
-/** Strip leading slash so backend base URL concatenation doesn't produce double slashes */
-function mediaKey(path: string): string {
-  return path.replace(/^\/+/, "");
+// ---------------------------------------------------------------------------
+// Media Upload
+// ---------------------------------------------------------------------------
+
+let mediaUrlMap: Record<string, string> = {};
+
+// Load cached mapping if it exists
+try {
+  mediaUrlMap = JSON.parse(fs.readFileSync(MEDIA_MAP_FILE, "utf-8"));
+} catch {
+  // No cache yet
+}
+
+function getMimeType(filePath: string): string {
+  const ext = path.extname(filePath).toLowerCase();
+  const mimes: Record<string, string> = {
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".png": "image/png",
+    ".svg": "image/svg+xml",
+    ".mp4": "video/mp4",
+    ".webp": "image/webp",
+    ".gif": "image/gif",
+  };
+  return mimes[ext] ?? "application/octet-stream";
+}
+
+/** Collect every unique local media path referenced in the mock data */
+function collectAllMediaPaths(): string[] {
+  const paths = new Set<string>();
+
+  for (const b of brands) {
+    if (b.logoUrl) paths.add(b.logoUrl);
+    if (b.heroMedia?.url) paths.add(b.heroMedia.url);
+    if (b.editorialImages?.heritage) paths.add(b.editorialImages.heritage);
+    if (b.editorialImages?.innovation) paths.add(b.editorialImages.innovation);
+  }
+
+  for (const m of models) {
+    if (m.imageUrl) paths.add(m.imageUrl);
+    if (m.images) {
+      for (const url of Object.values(m.images)) {
+        if (url) paths.add(url as string);
+      }
+    }
+  }
+
+  for (const t of trims) {
+    if (t.images) {
+      for (const url of t.images) {
+        if (url) paths.add(url);
+      }
+    }
+    for (const v of t.variants) {
+      if (v.images) {
+        for (const url of v.images) {
+          if (url) paths.add(url);
+        }
+      }
+    }
+  }
+
+  // Only local paths (starting with /), skip empty strings
+  return [...paths].filter((p) => p.startsWith("/"));
+}
+
+interface PresignedResult {
+  uploadUrl: string;
+  publicUrls: { url: string };
+  method: string;
+  headers: Record<string, string>;
+}
+
+async function requestPresignedUrls(
+  files: { mime: string; size: number; type: string }[],
+): Promise<PresignedResult[]> {
+  const res = await fetch(UPLOAD_API, {
+    method: "POST",
+    headers: {
+      "Application-Source": "q84sale",
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      "admin-console-token": UPLOAD_ADMIN_TOKEN,
+      "X-Custom-Authorization": UPLOAD_CUSTOM_AUTH,
+      "Accept-Language": "en",
+    },
+    body: JSON.stringify({ files }),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Presigned URL request failed (${res.status}): ${text.slice(0, 500)}`);
+  }
+
+  const data = (await res.json()) as { results: PresignedResult[] };
+  return data.results;
+}
+
+async function uploadFileToS3(
+  uploadUrl: string,
+  absPath: string,
+  contentType: string,
+): Promise<void> {
+  const fileBuffer = fs.readFileSync(absPath);
+
+  const res = await fetch(uploadUrl, {
+    method: "PUT",
+    headers: { "Content-Type": contentType },
+    body: fileBuffer,
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`S3 upload failed (${res.status}): ${text.slice(0, 300)}`);
+  }
+}
+
+async function uploadAllMedia(): Promise<void> {
+  const allPaths = collectAllMediaPaths();
+  const toUpload = allPaths.filter((p) => !mediaUrlMap[p]);
+
+  console.log(`\n[${"=".repeat(60)}]`);
+  console.log(`[UPLOAD] Step 0: Upload Media Files`);
+  console.log(`[UPLOAD] Total unique media paths: ${allPaths.length}`);
+  console.log(`[UPLOAD] Already cached: ${allPaths.length - toUpload.length}`);
+  console.log(`[UPLOAD] Need to upload: ${toUpload.length}`);
+
+  if (toUpload.length === 0) {
+    console.log("[UPLOAD] All media already uploaded. Skipping.");
+    return;
+  }
+
+  if (!UPLOAD_ADMIN_TOKEN || !UPLOAD_CUSTOM_AUTH) {
+    console.error("[UPLOAD] ERROR: UPLOAD_ADMIN_TOKEN and UPLOAD_CUSTOM_AUTH env vars are required for media upload.");
+    console.error("[UPLOAD] Set SKIP_UPLOAD=1 to skip upload and use cached mapping.");
+    process.exit(1);
+  }
+
+  // Verify all files exist locally before starting
+  const missing: string[] = [];
+  for (const localPath of toUpload) {
+    const absPath = path.join(PUBLIC_DIR, localPath);
+    if (!fs.existsSync(absPath)) {
+      missing.push(localPath);
+    }
+  }
+  if (missing.length > 0) {
+    console.warn(`[UPLOAD] Warning: ${missing.length} files not found locally, will be skipped:`);
+    for (const m of missing.slice(0, 5)) console.warn(`  - ${m}`);
+    if (missing.length > 5) console.warn(`  ... and ${missing.length - 5} more`);
+  }
+
+  const validFiles = toUpload.filter((p) => !missing.includes(p));
+
+  // Process in batches of 10 (presigned API accepts arrays)
+  const BATCH_SIZE = 10;
+  let uploaded = 0;
+  let failed = 0;
+
+  for (let i = 0; i < validFiles.length; i += BATCH_SIZE) {
+    const batch = validFiles.slice(i, i + BATCH_SIZE);
+    const batchNum = Math.floor(i / BATCH_SIZE) + 1;
+    const totalBatches = Math.ceil(validFiles.length / BATCH_SIZE);
+    console.log(`[UPLOAD] Batch ${batchNum}/${totalBatches} (${batch.length} files)`);
+
+    // Prepare file metadata
+    const filesMeta = batch.map((localPath) => {
+      const absPath = path.join(PUBLIC_DIR, localPath);
+      const stat = fs.statSync(absPath);
+      return {
+        localPath,
+        absPath,
+        mime: getMimeType(localPath),
+        size: stat.size,
+        type: "new_cars" as const,
+      };
+    });
+
+    try {
+      // Request presigned URLs for this batch
+      const presigned = await requestPresignedUrls(
+        filesMeta.map((f) => ({ mime: f.mime, size: f.size, type: f.type })),
+      );
+
+      // Upload each file
+      for (let j = 0; j < batch.length; j++) {
+        const { localPath, absPath, mime } = filesMeta[j];
+        const { uploadUrl, publicUrls } = presigned[j];
+
+        try {
+          await uploadFileToS3(uploadUrl, absPath, mime);
+          mediaUrlMap[localPath] = publicUrls.url;
+          uploaded++;
+          console.log(`  [OK] ${localPath}`);
+        } catch (err) {
+          failed++;
+          console.error(`  [FAIL] ${localPath}: ${err instanceof Error ? err.message : err}`);
+        }
+      }
+    } catch (err) {
+      // Presigned URL request failed for whole batch
+      failed += batch.length;
+      console.error(`  [BATCH FAIL] ${err instanceof Error ? err.message : err}`);
+    }
+
+    // Small delay between batches to avoid rate limiting
+    if (i + BATCH_SIZE < validFiles.length) {
+      await sleep(300);
+    }
+  }
+
+  // Save mapping to disk
+  fs.writeFileSync(MEDIA_MAP_FILE, JSON.stringify(mediaUrlMap, null, 2));
+  console.log(`[UPLOAD] Done: ${uploaded} uploaded, ${failed} failed, mapping saved to media-url-map.json`);
+}
+
+/**
+ * Resolve a local path to its uploaded public URL.
+ * Falls back to stripping the leading slash (legacy _key behavior) if not uploaded.
+ */
+function resolveMedia(localPath: string): string {
+  if (!localPath) return "";
+  if (mediaUrlMap[localPath]) return mediaUrlMap[localPath];
+  // Fallback: strip leading slash for legacy key-based behavior
+  return localPath.replace(/^\/+/, "");
 }
 
 // ---------------------------------------------------------------------------
@@ -156,7 +425,7 @@ function mapBrands() {
       name_en: b.name,
       slug: slugify(b.name),
       is_featured: b.featured ?? false,
-      logo_key: mediaKey(b.logoUrl),
+      logo_key: resolveMedia(b.logoUrl),
       sort_order: idx + 1,
       status: "active",
     };
@@ -167,7 +436,7 @@ function mapBrands() {
 
     if (b.heroMedia) {
       payload.hero_media_type = b.heroMedia.type;
-      payload.hero_media_key = mediaKey(b.heroMedia.url);
+      payload.hero_media_key = resolveMedia(b.heroMedia.url);
     }
 
     if (editorial) {
@@ -202,10 +471,10 @@ function mapBrands() {
 
     if (b.editorialImages) {
       if (b.editorialImages.heritage) {
-        payload.heritage_image_key = mediaKey(b.editorialImages.heritage);
+        payload.heritage_image_key = resolveMedia(b.editorialImages.heritage);
       }
       if (b.editorialImages.innovation) {
-        payload.innovation_image_key = mediaKey(b.editorialImages.innovation);
+        payload.innovation_image_key = resolveMedia(b.editorialImages.innovation);
       }
     }
 
@@ -219,7 +488,6 @@ function mapBrands() {
 
 function mapModels() {
   return models.map((m, idx) => {
-    // Build gallery images array from the model's images object
     const images: { image_key: string; alt_en: string; category: string; sort_order: number }[] =
       [];
     if (m.images) {
@@ -227,7 +495,7 @@ function mapModels() {
       imgEntries.forEach(([category, url], i) => {
         if (url) {
           images.push({
-            image_key: mediaKey(url),
+            image_key: resolveMedia(url),
             alt_en: `${m.name} ${category}`,
             category,
             sort_order: i + 1,
@@ -247,11 +515,12 @@ function mapModels() {
       is_new: m.isNew,
       is_updated: m.isUpdated,
       is_featured: m.featured,
-      hero_image_key: mediaKey(m.imageUrl),
+      hero_image_key: resolveMedia(m.imageUrl),
+      family_code: m.modelFamily ? slugify(m.modelFamily) : "",
       segment_order: m.segmentOrder ?? idx + 1,
       currency: "KWD",
       status: "active",
-      publish_state: "draft",
+      publish_state: "published",
       images,
       metadata: {
         specs_summary: m.specsSummary,
@@ -273,7 +542,7 @@ function mapTrims() {
 
     const images: { image_key: string; alt_en: string; category: string; sort_order: number }[] =
       (t.images ?? []).map((url, i) => ({
-        image_key: mediaKey(url),
+        image_key: resolveMedia(url),
         alt_en: `${t.name} view ${i + 1}`,
         category: i === 0 ? "hero" : "gallery",
         sort_order: i + 1,
@@ -294,7 +563,7 @@ function mapTrims() {
       drivetrain: specs.driveType,
       seats: specs.seatingCapacity,
       spec_region: specs.specRegion,
-      hero_image_key: mediaKey(t.images?.[0] ?? ""),
+      hero_image_key: resolveMedia(t.images?.[0] ?? ""),
       sort_order: idx + 1,
       images,
       is_default: idx === 0 || t.name === "Standard" || t.name === "LE" || t.name === "Comfort",
@@ -368,7 +637,7 @@ function mapTrimVariants() {
         currency: "KWD",
         slug: slugify(v.id),
         description_en: v.description ?? "",
-        hero_image_key: mediaKey(v.images?.[0] ?? ""),
+        hero_image_key: resolveMedia(v.images?.[0] ?? ""),
       });
     }
   }
@@ -385,7 +654,6 @@ function mapDealers() {
   const brandCodes = brands.map((b) => b.id);
 
   for (const b of branches) {
-    // Extract lat/lng from mapUrl if present
     let latitude = 0;
     let longitude = 0;
     const coordMatch = b.mapUrl.match(/q=([\d.-]+),([\d.-]+)/);
@@ -395,7 +663,6 @@ function mapDealers() {
     }
 
     if (b.brandId === "all") {
-      // Platform-wide branches: create one dealer entry per brand
       for (const brandCode of brandCodes) {
         items.push({
           brand_code: brandCode,
@@ -434,6 +701,7 @@ async function main() {
   console.log("[SEED] Starting backend seed from mock data");
   console.log(`[SEED] API base: ${API_BASE}`);
   console.log(`[SEED] Auth: ${API_KEY ? "Bearer token set" : "No auth token (set SEED_API_KEY env var)"}`);
+  console.log(`[SEED] Upload: ${SKIP_UPLOAD ? "SKIPPED" : UPLOAD_ADMIN_TOKEN ? "Enabled" : "No token (set UPLOAD_ADMIN_TOKEN)"}`);
   console.log(`[SEED] Data summary:`);
   console.log(`       Brands:        ${brands.length}`);
   console.log(`       Models:        ${models.length}`);
@@ -446,6 +714,16 @@ async function main() {
   console.log(`       Equipment:     ${allEquipment} items`);
   console.log("=".repeat(70));
 
+  // -----------------------------------------------------------------------
+  // Step 0: Upload media
+  // -----------------------------------------------------------------------
+  if (!SKIP_UPLOAD) {
+    await uploadAllMedia();
+  } else {
+    const cached = Object.keys(mediaUrlMap).length;
+    console.log(`\n[UPLOAD] Skipped (SKIP_UPLOAD=1). Using ${cached} cached URL mappings.`);
+  }
+
   // Track overall results
   const results: { step: string; result: BatchResult | null }[] = [];
 
@@ -455,6 +733,7 @@ async function main() {
   const brandPayload = mapBrands();
   const brandResult = await postImport("/v1/admin/import/brands", brandPayload, "Step 1/7: Import Brands");
   results.push({ step: "Brands", result: brandResult });
+  await sleep(1000);
 
   // -----------------------------------------------------------------------
   // Step 2: Models
@@ -462,6 +741,7 @@ async function main() {
   const modelPayload = mapModels();
   const modelResult = await postImport("/v1/admin/import/models", modelPayload, "Step 2/7: Import Models");
   results.push({ step: "Models", result: modelResult });
+  await sleep(1000);
 
   // -----------------------------------------------------------------------
   // Step 3: Trims
@@ -469,13 +749,15 @@ async function main() {
   const trimPayload = mapTrims();
   const trimResult = await postImport("/v1/admin/import/trims", trimPayload, "Step 3/7: Import Trims");
   results.push({ step: "Trims", result: trimResult });
+  await sleep(2000);
 
   // -----------------------------------------------------------------------
   // Step 4: Equipment
   // -----------------------------------------------------------------------
   const equipmentPayload = mapEquipment();
-  const equipResult = await postImport("/v1/admin/import/equipment", equipmentPayload, "Step 4/7: Import Equipment");
+  const equipResult = await postImportBatched("/v1/admin/import/equipment", equipmentPayload, "Step 4/7: Import Equipment", 200);
   results.push({ step: "Equipment", result: equipResult });
+  await sleep(2000);
 
   // -----------------------------------------------------------------------
   // Step 5: Trim Variants
@@ -550,9 +832,9 @@ async function main() {
       totalCreated += c;
       totalUpdated += u;
       totalFailed += f;
-      const status = f > 0 ? "PARTIAL" : "OK";
+      const resultStatus = f > 0 ? "PARTIAL" : "OK";
       console.log(
-        `  ${step.padEnd(20)} created=${String(c).padStart(4)}  updated=${String(u).padStart(4)}  failed=${String(f).padStart(4)}  [${status}]`,
+        `  ${step.padEnd(20)} created=${String(c).padStart(4)}  updated=${String(u).padStart(4)}  failed=${String(f).padStart(4)}  [${resultStatus}]`,
       );
     } else {
       console.log(`  ${step.padEnd(20)} -- SKIPPED or FAILED --`);
@@ -564,6 +846,9 @@ async function main() {
     `  ${"TOTAL".padEnd(20)} created=${String(totalCreated).padStart(4)}  updated=${String(totalUpdated).padStart(4)}  failed=${String(totalFailed).padStart(4)}`,
   );
   console.log("=".repeat(70));
+
+  const uploadedCount = Object.keys(mediaUrlMap).length;
+  console.log(`  Media URLs mapped:  ${uploadedCount}`);
 
   if (totalFailed > 0) {
     console.log("\n[SEED] Completed with errors. Check the logs above for details.");
