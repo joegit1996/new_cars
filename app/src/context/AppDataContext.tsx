@@ -177,10 +177,8 @@ function ApiDataProvider({ children }: { children: ReactNode }) {
         setModels(mappedModels);
         setCollections(mappedCollections);
       } catch (err) {
-        console.error("Failed to fetch API data, falling back to mock:", err);
-        setBrands(mockBrands);
-        setModels(mockModels);
-        setCollections(mockCollections);
+        console.error("Failed to fetch API data:", err);
+        // No fallback -- API mode depends solely on the backend
       } finally {
         setLoading(false);
       }
