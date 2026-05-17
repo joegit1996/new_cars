@@ -19,13 +19,7 @@ import {
   Home,
   Leaf,
 } from "lucide-react";
-import {
-  getBrandById,
-  getModelsByBrandSegmentOrder,
-  getBrandEditorial,
-  getTrimsByModel,
-} from "@/data/helpers";
-import { filterModels } from "@/data/helpers";
+import { useAppData } from "@/context/AppDataContext";
 import type { Model } from "@/data/types";
 import { type FilterState, PRICE_MIN, PRICE_MAX } from "@/components/FilterPanel";
 import FilterPanel from "@/components/FilterPanel";
@@ -257,6 +251,7 @@ function ModelShowcase({
   onClearFamilies: () => void;
   onFilterOpen: () => void;
 }) {
+  const { getTrimsByModel } = useAppData();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(0);
   const touchStart = useRef(0);
@@ -550,6 +545,7 @@ function FeaturedModelsSection({
   brandName: string;
   brandId: string;
 }) {
+  const { getTrimsByModel } = useAppData();
   const featured = useMemo(() => {
     const raw = models.filter((m) => m.featured);
     // Interleave so no two consecutive models share the same modelFamily / image
@@ -648,7 +644,7 @@ function FeaturedModelsSection({
           ),
         };
       }),
-    [featured, brandName]
+    [featured, brandName, getTrimsByModel]
   );
 
   if (featured.length === 0) return null;
@@ -902,6 +898,7 @@ function BrandDetailsZone({
   brandName: string;
   allModels: Model[];
 }) {
+  const { getBrandEditorial, getBrandById } = useAppData();
   const editorial = getBrandEditorial(brandId);
   const brand = getBrandById(brandId);
   if (!editorial) return null;
@@ -1039,9 +1036,10 @@ function BrandDetailsZone({
 type FilterMode = "bodyType" | "class";
 
 function BrandShowcaseContent({ brandId }: { brandId: string }) {
+  const { getBrandById, getModelsByBrandSegmentOrder, filterModels, loading } = useAppData();
   const brand = getBrandById(brandId);
   const compare = useCompare();
-  const allBrandModels = useMemo(() => getModelsByBrandSegmentOrder(brandId), [brandId]);
+  const allBrandModels = useMemo(() => getModelsByBrandSegmentOrder(brandId), [brandId, getModelsByBrandSegmentOrder]);
 
   // Derive available body types and model families
   const availableBodyTypes = useMemo(() => {
@@ -1107,7 +1105,15 @@ function BrandShowcaseContent({ brandId }: { brandId: string }) {
       result = result.filter((m) => m.modelFamily && activeFamilies.includes(m.modelFamily));
     }
     return result.sort((a, b) => (a.segmentOrder ?? 999) - (b.segmentOrder ?? 999));
-  }, [allBrandModels, filters, activeFamilies]);
+  }, [allBrandModels, filters, activeFamilies, filterModels]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">
+        <div className="w-8 h-8 border-3 border-[#1A56DB] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   if (!brand) {
     return (

@@ -3,6 +3,7 @@ import { models } from "@/data/mock-data";
 import ModelDetailClient from "./ModelDetailClient";
 
 export function generateStaticParams() {
+  if (process.env.NEXT_PUBLIC_DATA_SOURCE === "api") return [];
   return models.map((m) => ({ id: m.id }));
 }
 

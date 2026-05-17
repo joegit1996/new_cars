@@ -20,11 +20,7 @@ import {
   CompareProvider,
   useCompare,
 } from "../../../../context/CompareContext";
-import {
-  getModelById,
-  getTrimsByModel,
-  getBrandById,
-} from "../../../../data/helpers";
+import { useAppData } from "@/context/AppDataContext";
 import type { Trim } from "../../../../data/types";
 
 /* ------------------------------------------------------------------ */
@@ -157,16 +153,25 @@ function TrimCard({
 /* ------------------------------------------------------------------ */
 
 function TrimsContent({ modelId }: { modelId: string }) {
-  const model = useMemo(() => getModelById(modelId), [modelId]);
+  const { getModelById, getTrimsByModel, getBrandById, loading } = useAppData();
+  const model = useMemo(() => getModelById(modelId), [modelId, getModelById]);
   const brand = useMemo(
     () => (model ? getBrandById(model.brandId) : undefined),
-    [model],
+    [model, getBrandById],
   );
   const modelTrims = useMemo(
     () => getTrimsByModel(modelId),
-    [modelId],
+    [modelId, getTrimsByModel],
   );
   const { totalCount } = useCompare();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">
+        <div className="w-8 h-8 border-3 border-[#1A56DB] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   if (!model || !brand) {
     return (

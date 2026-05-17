@@ -10,8 +10,7 @@ import Footer from "../../components/Footer";
 import MobileTabBar from "../../components/MobileTabBar";
 import PlaceholderImage from "../../components/PlaceholderImage";
 import { CompareProvider } from "../../context/CompareContext";
-import { searchTrims, getBrandById } from "../../data/helpers";
-import { brands, models } from "../../data/mock-data";
+import { useAppData } from "@/context/AppDataContext";
 import type { BodyType } from "../../data/types";
 import ModelCard from "../../components/ModelCard";
 
@@ -20,6 +19,7 @@ function SearchPageContent() {
   const initialQuery = searchParams.get("q") || "";
   const [query, setQuery] = useState(initialQuery);
   const [recentSearches] = useState(["Land Cruiser", "BMW X5", "V8", "AWD"]);
+  const { brands, models, searchTrims, getBrandById, loading } = useAppData();
 
   // Sync from URL param on mount / param change
   useEffect(() => {
@@ -34,8 +34,16 @@ function SearchPageContent() {
 
   const popularModels = useMemo(
     () => models.filter((m) => m.isNew || m.isUpdated).slice(0, 6),
-    []
+    [models]
   );
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">
+        <div className="w-8 h-8 border-3 border-[#1A56DB] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F8FAFC]">

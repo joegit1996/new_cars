@@ -81,6 +81,7 @@ export interface BrandHeroMedia {
 
 export interface Brand {
   id: string;
+  slug?: string;
   name: string;
   logoUrl: string;
   modelCount: number;
@@ -96,6 +97,7 @@ export interface Brand {
 
 export interface Model {
   id: string;
+  slug?: string;
   brandId: string;
   name: string;
   bodyType: BodyType;

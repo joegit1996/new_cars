@@ -4,6 +4,7 @@ import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
 import EmbeddedFloatingButtons from "@/components/EmbeddedFloatingButtons";
 import ScrollToTop from "@/components/ScrollToTop";
+import { AppDataProvider } from "@/context/AppDataContext";
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
@@ -29,9 +30,11 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col">
-        <ScrollToTop />
-        {children}
-        <EmbeddedFloatingButtons />
+        <AppDataProvider>
+          <ScrollToTop />
+          {children}
+          <EmbeddedFloatingButtons />
+        </AppDataProvider>
       </body>
     </html>
   );

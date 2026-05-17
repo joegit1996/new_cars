@@ -22,8 +22,8 @@ import PlaceholderImage from "@/components/PlaceholderImage";
 import { silhouetteMap } from "@/components/PlaceholderImage";
 import { BodyTypeIcon } from "@/components/BodyTypeIcon";
 
-import { brands, models, lifestyleCollections } from "@/data/mock-data";
-import { getNewModels, getBrandById, getModelsByBodyType, getModelsByBrand } from "@/data/helpers";
+import { useAppData } from "@/context/AppDataContext";
+import type { Brand } from "@/data/types";
 
 // ---------- Animation Helpers ----------
 
@@ -249,7 +249,8 @@ const brandGradients: Record<string, string> = {
 };
 
 function FeaturedBrands() {
-  const featuredBrands = useMemo(() => brands.filter((b) => b.featured), []);
+  const { brands, getModelsByBrand, brandColors } = useAppData();
+  const featuredBrands = useMemo(() => brands.filter((b) => b.featured), [brands]);
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
   const [mobileActiveIdx, setMobileActiveIdx] = useState(0);
   const mobileScrollRef = useRef<HTMLDivElement>(null);
@@ -597,10 +598,9 @@ function FeaturedBrands() {
 
 // ---------- Browse by Brand ----------
 
-import { brandColors } from "@/data/helpers";
-
-function BrowseByBrandLogo({ brand }: { brand: typeof brands[0] }) {
+function BrowseByBrandLogo({ brand }: { brand: Brand }) {
   const [imgError, setImgError] = useState(false);
+  const { brandColors } = useAppData();
   const hasLogo = brand.logoUrl && !imgError;
   return (
     <div
@@ -624,6 +624,7 @@ function BrowseByBrandLogo({ brand }: { brand: typeof brands[0] }) {
 }
 
 function BrowseByBrand() {
+  const { brands } = useAppData();
   return (
     <AnimatedSection className="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-12">
       <SectionTitle
@@ -658,6 +659,7 @@ function BrowseByBrand() {
 const bodyTypes = ["Sedan", "SUV", "Hatchback", "Coupe", "Pickup", "Van", "Convertible"];
 
 function BrowseByBodyType() {
+  const { getModelsByBodyType } = useAppData();
   return (
     <AnimatedSection className="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-12">
       <SectionTitle
@@ -695,9 +697,10 @@ function BrowseByBodyType() {
 // ---------- Popular Models ----------
 
 function PopularModels() {
+  const { models, getBrandById } = useAppData();
   const scrollRef = useRef<HTMLDivElement>(null);
   const { addItem } = useCompare();
-  const popular = useMemo(() => models.slice(0, 8), []);
+  const popular = useMemo(() => models.slice(0, 8), [models]);
 
   const scroll = (dir: "left" | "right") => {
     if (!scrollRef.current) return;
@@ -901,8 +904,9 @@ function BrowseByBudget() {
 // ---------- What's New ----------
 
 function WhatsNew() {
+  const { getNewModels, getBrandById } = useAppData();
   const scrollRef = useRef<HTMLDivElement>(null);
-  const newModels = useMemo(() => getNewModels(), []);
+  const newModels = useMemo(() => getNewModels(), [getNewModels]);
   const { addItem } = useCompare();
 
   const scroll = (dir: "left" | "right") => {
@@ -1002,6 +1006,7 @@ const lifestyleThemes: {
 ];
 
 function ExploreByLifestyle() {
+  const { lifestyleCollections } = useAppData();
   return (
     <AnimatedSection className="py-8 md:py-12">
       <div className="max-w-7xl mx-auto px-4 md:px-6 mb-6">
@@ -1113,7 +1118,16 @@ function ExploreByLifestyle() {
 // ---------- Main Page Content (needs CompareProvider above) ----------
 
 function HomePageContent() {
+  const { brands, models, lifestyleCollections, getNewModels, getBrandById, getModelsByBodyType, getModelsByBrand, loading } = useAppData();
   const { totalCount } = useCompare();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">
+        <div className="w-8 h-8 border-3 border-[#1A56DB] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div id="page-root" className="min-h-screen flex flex-col bg-slate-950">

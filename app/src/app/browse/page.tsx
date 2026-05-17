@@ -19,17 +19,8 @@ import { EmbedAnchor } from "@/components/EmbedLink";
 import { useIsEmbedded } from "@/hooks/useIsEmbedded";
 import { appendEmbedParam } from "@/hooks/useEmbedHref";
 import { CompareProvider, useCompare } from "@/context/CompareContext";
-import { models as allModelsRaw } from "@/data/mock-data";
-import {
-  getBrandById,
-  getModelsByBrand,
-  getModelsByBodyType,
-  getModelsByLifestyleCollection,
-  getCollectionById,
-  filterModels,
-  sortModels,
-} from "@/data/helpers";
-import type { Model, SortBy } from "@/data/types";
+import { useAppData } from "@/context/AppDataContext";
+import type { Brand, Model, SortBy } from "@/data/types";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -37,7 +28,7 @@ import type { Model, SortBy } from "@/data/types";
 
 const ITEMS_PER_PAGE = 12;
 
-function modelToCardData(m: Model): ModelData {
+function modelToCardData(m: Model, getBrandById: (id: string) => Brand | undefined): ModelData {
   const brand = getBrandById(m.brandId);
   return {
     id: m.id,
@@ -339,6 +330,7 @@ function BrowsePageContent() {
   const collectionParam = searchParams.get("collection");
 
   const compare = useCompare();
+  const { models: allModelsRaw, getBrandById, getModelsByBrand, getModelsByBodyType, getModelsByLifestyleCollection, getCollectionById, filterModels, sortModels, loading } = useAppData();
 
   // Resolve base model set
   const { baseModels, pageTitle, breadcrumbLabel } = useMemo(() => {
@@ -375,7 +367,7 @@ function BrowsePageContent() {
       pageTitle: "All Cars",
       breadcrumbLabel: "All Cars",
     };
-  }, [brandParam, bodyParam, collectionParam]);
+  }, [brandParam, bodyParam, collectionParam, allModelsRaw, getBrandById, getModelsByBrand, getModelsByBodyType, getModelsByLifestyleCollection, getCollectionById]);
 
   // Filters
   const initialFilters: FilterState = useMemo(() => {
@@ -390,7 +382,7 @@ function BrowsePageContent() {
       brands: brandParam ? (() => { const b = getBrandById(brandParam); return b ? [b.name] : []; })() : [],
     };
     return f;
-  }, [brandParam, bodyParam]);
+  }, [brandParam, bodyParam, getBrandById]);
 
   const [filters, setFilters] = useState<FilterState>(initialFilters);
   const [sort, setSort] = useState<SortBy>("popular");
@@ -409,7 +401,7 @@ function BrowsePageContent() {
   const filteredModels = useMemo(() => {
     const filtered = filterModels(baseModels, filters);
     return sortModels(filtered, sort);
-  }, [baseModels, filters, sort]);
+  }, [baseModels, filters, sort, filterModels, sortModels]);
 
   // Paginated
   const paginatedModels = useMemo(() => {
@@ -419,7 +411,7 @@ function BrowsePageContent() {
   const hasMore = paginatedModels.length < filteredModels.length;
 
   // Card data
-  const cardItems = useMemo(() => paginatedModels.map(modelToCardData), [paginatedModels]);
+  const cardItems = useMemo(() => paginatedModels.map(m => modelToCardData(m, getBrandById)), [paginatedModels, getBrandById]);
 
   // Selection
   const toggleSelection = useCallback(
@@ -450,13 +442,21 @@ function BrowsePageContent() {
         return { id: m.id, name: m.name, trimName: `${brand?.name ?? ""} ${m.name}` };
       })
       .filter((x): x is ComparisonItem => x !== null);
-  }, [selectedIds]);
+  }, [selectedIds, allModelsRaw, getBrandById]);
 
   const isEmbedded = useIsEmbedded();
   const hideBrands = !!brandParam;
   const currentSortLabel = SORT_OPTIONS.find((o) => o.value === sort)?.label ?? "Sort";
 
   const brandObj = brandParam ? getBrandById(brandParam) : null;
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">
+        <div className="w-8 h-8 border-3 border-[#1A56DB] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex flex-col">

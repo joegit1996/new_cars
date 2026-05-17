@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
-import { motion, AnimatePresence, useInView, useScroll, useMotionValueEvent } from "framer-motion";
+import { motion, AnimatePresence, useInView } from "framer-motion";
 import {
   ChevronLeft,
   ChevronRight,
@@ -30,12 +30,7 @@ import {
   Search,
   Scale,
 } from "lucide-react";
-import {
-  getModelById,
-  getBrandByModelId,
-  getTrimsByModel,
-  getBranchesForModel,
-} from "@/data/helpers";
+import { useAppData } from "@/context/AppDataContext";
 import { EquipmentCategory } from "@/data/types";
 import type { Trim, TrimVariant, Equipment } from "@/data/types";
 import PlaceholderImage from "@/components/PlaceholderImage";
@@ -1101,6 +1096,7 @@ function PricingBreakdown({
 // ---------------------------------------------------------------------------
 
 function BranchesSection({ modelId }: { modelId: string }) {
+  const { getBranchesForModel } = useAppData();
   const branchList = getBranchesForModel(modelId);
 
   return (
@@ -1196,6 +1192,8 @@ function AllTrimsComparison({
 // =============== MAIN PAGE COMPONENT ===============
 
 export default function ModelDetailClient({ id }: { id: string }) {
+  const { getModelById, getBrandByModelId, getTrimsByModel, getBranchesForModel, loading } = useAppData();
+
   const model = getModelById(id);
   const brand = getBrandByModelId(id);
   const allTrims = getTrimsByModel(id);
@@ -1211,17 +1209,27 @@ export default function ModelDetailClient({ id }: { id: string }) {
 
   const heroRef = useRef<HTMLDivElement>(null);
   const mainRef = useRef<HTMLDivElement>(null);
-  const { scrollY } = useScroll({ container: mainRef });
 
-  useMotionValueEvent(scrollY, "change", (latest) => {
-    // Show sticky nav after scrolling past hero + model info area
-    setShowSubNav(latest > 500);
+  useEffect(() => {
+    const el = mainRef.current;
+    if (!el) return;
+    const handleScroll = () => setShowSubNav(el.scrollTop > 500);
+    el.addEventListener("scroll", handleScroll, { passive: true });
+    return () => el.removeEventListener("scroll", handleScroll);
   });
 
   const selectedTrim = allTrims.find((t) => t.id === selectedTrimId) || allTrims[0];
   const currentPrice = selectedVariant
     ? selectedVariant.price
     : selectedTrim?.price || 0;
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">
+        <div className="w-8 h-8 border-3 border-[#1A56DB] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   if (!model || !brand || !selectedTrim) {
     return (

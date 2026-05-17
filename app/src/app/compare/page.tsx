@@ -25,16 +25,7 @@ import PlaceholderImage from "../../components/PlaceholderImage";
 import LeadFormModal from "../../components/LeadFormModal";
 import { CompareProvider, useCompare } from "../../context/CompareContext";
 import type { CompareMode } from "../../context/CompareContext";
-import {
-  getTrimById,
-  getTrimsByModel,
-  getBrandByModelId,
-  getModelById,
-  getBrandById,
-  getModelAggregateSpecs,
-  searchTrims,
-  searchModelsDeduped,
-} from "../../data/helpers";
+import { useAppData } from "@/context/AppDataContext";
 import { useIsEmbedded } from "../../hooks/useIsEmbedded";
 import type { Trim, Model, ModelAggregateSpecs, SearchEntry, BodyType } from "../../data/types";
 
@@ -71,12 +62,14 @@ function sr(
   return { label, getValue, getRaw: getRaw ?? getValue };
 }
 
-const overviewRows: SpecRow[] = [
-  sr("Body Type", (t) => getModelById(t.modelId)?.bodyType ?? "-"),
-  sr("Fuel Type", (t) => t.fuelType),
-  sr("Year", (t) => String(getModelById(t.modelId)?.year ?? "-")),
-  sr("Spec Region", (t) => t.specs.specRegion),
-];
+function makeOverviewRows(getModelById: (id: string) => Model | undefined): SpecRow[] {
+  return [
+    sr("Body Type", (t) => getModelById(t.modelId)?.bodyType ?? "-"),
+    sr("Fuel Type", (t) => t.fuelType),
+    sr("Year", (t) => String(getModelById(t.modelId)?.year ?? "-")),
+    sr("Spec Region", (t) => t.specs.specRegion),
+  ];
+}
 
 const engineRows: SpecRow[] = [
   sr("Engine Type", (t) => t.specs.engineType),
@@ -288,6 +281,7 @@ function InlinePicker({
   existingIds: string[];
   onSelect: (id: string) => void;
 }) {
+  const { searchModelsDeduped, searchTrims } = useAppData();
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -295,7 +289,7 @@ function InlinePicker({
   const results = useMemo(() => {
     if (query.length < 2) return [];
     return mode === "models" ? searchModelsDeduped(query) : searchTrims(query);
-  }, [query, mode]);
+  }, [query, mode, searchModelsDeduped, searchTrims]);
 
   useEffect(() => {
     if (isOpen) inputRef.current?.focus();
@@ -443,6 +437,7 @@ function CompareContent() {
   const searchParams = useSearchParams();
   const compare = useCompare();
   const isEmbedded = useIsEmbedded();
+  const { getTrimById, getTrimsByModel, getBrandByModelId, getModelById, getBrandById, getModelAggregateSpecs, searchTrims, searchModelsDeduped, loading } = useAppData();
 
   // Determine initial tab from URL
   const initialTab = (searchParams.get("tab") as CompareMode) || "models";
@@ -478,17 +473,17 @@ function CompareContent() {
   // Resolve models
   const selectedModels = useMemo(
     () => activeModelIds.map((id) => getModelById(id)).filter((m): m is Model => m !== undefined),
-    [activeModelIds],
+    [activeModelIds, getModelById],
   );
   const modelAggregates = useMemo(
     () => selectedModels.map((m) => ({ model: m, agg: getModelAggregateSpecs(m.id)!, brand: getBrandByModelId(m.id) })).filter((x) => x.agg),
-    [selectedModels],
+    [selectedModels, getModelAggregateSpecs, getBrandByModelId],
   );
 
   // Resolve trims
   const selectedTrims = useMemo(
     () => activeTrimIds.map((id) => getTrimById(id)).filter((t): t is Trim => t !== undefined),
-    [activeTrimIds],
+    [activeTrimIds, getTrimById],
   );
   const trimInfo = selectedTrims.map((t) => {
     const model = getModelById(t.modelId);
@@ -536,9 +531,19 @@ function CompareContent() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const overviewRows = useMemo(() => makeOverviewRows(getModelById), [getModelById]);
+
   const currentItems = activeTab === "models" ? activeModelIds : activeTrimIds;
   const hasAddCol = currentItems.length < 4;
   const isEmpty = currentItems.length === 0;
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">
+        <div className="w-8 h-8 border-3 border-[#1A56DB] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   /* ---- EMPTY STATE ---- */
   if (isEmpty) {
