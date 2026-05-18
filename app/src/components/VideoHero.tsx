@@ -26,8 +26,17 @@ export default function VideoHero({
     }
   }, [media]);
 
-  const isVideo = media ? media.type === "video" : true;
-  const src = media?.url ?? "/videos/porsche-hero.mp4";
+  const src = media?.url;
+  const isVideo = media?.type === "video";
+
+  if (!src) {
+    return (
+      <div className={`relative w-full overflow-hidden bg-black ${className}`}>
+        <div className="relative w-full" style={{ aspectRatio: "21/9" }} />
+        {children}
+      </div>
+    );
+  }
 
   return (
     <div className={`relative w-full overflow-hidden bg-black ${className}`}>
