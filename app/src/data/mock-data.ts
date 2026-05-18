@@ -33,16 +33,198 @@ const mercedesEditorial: BrandEditorial = {
   ],
 };
 
+const bmwEditorial: BrandEditorial = {
+  heroGradient: "linear-gradient(135deg, #0a0a0a 0%, #1a237e 40%, #0d47a1 70%, #0a0a0a 100%)",
+  story: "BMW has been synonymous with driving pleasure since its founding in Munich in 1916. What began as an aircraft engine manufacturer evolved into one of the world's most respected automotive brands, known for rear-wheel-drive dynamics, inline-six engines, and a driver-focused philosophy that permeates every model. In Kuwait, BMW represents the perfect balance of performance and luxury -- vehicles that are as thrilling on the open highway as they are comfortable in city traffic. The brand's commitment to 'Sheer Driving Pleasure' is not just a tagline; it's an engineering mandate.",
+  heritage: {
+    title: "Over a Century of Driving Excellence",
+    description: "From the iconic BMW 328 of the 1930s to the M1 supercar, from the legendary E30 M3 to today's electrified i-series, BMW has always pushed the boundaries of what a driver's car can be. The brand's motorsport DNA runs deep -- victories at Le Mans, the Nurburgring, and Formula 1 have all fed directly into the cars you can drive on the road. Every BMW carries this racing heritage in its chassis, its steering feel, and its engine note.",
+    founded: "1916",
+    milestone: "BMW was founded in Munich as Bayerische Motoren Werke, initially producing aircraft engines before pivoting to motorcycles and then automobiles.",
+  },
+  stats: [
+    { label: "Founded", value: "1916" },
+    { label: "Models in Kuwait", value: "5" },
+    { label: "Dealerships", value: "2" },
+    { label: "Warranty", value: "5 Years" },
+  ],
+  innovationTitle: "The Ultimate Driving Machine, Reimagined",
+  innovationDescription: "BMW iDrive has evolved into the most intuitive cockpit experience in the industry, combining a curved display with natural voice interaction and gesture control. The brand's 48V mild-hybrid technology across the lineup delivers instant torque and improved efficiency without sacrificing the signature BMW driving dynamics. With the i4 and iX leading the electric charge, BMW proves that zero emissions and driving pleasure are not mutually exclusive.",
+  sustainability: "BMW aims for fully climate-neutral production by 2030. The BMW i Vision Circular concept demonstrates the brand's commitment to a fully recyclable vehicle, while current models increasingly use recycled materials, green electricity in manufacturing, and sustainably sourced supply chains.",
+  serviceLinks: [
+    { title: "Book a Test Drive", description: "Experience the BMW lineup at your nearest dealership.", icon: "car", href: "#" },
+    { title: "Find a Dealer", description: "Locate authorized BMW dealerships across Kuwait.", icon: "map-pin", href: "#" },
+    { title: "Service & Maintenance", description: "Schedule your next service with BMW certified technicians.", icon: "wrench", href: "#" },
+    { title: "My BMW App", description: "Connect to your vehicle remotely with the My BMW app.", icon: "smartphone", href: "#" },
+  ],
+};
+
+const toyotaEditorial: BrandEditorial = {
+  heroGradient: "linear-gradient(135deg, #0a0a0a 0%, #1b5e20 40%, #2e7d32 70%, #0a0a0a 100%)",
+  story: "Toyota is the world's largest automaker and a name that has become synonymous with reliability, durability, and value. Founded in 1937 by Kiichiro Toyoda, the brand revolutionized manufacturing with the Toyota Production System and has since delivered vehicles trusted by millions across every continent. In Kuwait, Toyota is the bestselling brand -- the Land Cruiser is a cultural icon, the Camry is the sedan of choice, and the Hilux is the backbone of commercial fleets. Toyota's philosophy of 'kaizen' (continuous improvement) ensures that every generation is better than the last.",
+  heritage: {
+    title: "Built to Last, Driven by Millions",
+    description: "Toyota's journey from a loom manufacturer to the world's most trusted automaker is a story of relentless improvement. The Corolla became the bestselling car in history. The Land Cruiser conquered every terrain on Earth. The Prius pioneered hybrid technology for the masses. And through it all, Toyota's commitment to quality, reliability, and durability has never wavered -- principles that have earned the loyalty of drivers in Kuwait for over 50 years.",
+    founded: "1937",
+    milestone: "Toyota Motor Corporation was established in Aichi, Japan. The Land Cruiser debuted in 1951 and has since become the most trusted SUV in the Middle East.",
+  },
+  stats: [
+    { label: "Founded", value: "1937" },
+    { label: "Models in Kuwait", value: "5" },
+    { label: "Dealerships", value: "5" },
+    { label: "Warranty", value: "3 Years" },
+  ],
+  innovationTitle: "Pioneering Mobility for Everyone",
+  innovationDescription: "Toyota Safety Sense comes standard across the lineup, bringing adaptive cruise control, lane departure alert, and pre-collision systems to every price point. The brand's hybrid powertrain technology, refined over 25 years since the original Prius, now powers everything from the Corolla to the Land Cruiser. Toyota's vision extends beyond cars -- hydrogen fuel cells, solid-state batteries, and autonomous driving research are all shaping the mobility of tomorrow.",
+  sustainability: "Toyota's Environmental Challenge 2050 targets zero CO2 emissions from vehicles and manufacturing. The brand leads in hybrid adoption globally, with over 20 million electrified vehicles sold, and is investing heavily in hydrogen fuel cell technology as a complementary path to full electrification.",
+  serviceLinks: [
+    { title: "Book a Test Drive", description: "Test drive any Toyota model at your nearest showroom.", icon: "car", href: "#" },
+    { title: "Find a Dealer", description: "Locate authorized Toyota dealerships across Kuwait.", icon: "map-pin", href: "#" },
+    { title: "Service & Maintenance", description: "Schedule your service with Toyota-trained technicians.", icon: "wrench", href: "#" },
+    { title: "Toyota Connect", description: "Access vehicle services and support through Toyota Connect.", icon: "smartphone", href: "#" },
+  ],
+};
+
+const lexusEditorial: BrandEditorial = {
+  heroGradient: "linear-gradient(135deg, #0a0a0a 0%, #212121 40%, #37474f 70%, #0a0a0a 100%)",
+  story: "Lexus was born from a single challenge: create the finest luxury car in the world. When the LS 400 launched in 1989, it stunned the industry with its whisper-quiet cabin, flawless build quality, and relentless attention to detail. Since then, Lexus has carved its own path in luxury -- one defined by Japanese craftsmanship, cutting-edge technology, and an ownership experience that anticipates every need. In Kuwait, Lexus represents refined luxury for those who appreciate quality over ostentation.",
+  heritage: {
+    title: "The Relentless Pursuit of Perfection",
+    description: "The Lexus story began with a secret project codenamed F1 -- a mission to build a car that would redefine luxury. The result, the LS 400, set new benchmarks for refinement and reliability that competitors are still chasing. From there, Lexus introduced the world's first luxury hybrid (the RX 400h), pioneered the spindle grille design language, and developed the LC coupe as a statement of emotional luxury. Every Lexus is assembled by Takumi master craftsmen who bring decades of expertise to each vehicle.",
+    founded: "1989",
+    milestone: "The Lexus LS 400 launched at the Detroit Auto Show, immediately challenging established European luxury brands with superior refinement and reliability.",
+  },
+  stats: [
+    { label: "Founded", value: "1989" },
+    { label: "Models in Kuwait", value: "4" },
+    { label: "Dealerships", value: "2" },
+    { label: "Warranty", value: "4 Years" },
+  ],
+  innovationTitle: "Craftsmanship Meets Technology",
+  innovationDescription: "Lexus Safety System+ brings a comprehensive suite of active safety technologies to every model, while the brand's self-charging hybrid powertrain delivers effortless power with remarkable efficiency. The Lexus Interface multimedia system features a 14-inch touchscreen with intuitive cloud-based navigation, and the Mark Levinson audio systems -- hand-tuned for each vehicle's cabin -- deliver a concert-hall listening experience.",
+  sustainability: "Lexus is committed to achieving carbon neutrality by 2050. The brand's hybrid technology has been a cornerstone of its lineup for nearly two decades, and the new RZ all-electric SUV signals the start of a fully electrified future. Lexus factories operate with zero waste to landfill, and the brand increasingly uses sustainable materials like bamboo and recycled metals in its interiors.",
+  serviceLinks: [
+    { title: "Book a Test Drive", description: "Experience Lexus luxury at your nearest dealership.", icon: "car", href: "#" },
+    { title: "Find a Dealer", description: "Locate authorized Lexus dealerships across Kuwait.", icon: "map-pin", href: "#" },
+    { title: "Service & Maintenance", description: "Schedule service with Lexus-certified technicians.", icon: "wrench", href: "#" },
+    { title: "Lexus Connected", description: "Stay connected to your Lexus with the Lexus app.", icon: "smartphone", href: "#" },
+  ],
+};
+
+const porscheEditorial: BrandEditorial = {
+  heroGradient: "linear-gradient(135deg, #0a0a0a 0%, #4a0e0e 40%, #6d1b1b 70%, #0a0a0a 100%)",
+  story: "Porsche is the world's most profitable luxury automaker and a brand that has turned motorsport success into road car excellence for over 75 years. Founded by Ferdinand Porsche in Stuttgart in 1931, the company created the iconic 911 -- a rear-engined sports car that has evolved through eight generations while never losing its soul. In Kuwait, Porsche represents the pinnacle of driving excitement, from the everyday thrill of the Macan to the breathtaking performance of the 911 Turbo S.",
+  heritage: {
+    title: "75 Years of Sports Car Legacy",
+    description: "The Porsche story is written on racetracks around the world -- over 30,000 motorsport victories, including 19 overall wins at Le Mans. But Porsche's genius lies in translating that racing DNA directly into road cars. The 356 started it all, the 911 became an automotive icon, the 959 pioneered all-wheel drive supercars, and the Carrera GT set lap records that stood for years. Every Porsche you drive today carries this unbroken lineage of performance engineering.",
+    founded: "1931",
+    milestone: "Porsche was founded in Stuttgart by Ferdinand Porsche. The first car to bear the Porsche name, the 356, debuted in 1948.",
+  },
+  stats: [
+    { label: "Founded", value: "1931" },
+    { label: "Models in Kuwait", value: "4" },
+    { label: "Dealerships", value: "1" },
+    { label: "Warranty", value: "4 Years" },
+  ],
+  innovationTitle: "Performance Without Compromise",
+  innovationDescription: "Porsche Active Suspension Management (PASM), rear-axle steering, and the PDK dual-clutch transmission represent the cutting edge of chassis and powertrain technology. The Taycan proved that electric vehicles can deliver authentic Porsche performance, with its 800-volt architecture enabling repeated high-speed launches without degradation. Porsche Communication Management (PCM) keeps you connected while the sport chrono package lets you extract every ounce of performance on demand.",
+  sustainability: "Porsche is investing over 15 billion euros in electrification by 2030. The Taycan leads the charge, while eFuels research at Porsche's pilot plant in Chile aims to make existing combustion-engine Porsches nearly carbon-neutral. The brand's Leipzig factory already operates carbon-neutral, and Porsche is committed to net-zero across its entire value chain.",
+  serviceLinks: [
+    { title: "Book a Test Drive", description: "Experience the Porsche range at your nearest Centre.", icon: "car", href: "#" },
+    { title: "Find a Centre", description: "Locate your nearest authorized Porsche Centre in Kuwait.", icon: "map-pin", href: "#" },
+    { title: "Service & Maintenance", description: "Schedule service with Porsche-certified technicians.", icon: "wrench", href: "#" },
+    { title: "My Porsche App", description: "Connect to your Porsche remotely with the My Porsche app.", icon: "smartphone", href: "#" },
+  ],
+};
+
+const changanEditorial: BrandEditorial = {
+  heroGradient: "linear-gradient(135deg, #0a0a0a 0%, #0d47a1 40%, #1565c0 70%, #0a0a0a 100%)",
+  story: "Changan Automobile is one of China's oldest and most established automakers, with roots stretching back to 1862 as a military industrial enterprise. Today, Changan is a modern, technology-driven brand delivering stylish, feature-rich vehicles at exceptional value. In Kuwait, Changan has rapidly gained popularity with models like the CS75 Plus and Uni-T, offering premium design, advanced technology, and comprehensive specifications that punch well above their price point.",
+  heritage: {
+    title: "From Industrial Pioneer to Global Automaker",
+    description: "Changan's transformation from a 160-year-old industrial company to a leading global automaker is one of the most remarkable stories in the automotive industry. With over 10,000 engineers and R&D centers in Chongqing, Beijing, Turin, Tokyo, and Detroit, Changan combines Chinese manufacturing scale with global design and engineering expertise. Annual sales exceeding 2 million vehicles make it one of the top-selling Chinese automotive brands worldwide.",
+    founded: "1862",
+    milestone: "Changan was established as a military industrial enterprise, making it one of the oldest enterprises in China. It entered automobile manufacturing in 1984 and has since grown into a global brand.",
+  },
+  stats: [
+    { label: "Founded", value: "1862" },
+    { label: "Models in Kuwait", value: "4" },
+    { label: "Dealerships", value: "2" },
+    { label: "Warranty", value: "5 Years" },
+  ],
+  innovationTitle: "Smart Technology, Accessible Luxury",
+  innovationDescription: "Changan's in-house Blue Core engine technology delivers an optimal balance of power and fuel efficiency, while the brand's smart cockpit systems offer voice control, connected services, and large dual-screen displays typically found only in premium European models. Level 2 autonomous driving assistance, 360-degree camera systems, and advanced collision avoidance come standard across the range -- technology that was once exclusive to luxury brands, now available to everyone.",
+  sustainability: "Changan's Shangri-La Plan targets a full transition to electrified vehicles by 2025. The brand is investing heavily in battery technology, electric platforms, and hydrogen fuel cells, while its manufacturing facilities are moving toward carbon neutrality with solar power and water recycling programs.",
+  serviceLinks: [
+    { title: "Book a Test Drive", description: "Experience the Changan lineup at your nearest showroom.", icon: "car", href: "#" },
+    { title: "Find a Dealer", description: "Locate authorized Changan dealers across Kuwait.", icon: "map-pin", href: "#" },
+    { title: "Service & Maintenance", description: "Schedule service with trained Changan technicians.", icon: "wrench", href: "#" },
+    { title: "Changan Connect", description: "Stay connected with your vehicle through Changan's app.", icon: "smartphone", href: "#" },
+  ],
+};
+
+const havalEditorial: BrandEditorial = {
+  heroGradient: "linear-gradient(135deg, #0a0a0a 0%, #b71c1c 40%, #d32f2f 70%, #0a0a0a 100%)",
+  story: "Haval is the world's bestselling SUV brand by volume, a specialist that has focused exclusively on sport utility vehicles since its founding. Part of the Great Wall Motor group, Haval has sold over 7 million SUVs globally and is now one of the fastest-growing brands in the Middle East. In Kuwait, Haval offers a compelling proposition: modern design, generous specifications, and competitive pricing across a focused SUV lineup that covers everything from urban crossovers to rugged off-roaders.",
+  heritage: {
+    title: "The World's SUV Specialist",
+    description: "While other brands spread their attention across sedans, hatchbacks, and trucks, Haval has dedicated its entire engineering and design effort to one thing: building the best SUVs possible. This singular focus has paid off -- the Haval H6 became the bestselling SUV in China for over a decade, and the brand now sells in over 60 countries. Every Haval benefits from this depth of SUV expertise, from suspension tuning to cabin packaging to all-terrain capability.",
+    founded: "2013",
+    milestone: "Haval was established as an independent SUV brand under Great Wall Motor. The H6 quickly became China's bestselling SUV and held that position for over 100 consecutive months.",
+  },
+  stats: [
+    { label: "Founded", value: "2013" },
+    { label: "Models in Kuwait", value: "3" },
+    { label: "Dealerships", value: "2" },
+    { label: "Warranty", value: "5 Years" },
+  ],
+  innovationTitle: "SUV Expertise in Every Detail",
+  innovationDescription: "Haval's intelligent driving systems include adaptive cruise control with stop-and-go, automatic emergency braking, and lane centering -- all standard across the range. The brand's turbocharged engines are paired with efficient 7-speed dual-clutch transmissions, while the cabin features large touchscreen infotainment, wireless charging, and premium audio systems. Haval's L.E.M.O.N. platform underpins the latest models, offering class-leading rigidity and safety performance.",
+  sustainability: "As part of Great Wall Motor, Haval benefits from significant investment in electrification. The brand is transitioning to hybrid and fully electric powertrains across its lineup, with new energy vehicles forming an increasing share of production. Manufacturing facilities are adopting renewable energy and closed-loop recycling systems.",
+  serviceLinks: [
+    { title: "Book a Test Drive", description: "Experience the Haval SUV range at your nearest showroom.", icon: "car", href: "#" },
+    { title: "Find a Dealer", description: "Locate authorized Haval dealers across Kuwait.", icon: "map-pin", href: "#" },
+    { title: "Service & Maintenance", description: "Schedule service with Haval-trained technicians.", icon: "wrench", href: "#" },
+    { title: "Haval Connect", description: "Access vehicle services through Haval's connected app.", icon: "smartphone", href: "#" },
+  ],
+};
+
+const mgEditorial: BrandEditorial = {
+  heroGradient: "linear-gradient(135deg, #0a0a0a 0%, #1a237e 40%, #283593 70%, #0a0a0a 100%)",
+  story: "MG is one of the most storied names in British motoring, born in 1924 in a Morris garage in Oxford. Now under SAIC Motor ownership, MG has been reborn as a global brand delivering stylish, tech-forward vehicles at accessible prices. In Kuwait, MG has become one of the fastest-growing brands, offering a range that spans from the practical MG5 sedan to the sporty HS SUV and the fully electric MG4 -- all with a distinctly British design sensibility and exceptional value.",
+  heritage: {
+    title: "A British Icon, Reimagined for Today",
+    description: "MG's history is woven into the fabric of British motoring culture. The MGA and MGB roadsters defined affordable sports car motoring for a generation, and the brand's octagonal badge became a symbol of accessible driving excitement worldwide. Today, MG honours that legacy by democratizing technology -- bringing electric vehicles, advanced safety systems, and connected car features to price points that welcome everyone. The spirit of the original Morris Garages lives on in every MG sold today.",
+    founded: "1924",
+    milestone: "MG was founded in Oxford, England, by Cecil Kimber, who modified Morris cars for better performance. The MG badge became one of the most recognized in British motoring history.",
+  },
+  stats: [
+    { label: "Founded", value: "1924" },
+    { label: "Models in Kuwait", value: "4" },
+    { label: "Dealerships", value: "3" },
+    { label: "Warranty", value: "6 Years" },
+  ],
+  innovationTitle: "Electric for Everyone",
+  innovationDescription: "MG is leading the charge in making electric vehicles accessible. The MG4 Electric delivers up to 450 km of range with a starting price that undercuts competitors by thousands, while the ZS EV brings zero-emission motoring to the compact SUV segment. Across the range, MG Pilot advanced driver assistance brings lane keep, adaptive cruise, and emergency braking as standard. The brand's iSMART connected car system offers remote vehicle control, live navigation, and over-the-air updates.",
+  sustainability: "MG is at the forefront of affordable electrification. Under SAIC Motor, the brand benefits from massive investment in battery technology and electric platforms. The MG4's modular electric architecture is designed for multiple lifecycle uses, and the brand is committed to reducing the environmental footprint across manufacturing, logistics, and vehicle end-of-life recycling.",
+  serviceLinks: [
+    { title: "Book a Test Drive", description: "Experience the MG range at your nearest showroom.", icon: "car", href: "#" },
+    { title: "Find a Dealer", description: "Locate authorized MG dealers across Kuwait.", icon: "map-pin", href: "#" },
+    { title: "Service & Maintenance", description: "Schedule service with MG-trained technicians.", icon: "wrench", href: "#" },
+    { title: "iSMART App", description: "Connect to your MG remotely with the iSMART app.", icon: "smartphone", href: "#" },
+  ],
+};
+
 // ============ BRANDS ============
 export const brands: Brand[] = [
   { id: "mercedes", name: "Mercedes-Benz", logoUrl: "/images/brands/mercedes.png", modelCount: 11, featured: true, tagline: "The best or nothing", editorial: mercedesEditorial , heroMedia: { type: "video", url: "/videos/merc-hero.mp4" }, editorialImages: { heritage: "/images/brands/editorial/mercedes-heritage.jpg", innovation: "/images/brands/editorial/mercedes-innovation.jpg" }},
-  { id: "bmw", name: "BMW", logoUrl: "/images/brands/bmw.png", modelCount: 5, featured: true, tagline: "Sheer driving pleasure" , heroMedia: { type: "video", url: "/videos/bmw-hero.mp4" }, editorialImages: { heritage: "/images/brands/editorial/bmw-heritage.jpg", innovation: "/images/brands/editorial/bmw-innovation.jpg" }},
-  { id: "toyota", name: "Toyota", logoUrl: "/images/brands/toyota.png", modelCount: 5, featured: true, tagline: "Let's go places" , heroMedia: { type: "image", url: "/images/brands/editorial/toyota-hero.jpg" }, editorialImages: { heritage: "/images/brands/editorial/toyota-heritage.jpg", innovation: "/images/brands/editorial/toyota-innovation.jpg" }},
-  { id: "lexus", name: "Lexus", logoUrl: "/images/brands/lexus.png", modelCount: 4 , heroMedia: { type: "video", url: "/videos/lexus-hero.mp4" }, editorialImages: { heritage: "/images/brands/editorial/lexus-heritage.jpg", innovation: "/images/brands/editorial/lexus-innovation.jpg" }},
-  { id: "porsche", name: "Porsche", logoUrl: "/images/brands/porsche.png", modelCount: 4, featured: true, tagline: "There is no substitute" , heroMedia: { type: "video", url: "/videos/porsche-hero.mp4" }, editorialImages: { heritage: "/images/brands/editorial/porsche-heritage.jpg", innovation: "/images/brands/editorial/porsche-innovation.jpg" }},
-  { id: "changan", name: "Changan", logoUrl: "/images/brands/changan.png", modelCount: 4 , heroMedia: { type: "image", url: "/images/brands/editorial/changan-hero.jpg" }, editorialImages: { heritage: "/images/brands/editorial/changan-heritage.jpg", innovation: "/images/brands/editorial/changan-innovation.jpg" }},
-  { id: "haval", name: "Haval", logoUrl: "/images/brands/haval.png", modelCount: 3 , heroMedia: { type: "image", url: "/images/brands/editorial/haval-hero.jpg" }, editorialImages: { heritage: "/images/brands/editorial/haval-heritage.jpg", innovation: "/images/brands/editorial/haval-innovation.jpg" }},
-  { id: "mg", name: "MG", logoUrl: "/images/brands/mg.png", modelCount: 4 , heroMedia: { type: "image", url: "/images/brands/editorial/mg-hero.jpg" }, editorialImages: { heritage: "/images/brands/editorial/mg-heritage.jpg", innovation: "/images/brands/editorial/mg-innovation.jpg" }},
+  { id: "bmw", name: "BMW", logoUrl: "/images/brands/bmw.png", modelCount: 5, featured: true, tagline: "Sheer driving pleasure", editorial: bmwEditorial, heroMedia: { type: "video", url: "/videos/bmw-hero.mp4" }, editorialImages: { heritage: "/images/brands/editorial/bmw-heritage.jpg", innovation: "/images/brands/editorial/bmw-innovation.jpg" }},
+  { id: "toyota", name: "Toyota", logoUrl: "/images/brands/toyota.png", modelCount: 5, featured: true, tagline: "Let's go places", editorial: toyotaEditorial, heroMedia: { type: "image", url: "/images/brands/editorial/toyota-hero.jpg" }, editorialImages: { heritage: "/images/brands/editorial/toyota-heritage.jpg", innovation: "/images/brands/editorial/toyota-innovation.jpg" }},
+  { id: "lexus", name: "Lexus", logoUrl: "/images/brands/lexus.png", modelCount: 4, editorial: lexusEditorial, heroMedia: { type: "video", url: "/videos/lexus-hero.mp4" }, editorialImages: { heritage: "/images/brands/editorial/lexus-heritage.jpg", innovation: "/images/brands/editorial/lexus-innovation.jpg" }},
+  { id: "porsche", name: "Porsche", logoUrl: "/images/brands/porsche.png", modelCount: 4, featured: true, tagline: "There is no substitute", editorial: porscheEditorial, heroMedia: { type: "video", url: "/videos/porsche-hero.mp4" }, editorialImages: { heritage: "/images/brands/editorial/porsche-heritage.jpg", innovation: "/images/brands/editorial/porsche-innovation.jpg" }},
+  { id: "changan", name: "Changan", logoUrl: "/images/brands/changan.png", modelCount: 4, editorial: changanEditorial, heroMedia: { type: "image", url: "/images/brands/editorial/changan-hero.jpg" }, editorialImages: { heritage: "/images/brands/editorial/changan-heritage.jpg", innovation: "/images/brands/editorial/changan-innovation.jpg" }},
+  { id: "haval", name: "Haval", logoUrl: "/images/brands/haval.png", modelCount: 3, editorial: havalEditorial, heroMedia: { type: "image", url: "/images/brands/editorial/haval-hero.jpg" }, editorialImages: { heritage: "/images/brands/editorial/haval-heritage.jpg", innovation: "/images/brands/editorial/haval-innovation.jpg" }},
+  { id: "mg", name: "MG", logoUrl: "/images/brands/mg.png", modelCount: 4, editorial: mgEditorial, heroMedia: { type: "image", url: "/images/brands/editorial/mg-hero.jpg" }, editorialImages: { heritage: "/images/brands/editorial/mg-heritage.jpg", innovation: "/images/brands/editorial/mg-innovation.jpg" }},
 ];
 
 // Helper to build equipment lists
