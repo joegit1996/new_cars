@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useCallback, useEffect, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import { useHistoryState } from "@/hooks/useHistoryState";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   SlidersHorizontal, X, ChevronLeft, ChevronRight,
@@ -20,6 +21,7 @@ import { useIsEmbedded } from "@/hooks/useIsEmbedded";
 import { appendEmbedParam } from "@/hooks/useEmbedHref";
 import { CompareProvider, useCompare } from "@/context/CompareContext";
 import { useAppData } from "@/context/AppDataContext";
+import { useLanguage, tFormat } from "@/context/LanguageContext";
 import type { Brand, Model, SortBy } from "@/data/types";
 
 // ---------------------------------------------------------------------------
@@ -35,6 +37,7 @@ function modelToCardData(m: Model, getBrandById: (id: string) => Brand | undefin
     name: m.name,
     brandId: m.brandId,
     brandName: brand?.name ?? "",
+    brandLogoUrl: brand?.logoUrl,
     bodyType: m.bodyType,
     startingPrice: m.startingPrice,
     engineRange: m.specsSummary.engineRange,
@@ -47,13 +50,7 @@ function modelToCardData(m: Model, getBrandById: (id: string) => Brand | undefin
   };
 }
 
-const SORT_OPTIONS: { value: SortBy; label: string }[] = [
-  { value: "price-asc", label: "Price: Low to High" },
-  { value: "price-desc", label: "Price: High to Low" },
-  { value: "newest", label: "Newest" },
-  { value: "popular", label: "Most Popular" },
-  { value: "horsepower", label: "Horsepower" },
-];
+const SORT_VALUES: SortBy[] = ["price-asc", "price-desc", "newest", "popular", "horsepower"];
 
 function capitalize(s: string) {
   return s.charAt(0).toUpperCase() + s.slice(1);
@@ -74,6 +71,7 @@ function Carousel({
 }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [mobileCardW, setMobileCardW] = useState(300);
+  const { t, dir } = useLanguage();
 
   // Measure mobile card width from viewport
   useEffect(() => {
@@ -147,18 +145,18 @@ function Carousel({
           <button
             onClick={prev}
             className="absolute start-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center bg-white/90 rounded-full shadow-lg border border-[#E2E8F0] text-[#1E293B] hover:bg-white transition-colors"
-            aria-label="Previous"
+            aria-label={t.common.previous}
           >
-            <ChevronLeft className="w-5 h-5" />
+            <ChevronLeft className={`w-5 h-5 ${dir === "rtl" ? "rotate-180" : ""}`} />
           </button>
         )}
         {currentIndex < maxIndex && (
           <button
             onClick={next}
             className="absolute end-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center bg-white/90 rounded-full shadow-lg border border-[#E2E8F0] text-[#1E293B] hover:bg-white transition-colors"
-            aria-label="Next"
+            aria-label={t.common.next}
           >
-            <ChevronRight className="w-5 h-5" />
+            <ChevronRight className={`w-5 h-5 ${dir === "rtl" ? "rotate-180" : ""}`} />
           </button>
         )}
       </div>
@@ -225,6 +223,7 @@ function Carousel({
 // ---------------------------------------------------------------------------
 
 function BrandHero({ brandName, brandId, heroMedia }: { brandName: string; brandId: string; heroMedia?: { type: "video" | "image"; url: string } }) {
+  const { t, ln } = useLanguage();
   return (
     <VideoHero media={heroMedia}>
       {/* Brand name overlay */}
@@ -237,10 +236,10 @@ function BrandHero({ brandName, brandId, heroMedia }: { brandName: string; brand
           </div>
           <div>
             <h1 className="text-2xl md:text-4xl font-bold text-white drop-shadow-lg">
-              {brandName}
+              {ln.brand(brandName)}
             </h1>
             <p className="text-sm text-white/70 mt-0.5 hidden md:block">
-              Explore the full {brandName} lineup in Kuwait
+              {tFormat(t.brand.exploreLineup, { brand: ln.brand(brandName) })}
             </p>
           </div>
         </div>
@@ -268,6 +267,7 @@ function MobileFilterSheet({
   resultCount: number;
   hideBrands: boolean;
 }) {
+  const { t } = useLanguage();
   return (
     <AnimatePresence>
       {open && (
@@ -294,8 +294,8 @@ function MobileFilterSheet({
             </div>
             {/* Header */}
             <div className="flex items-center justify-between px-4 pb-3 border-b border-[#E2E8F0]">
-              <h2 className="font-bold text-[#1E293B]">Filters</h2>
-              <button onClick={onClose} className="p-1 text-[#64748B]" aria-label="Close filters">
+              <h2 className="font-bold text-[#1E293B]">{t.common.filters}</h2>
+              <button onClick={onClose} className="p-1 text-[#64748B]" aria-label={t.common.close}>
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -309,7 +309,7 @@ function MobileFilterSheet({
                 onClick={onClose}
                 className="w-full py-3 bg-[#1A56DB] text-white font-bold text-sm rounded-xl"
               >
-                Show {resultCount} Result{resultCount !== 1 ? "s" : ""}
+                {tFormat(t.browse.showRange, { count: resultCount })}
               </button>
             </div>
           </motion.div>
@@ -328,6 +328,8 @@ function BrowsePageContent() {
   const brandParam = searchParams.get("brand");
   const bodyParam = searchParams.get("body");
   const collectionParam = searchParams.get("collection");
+  const { t, dir, ln } = useLanguage();
+  const SORT_OPTIONS = SORT_VALUES.map((value) => ({ value, label: t.browse.sortBy[value] }));
 
   const compare = useCompare();
   const { models: allModelsRaw, getBrandById, getModelsByBrand, getModelsByBodyType, getModelsByLifestyleCollection, getCollectionById, filterModels, sortModels, loading } = useAppData();
@@ -337,10 +339,11 @@ function BrowsePageContent() {
     if (collectionParam) {
       const col = getCollectionById(collectionParam);
       if (col) {
+        const localizedTitle = ln.collectionTitle(col.id, col.title);
         return {
           baseModels: getModelsByLifestyleCollection(collectionParam),
-          pageTitle: col.title,
-          breadcrumbLabel: col.title,
+          pageTitle: localizedTitle,
+          breadcrumbLabel: localizedTitle,
         };
       }
     }
@@ -349,25 +352,26 @@ function BrowsePageContent() {
       if (brand) {
         return {
           baseModels: getModelsByBrand(brandParam),
-          pageTitle: brand.name,
-          breadcrumbLabel: brand.name,
+          pageTitle: ln.brand(brand.name),
+          breadcrumbLabel: ln.brand(brand.name),
         };
       }
     }
     if (bodyParam) {
       const bodyName = capitalize(bodyParam);
+      const localizedBody = ln.body(bodyName);
       return {
         baseModels: getModelsByBodyType(bodyName),
-        pageTitle: bodyName,
-        breadcrumbLabel: bodyName,
+        pageTitle: localizedBody,
+        breadcrumbLabel: localizedBody,
       };
     }
     return {
       baseModels: allModelsRaw,
-      pageTitle: "All Cars",
-      breadcrumbLabel: "All Cars",
+      pageTitle: t.browse.allCars,
+      breadcrumbLabel: t.browse.allCars,
     };
-  }, [brandParam, bodyParam, collectionParam, allModelsRaw, getBrandById, getModelsByBrand, getModelsByBodyType, getModelsByLifestyleCollection, getCollectionById]);
+  }, [brandParam, bodyParam, collectionParam, allModelsRaw, getBrandById, getModelsByBrand, getModelsByBodyType, getModelsByLifestyleCollection, getCollectionById, t.browse.allCars, ln]);
 
   // Filters
   const initialFilters: FilterState = useMemo(() => {
@@ -384,18 +388,41 @@ function BrowsePageContent() {
     return f;
   }, [brandParam, bodyParam, getBrandById]);
 
-  const [filters, setFilters] = useState<FilterState>(initialFilters);
-  const [sort, setSort] = useState<SortBy>("popular");
-  const [view, setView] = useState<"carousel" | "grid">("grid");
-  const [page, setPage] = useState(1);
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [filters, setFiltersRaw] = useHistoryState<FilterState>("browse:filters", initialFilters);
+  const [sort, setSortRaw] = useHistoryState<SortBy>("browse:sort", "popular");
+  const [view, setView] = useHistoryState<"carousel" | "grid">("browse:view", "grid");
+  const [page, setPage] = useHistoryState<number>("browse:page", 1);
+  const [selectedIdsArr, setSelectedIdsArr] = useHistoryState<string[]>("browse:selectedIds", []);
+
+  // User-initiated filter/sort changes reset page back to 1. Driven by the
+  // setters so restoring filters from history.state does not clobber `page`.
+  const setFilters = useCallback(
+    (v: FilterState | ((prev: FilterState) => FilterState)) => {
+      setFiltersRaw(v);
+      setPage(1);
+    },
+    [setFiltersRaw, setPage],
+  );
+  const setSort = useCallback(
+    (v: SortBy | ((prev: SortBy) => SortBy)) => {
+      setSortRaw(v);
+      setPage(1);
+    },
+    [setSortRaw, setPage],
+  );
+  const selectedIds = useMemo(() => new Set(selectedIdsArr), [selectedIdsArr]);
+  const setSelectedIds = useCallback(
+    (updater: Set<string> | ((prev: Set<string>) => Set<string>)) => {
+      setSelectedIdsArr((prev) => {
+        const prevSet = new Set(prev);
+        const next = typeof updater === "function" ? updater(prevSet) : updater;
+        return Array.from(next);
+      });
+    },
+    [setSelectedIdsArr],
+  );
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
-
-  // Reset page when filters/sort change
-  useEffect(() => {
-    setPage(1);
-  }, [filters, sort]);
 
   // Filtered + sorted models
   const filteredModels = useMemo(() => {
@@ -439,14 +466,15 @@ function BrowsePageContent() {
         const m = allModelsRaw.find((mod) => mod.id === id);
         if (!m) return null;
         const brand = getBrandById(m.brandId);
-        return { id: m.id, name: m.name, trimName: `${brand?.name ?? ""} ${m.name}` };
+        const brandLabel = brand ? ln.brand(brand.name) : "";
+        return { id: m.id, name: ln.model(m.name), trimName: `${brandLabel} ${ln.model(m.name)}` };
       })
       .filter((x): x is ComparisonItem => x !== null);
-  }, [selectedIds, allModelsRaw, getBrandById]);
+  }, [selectedIds, allModelsRaw, getBrandById, ln]);
 
   const isEmbedded = useIsEmbedded();
   const hideBrands = !!brandParam;
-  const currentSortLabel = SORT_OPTIONS.find((o) => o.value === sort)?.label ?? "Sort";
+  const currentSortLabel = SORT_OPTIONS.find((o) => o.value === sort)?.label ?? t.browse.sort;
 
   const brandObj = brandParam ? getBrandById(brandParam) : null;
 
@@ -470,16 +498,16 @@ function BrowsePageContent() {
         <nav className="hidden md:flex items-center gap-1.5 text-xs text-[#64748B] mb-4">
           <EmbedAnchor href="/" className="flex items-center gap-1 hover:text-[#1A56DB] transition-colors">
             <Home className="w-3.5 h-3.5" />
-            <span>Home</span>
+            <span>{t.common.home}</span>
           </EmbedAnchor>
-          <ChevronRight className="w-3 h-3" />
+          <ChevronRight className={`w-3 h-3 ${dir === "rtl" ? "rotate-180" : ""}`} />
           <span className="text-[#1E293B] font-medium">{breadcrumbLabel}</span>
         </nav>
         {/* Mobile back button */}
         <div className="md:hidden mb-3">
           <EmbedAnchor href="/" className="inline-flex items-center gap-1.5 text-xs text-[#64748B] hover:text-[#1A56DB] transition-colors">
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Back to Home</span>
+            <ArrowLeft className={`w-3.5 h-3.5 ${dir === "rtl" ? "rotate-180" : ""}`} />
+            <span>{t.common.backToHome}</span>
           </EmbedAnchor>
         </div>
 
@@ -491,8 +519,12 @@ function BrowsePageContent() {
 
           <div className="flex flex-wrap items-center gap-3 justify-between">
             {/* Result count */}
-            <span className="text-sm text-[#64748B]">
-              Showing {filteredModels.length} model{filteredModels.length !== 1 ? "s" : ""}
+            <span
+              className="text-sm text-[#64748B]"
+              suppressHydrationWarning
+            >
+              {t.browse.showing} {filteredModels.length}{" "}
+              {filteredModels.length !== 1 ? t.common.models : t.common.model}
             </span>
 
             <div className="flex items-center gap-2">
@@ -502,7 +534,7 @@ function BrowsePageContent() {
                 className="md:hidden flex items-center gap-1.5 px-3 py-2 text-xs font-bold rounded-lg border border-[#E2E8F0] bg-white text-[#1E293B] hover:border-[#1A56DB] transition-colors"
               >
                 <SlidersHorizontal className="w-4 h-4" />
-                Filters
+                {t.browse.filters}
               </button>
 
               {/* Sort dropdown */}
@@ -553,7 +585,7 @@ function BrowsePageContent() {
                       ? "bg-[#1A56DB] text-white"
                       : "bg-white text-[#64748B] hover:text-[#1E293B]"
                   }`}
-                  aria-label="Carousel view"
+                  aria-label={t.browse.sort}
                 >
                   <GalleryHorizontalEnd className="w-4 h-4" />
                 </button>
@@ -564,7 +596,7 @@ function BrowsePageContent() {
                       ? "bg-[#1A56DB] text-white"
                       : "bg-white text-[#64748B] hover:text-[#1E293B]"
                   }`}
-                  aria-label="Grid view"
+                  aria-label={t.browse.filters}
                 >
                   <LayoutGrid className="w-4 h-4" />
                 </button>
@@ -591,10 +623,10 @@ function BrowsePageContent() {
                   <SlidersHorizontal className="w-10 h-10 text-[#64748B]" />
                 </div>
                 <h2 className="font-bold text-lg text-[#1E293B] mb-2">
-                  No models match your filters
+                  {t.browse.noResults}
                 </h2>
                 <p className="text-sm text-[#64748B] mb-4">
-                  Try adjusting your criteria to see more results.
+                  &nbsp;
                 </p>
                 <button
                   onClick={() =>
@@ -611,7 +643,7 @@ function BrowsePageContent() {
                   }
                   className="px-5 py-2.5 bg-[#1A56DB] text-white text-sm font-bold rounded-xl hover:bg-[#1A56DB]/90 transition-colors"
                 >
-                  Clear Filters
+                  {t.common.clear} {t.common.filters}
                 </button>
               </div>
             ) : view === "carousel" ? (
@@ -621,8 +653,13 @@ function BrowsePageContent() {
                 onSelect={toggleSelection}
               />
             ) : (
-              /* Grid view */
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              /* Grid view -- key forces a clean remount of the card list when
+                 the displayed count changes (esp. on back navigation, so the
+                 cached SSR tree is replaced by the restored state). */
+              <div
+                key={`grid-${cardItems.length}`}
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+              >
                 {cardItems.map((item) => (
                   <ModelCard
                     key={item.id}
@@ -641,7 +678,7 @@ function BrowsePageContent() {
                   onClick={() => setPage((p) => p + 1)}
                   className="px-8 py-3 border-2 border-[#1A56DB] text-[#1A56DB] text-sm font-bold rounded-xl hover:bg-[#1A56DB] hover:text-white transition-colors"
                 >
-                  Load More
+                  {t.browse.loadMore}
                 </button>
               </div>
             )}
@@ -681,7 +718,7 @@ function BrowsePageContent() {
                   <button
                     onClick={() => toggleSelection(item.id)}
                     className="p-0.5 rounded-full hover:bg-[#EF4444]/10 text-[#64748B] hover:text-[#EF4444] transition-colors"
-                    aria-label={`Remove ${item.trimName}`}
+                    aria-label={`${t.compare.removeCar} ${item.trimName}`}
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -693,7 +730,7 @@ function BrowsePageContent() {
                 onClick={clearSelection}
                 className="text-xs text-[#64748B] hover:text-[#EF4444] transition-colors"
               >
-                Clear
+                {t.common.clear}
               </button>
               <EmbedAnchor
                 href={`/compare?ids=${Array.from(selectedIds).join(",")}`}
@@ -703,7 +740,7 @@ function BrowsePageContent() {
                     : "bg-[#1A56DB]/40 text-white cursor-not-allowed pointer-events-none"
                 }`}
               >
-                Compare Selected
+                {t.common.compare}
               </EmbedAnchor>
             </div>
           </div>
@@ -716,13 +753,13 @@ function BrowsePageContent() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="text-sm font-bold text-[#1E293B]">
-                {selectedIds.size} selected
+                {selectedIds.size}
               </span>
               <button
                 onClick={clearSelection}
                 className="text-xs text-[#64748B] hover:text-[#EF4444] transition-colors"
               >
-                Clear
+                {t.common.clear}
               </button>
             </div>
             <EmbedAnchor
@@ -733,7 +770,7 @@ function BrowsePageContent() {
                   : "bg-[#1A56DB]/40 text-white pointer-events-none"
               }`}
             >
-              Compare Selected
+              {t.common.compare}
             </EmbedAnchor>
           </div>
           {/* Thumbnails */}
@@ -767,6 +804,7 @@ function BrowsePageContent() {
     </div>
   );
 }
+
 
 // ---------------------------------------------------------------------------
 // Page export -- wrapped in Suspense for useSearchParams

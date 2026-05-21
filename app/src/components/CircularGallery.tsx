@@ -4,6 +4,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 import PlaceholderImage, { silhouetteMap } from "./PlaceholderImage";
+import { useLanguage } from "@/context/LanguageContext";
 
 export interface GalleryImage {
   label: string;
@@ -38,6 +39,7 @@ function getCardStyle(angleDeg: number, containerW: number, cardW: number) {
 }
 
 export default function CircularGallery({ images, filter }: CircularGalleryProps) {
+  const { t, dir } = useLanguage();
   const [rotation, setRotation] = useState(0);
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
   const [containerW, setContainerW] = useState(800);
@@ -285,7 +287,7 @@ export default function CircularGallery({ images, filter }: CircularGalleryProps
               <button
                 onClick={() => setExpandedIndex(null)}
                 className="w-11 h-11 flex items-center justify-center bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors"
-                aria-label="Close lightbox"
+                aria-label={t.common.close}
               >
                 <X className="w-6 h-6" />
               </button>
@@ -323,10 +325,10 @@ export default function CircularGallery({ images, filter }: CircularGalleryProps
                     ? "bg-white/10 hover:bg-white/20"
                     : "opacity-30 cursor-default"
                 }`}
-                aria-label="Previous image"
+                aria-label={t.common.previous}
                 disabled={expandedIndex <= 0}
               >
-                <ChevronLeft className="w-6 h-6" />
+                <ChevronLeft className={`w-6 h-6 ${dir === "rtl" ? "rotate-180" : ""}`} />
               </button>
 
               <p className="text-white/70 text-sm text-center">
@@ -344,10 +346,10 @@ export default function CircularGallery({ images, filter }: CircularGalleryProps
                     ? "bg-white/10 hover:bg-white/20"
                     : "opacity-30 cursor-default"
                 }`}
-                aria-label="Next image"
+                aria-label={t.common.next}
                 disabled={expandedIndex >= filtered.length - 1}
               >
-                <ChevronRight className="w-6 h-6" />
+                <ChevronRight className={`w-6 h-6 ${dir === "rtl" ? "rotate-180" : ""}`} />
               </button>
             </div>
           </div>,

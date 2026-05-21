@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronUp, X, Scale } from "lucide-react";
 import PlaceholderImage from "./PlaceholderImage";
+import { useLanguage } from "@/context/LanguageContext";
 
 export interface ComparisonItem {
   id: string;
@@ -25,6 +26,7 @@ export default function ComparisonTray({
   onCompare,
 }: ComparisonTrayProps) {
   const [expanded, setExpanded] = useState(false);
+  const { t } = useLanguage();
 
   if (items.length === 0) return null;
 
@@ -36,7 +38,7 @@ export default function ComparisonTray({
           <div className="flex items-center gap-2">
             <Scale className="w-5 h-5 text-[#1A56DB]" />
             <span className="text-sm font-bold text-[#1E293B]">
-              {items.length} selected
+              {items.length} {t.compare.selected}
             </span>
           </div>
 
@@ -55,7 +57,7 @@ export default function ComparisonTray({
                 <button
                   onClick={() => onRemove(item.id)}
                   className="p-0.5 rounded-full hover:bg-[#EF4444]/10 text-[#64748B] hover:text-[#EF4444] transition-colors"
-                  aria-label={`Remove ${item.trimName}`}
+                  aria-label={`${t.compare.removeCar} ${item.trimName}`}
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -68,14 +70,14 @@ export default function ComparisonTray({
               onClick={onClearAll}
               className="text-xs text-[#64748B] hover:text-[#EF4444] transition-colors"
             >
-              Clear All
+              {t.compare.clearAll}
             </button>
             <button
               onClick={onCompare}
               disabled={items.length < 2}
               className="px-5 py-2 bg-[#1A56DB] text-white text-sm font-bold rounded-xl hover:bg-[#1A56DB]/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
-              Compare Now
+              {t.compare.compareNow}
             </button>
           </div>
         </div>
@@ -98,13 +100,13 @@ export default function ComparisonTray({
                   <div className="flex items-center gap-2">
                     <Scale className="w-4 h-4 text-[#1A56DB]" />
                     <span className="text-sm font-bold text-[#1E293B]">
-                      {items.length} selected
+                      {items.length} {t.compare.selected}
                     </span>
                   </div>
                   <button
                     onClick={() => setExpanded(false)}
                     className="p-1 text-[#64748B]"
-                    aria-label="Collapse"
+                    aria-label={t.common.close}
                   >
                     <ChevronUp className="w-5 h-5 rotate-180" />
                   </button>
@@ -126,7 +128,7 @@ export default function ComparisonTray({
                       <button
                         onClick={() => onRemove(item.id)}
                         className="p-1 text-[#64748B] hover:text-[#EF4444]"
-                        aria-label={`Remove ${item.trimName}`}
+                        aria-label={`${t.compare.removeCar} ${item.trimName}`}
                       >
                         <X className="w-4 h-4" />
                       </button>
@@ -140,14 +142,14 @@ export default function ComparisonTray({
                     onClick={onClearAll}
                     className="text-xs text-[#64748B] hover:text-[#EF4444]"
                   >
-                    Clear All
+                    {t.compare.clearAll}
                   </button>
                   <button
                     onClick={onCompare}
                     disabled={items.length < 2}
                     className="px-5 py-2.5 bg-[#1A56DB] text-white text-sm font-bold rounded-xl disabled:opacity-40 disabled:cursor-not-allowed"
                   >
-                    Compare Now
+                    {t.compare.compareNow}
                   </button>
                 </div>
               </div>
@@ -162,7 +164,7 @@ export default function ComparisonTray({
             >
               <div className="flex items-center gap-2">
                 <Scale className="w-4 h-4" />
-                <span className="text-sm font-bold">{items.length} to compare</span>
+                <span className="text-sm font-bold">{items.length} {t.compare.toCompare}</span>
               </div>
               <ChevronUp className="w-4 h-4" />
             </motion.button>

@@ -6,9 +6,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { searchTrims } from "@/data/helpers";
 import type { SearchEntry, BodyType } from "@/data/types";
 import PlaceholderImage from "./PlaceholderImage";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useIsEmbedded } from "@/hooks/useIsEmbedded";
 import { appendEmbedParam } from "@/hooks/useEmbedHref";
+import { useLanguage, tFormat } from "@/context/LanguageContext";
 
 const PREVIEW_COUNT = 6;
 
@@ -22,6 +23,9 @@ export default function EmbeddedFloatingButtons() {
   const inputRef = useRef<HTMLInputElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const sp = useSearchParams();
+  const lang = sp.get("lang");
+  const { t, ln } = useLanguage();
 
   useEffect(() => {
     if (searchExpanded) {
@@ -68,17 +72,17 @@ export default function EmbeddedFloatingButtons() {
     (entry: SearchEntry) => {
       setSearchExpanded(false);
       setQuery("");
-      router.push(appendEmbedParam(`/model/${entry.modelId}?trim=${entry.trimId}`, true));
+      router.push(appendEmbedParam(`/model/${entry.modelId}?trim=${entry.trimId}`, true, lang));
     },
-    [router]
+    [router, lang]
   );
 
   const navigateToFullResults = useCallback(() => {
     const q = query;
     setSearchExpanded(false);
     setQuery("");
-    router.push(appendEmbedParam(`/search?q=${encodeURIComponent(q)}`, true));
-  }, [router, query]);
+    router.push(appendEmbedParam(`/search?q=${encodeURIComponent(q)}`, true, lang));
+  }, [router, query, lang]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -122,16 +126,16 @@ export default function EmbeddedFloatingButtons() {
             <button
               onClick={() => setSearchExpanded(true)}
               className="w-10 h-10 rounded-full bg-[#1A56DB] text-white shadow-md flex items-center justify-center hover:bg-[#1A56DB]/90 active:scale-95 transition-transform"
-              aria-label="Search"
+              aria-label={t.common.search}
             >
               <Search className="w-[18px] h-[18px]" />
             </button>
 
             {/* Compare */}
             <button
-              onClick={() => router.push(appendEmbedParam("/compare", true))}
+              onClick={() => router.push(appendEmbedParam("/compare", true, lang))}
               className="w-10 h-10 rounded-full bg-[#1E293B] text-white shadow-md flex items-center justify-center hover:bg-[#0F172A] active:scale-95 transition-transform"
-              aria-label="Compare"
+              aria-label={t.common.compare}
             >
               <Scale className="w-[18px] h-[18px]" />
             </button>
@@ -169,13 +173,13 @@ export default function EmbeddedFloatingButtons() {
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Search brands, models, specs..."
+                  placeholder={t.search.placeholderMobile}
                   className="flex-1 px-3 py-4 text-sm text-[#1E293B] placeholder:text-[#94A3B8] focus:outline-none"
                 />
                 <button
                   onClick={() => setSearchExpanded(false)}
                   className="shrink-0 w-8 h-8 flex items-center justify-center rounded-full text-[#64748B] hover:bg-[#F1F5F9] transition-colors"
-                  aria-label="Close search"
+                  aria-label={t.common.close}
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -185,11 +189,11 @@ export default function EmbeddedFloatingButtons() {
               <div className="flex-1 overflow-y-auto">
                 {query.length < 2 ? (
                   <div className="px-4 py-8 text-center">
-                    <p className="text-sm text-[#94A3B8]">Type to search brands, models, specs...</p>
+                    <p className="text-sm text-[#94A3B8]">{t.search.typeToSearch}</p>
                   </div>
                 ) : preview.length === 0 ? (
                   <div className="px-4 py-8 text-center">
-                    <p className="text-sm text-[#64748B]">No results for &quot;{query}&quot;</p>
+                    <p className="text-sm text-[#64748B]">{t.search.noResultsFor} &quot;{query}&quot;</p>
                   </div>
                 ) : (
                   <>
@@ -211,10 +215,10 @@ export default function EmbeddedFloatingButtons() {
                               />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="text-[10px] text-[#64748B] uppercase">{entry.brandName}</p>
+                              <p className="text-[10px] text-[#64748B] uppercase">{ln.brand(entry.brandName)}</p>
                               <p className="text-sm font-semibold text-[#1E293B] truncate">
-                                {entry.modelName}{" "}
-                                <span className="font-normal text-[#64748B]">{entry.trimName}</span>
+                                {ln.model(entry.modelName)}{" "}
+                                <span className="font-normal text-[#64748B]">{ln.trim(entry.trimName)}</span>
                               </p>
                             </div>
                             <span className="shrink-0 text-xs font-bold text-[#F59E0B]">
@@ -229,7 +233,7 @@ export default function EmbeddedFloatingButtons() {
                         onClick={navigateToFullResults}
                         className="w-full flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold text-[#1A56DB] border-t border-[#E2E8F0] hover:bg-[#F8FAFC] transition-colors"
                       >
-                        View all {results.length} results
+                        {tFormat(t.search.viewAllResults, { count: results.length })}
                         <ArrowRight className="w-4 h-4" />
                       </button>
                     )}

@@ -2,26 +2,29 @@
 
 import { Home, Search, Scale, Heart, User } from "lucide-react";
 import { useIsEmbedded } from "../hooks/useIsEmbedded";
+import { useLanguage } from "@/context/LanguageContext";
+import EmbedLink from "./EmbedLink";
 
 interface MobileTabBarProps {
   activeTab?: "home" | "search" | "compare" | "saved" | "account";
   compareCount?: number;
 }
 
-const tabs = [
-  { id: "home" as const, label: "Home", icon: Home, href: "/" },
-  { id: "search" as const, label: "Search", icon: Search, href: "/search" },
-  { id: "compare" as const, label: "Compare", icon: Scale, href: "/compare" },
-  { id: "saved" as const, label: "Saved", icon: Heart, href: "/saved" },
-  { id: "account" as const, label: "Account", icon: User, href: "/account" },
-];
-
 export default function MobileTabBar({
   activeTab = "home",
   compareCount = 0,
 }: MobileTabBarProps) {
   const isEmbedded = useIsEmbedded();
+  const { t } = useLanguage();
   if (isEmbedded) return null;
+
+  const tabs = [
+    { id: "home" as const, label: t.common.home, icon: Home, href: "/" },
+    { id: "search" as const, label: t.common.search, icon: Search, href: "/search" },
+    { id: "compare" as const, label: t.common.compare, icon: Scale, href: "/compare" },
+    { id: "saved" as const, label: t.common.saved, icon: Heart, href: "/saved" },
+    { id: "account" as const, label: t.common.account, icon: User, href: "/account" },
+  ];
 
   return (
     <nav className="md:hidden fixed bottom-0 inset-x-0 z-50 bg-white border-t border-[#E2E8F0] shadow-[0_-2px_10px_rgba(0,0,0,0.06)]">
@@ -31,7 +34,7 @@ export default function MobileTabBar({
           const Icon = tab.icon;
 
           return (
-            <a
+            <EmbedLink
               key={tab.id}
               href={tab.href}
               className={`relative flex flex-col items-center gap-0.5 px-3 py-1 transition-colors ${
@@ -53,7 +56,7 @@ export default function MobileTabBar({
               >
                 {tab.label}
               </span>
-            </a>
+            </EmbedLink>
           );
         })}
       </div>

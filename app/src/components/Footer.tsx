@@ -1,38 +1,17 @@
 "use client";
 
 import { useIsEmbedded } from "../hooks/useIsEmbedded";
+import { useLanguage } from "@/context/LanguageContext";
+import LanguageSwitcher from "./LanguageSwitcher";
+import EmbedLink from "./EmbedLink";
 
 const brandLinks = [
-  { label: "Toyota", href: "/brand/toyota" },
-  { label: "Lexus", href: "/brand/lexus" },
-  { label: "BMW", href: "/brand/bmw" },
-  { label: "Mercedes-Benz", href: "/brand/mercedes" },
-  { label: "Chery", href: "/brand/chery" },
-  { label: "Changan", href: "/brand/changan" },
-  { label: "View All Brands", href: "/brands" },
-];
-
-const bodyTypeLinks = [
-  { label: "Sedan", href: "/browse?body=sedan" },
-  { label: "SUV", href: "/browse?body=suv" },
-  { label: "Hatchback", href: "/browse?body=hatchback" },
-  { label: "Coupe", href: "/browse?body=coupe" },
-  { label: "Pickup", href: "/browse?body=pickup" },
-  { label: "Convertible", href: "/browse?body=convertible" },
-];
-
-const quickLinks = [
-  { label: "Compare Cars", href: "/compare" },
-  { label: "About 4Sale New Cars", href: "/about" },
-  { label: "Contact Us", href: "/contact" },
-  { label: "Privacy Policy", href: "/privacy" },
-  { label: "Terms of Service", href: "/terms" },
-];
-
-const contactInfo = [
-  { label: "Email", value: "newcars@4sale.com.kw" },
-  { label: "Phone", value: "+965 1234 5678" },
-  { label: "Location", value: "Kuwait City, Kuwait" },
+  { id: "toyota", href: "/brand/toyota", label: "Toyota" },
+  { id: "lexus", href: "/brand/lexus", label: "Lexus" },
+  { id: "bmw", href: "/brand/bmw", label: "BMW" },
+  { id: "mercedes", href: "/brand/mercedes", label: "Mercedes-Benz" },
+  { id: "chery", href: "/brand/chery", label: "Chery" },
+  { id: "changan", href: "/brand/changan", label: "Changan" },
 ];
 
 function FooterColumn({
@@ -52,69 +31,102 @@ function FooterColumn({
 
 export default function Footer() {
   const isEmbedded = useIsEmbedded();
+  const { t, ln } = useLanguage();
   if (isEmbedded) return null;
+
+  const bodyTypeLinks = [
+    { key: "sedan", href: "/browse?body=sedan", label: t.bodyTypes.Sedan },
+    { key: "suv", href: "/browse?body=suv", label: t.bodyTypes.SUV },
+    { key: "hatchback", href: "/browse?body=hatchback", label: t.bodyTypes.Hatchback },
+    { key: "coupe", href: "/browse?body=coupe", label: t.bodyTypes.Coupe },
+    { key: "pickup", href: "/browse?body=pickup", label: t.bodyTypes.Pickup },
+    { key: "convertible", href: "/browse?body=convertible", label: t.bodyTypes.Convertible },
+  ];
+
+  const quickLinks = [
+    { key: "compare", href: "/compare", label: t.footer.compareCars },
+    { key: "about", href: "/about", label: t.footer.about },
+    { key: "contact", href: "/contact", label: t.footer.contactUs },
+    { key: "privacy", href: "/privacy", label: t.footer.privacy },
+    { key: "terms", href: "/terms", label: t.footer.terms },
+  ];
+
+  const contactInfo = [
+    { label: t.footer.email, value: "newcars@4sale.com.kw" },
+    { label: t.footer.phone, value: "+965 1234 5678" },
+    { label: t.footer.location, value: t.footer.locationValue },
+  ];
 
   return (
     <footer className="bg-[#0F1B2D] text-[#94A3B8]">
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-10">
         {/* Branding */}
-        <div className="mb-8">
-          <span className="text-white font-bold text-xl tracking-tight">
-            4Sale <span className="text-[#60A5FA]">New Cars</span>
-          </span>
-          <p className="text-sm mt-2 max-w-md">
-            Browse, compare, and configure new cars from every brand available in Kuwait.
-          </p>
+        <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <span className="text-white font-bold text-xl tracking-tight">
+              {t.nav.brand} <span className="text-[#60A5FA]">{t.nav.brandAccent}</span>
+            </span>
+            <p className="text-sm mt-2 max-w-md">{t.footer.tagline}</p>
+          </div>
+          <LanguageSwitcher variant="footer" />
         </div>
 
         {/* Columns */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-          <FooterColumn title="Brands">
+          <FooterColumn title={t.footer.brands}>
             <ul className="space-y-2">
               {brandLinks.map((link) => (
-                <li key={link.href}>
-                  <a
+                <li key={link.id}>
+                  <EmbedLink
                     href={link.href}
                     className="text-sm hover:text-white transition-colors"
                   >
-                    {link.label}
-                  </a>
+                    {ln.brand(link.label)}
+                  </EmbedLink>
                 </li>
               ))}
+              <li>
+                <EmbedLink
+                  href="/browse?view=brands"
+                  className="text-sm hover:text-white transition-colors"
+                >
+                  {t.footer.viewAllBrands}
+                </EmbedLink>
+              </li>
             </ul>
           </FooterColumn>
 
-          <FooterColumn title="Body Types">
+          <FooterColumn title={t.footer.bodyTypes}>
             <ul className="space-y-2">
               {bodyTypeLinks.map((link) => (
-                <li key={link.href}>
-                  <a
+                <li key={link.key}>
+                  <EmbedLink
                     href={link.href}
                     className="text-sm hover:text-white transition-colors"
                   >
                     {link.label}
-                  </a>
+                  </EmbedLink>
                 </li>
               ))}
             </ul>
           </FooterColumn>
 
-          <FooterColumn title="Quick Links">
+          <FooterColumn title={t.footer.quickLinks}>
             <ul className="space-y-2">
               {quickLinks.map((link) => (
-                <li key={link.href}>
-                  <a
+                <li key={link.key}>
+                  <EmbedLink
                     href={link.href}
                     className="text-sm hover:text-white transition-colors"
                   >
                     {link.label}
-                  </a>
+                  </EmbedLink>
                 </li>
               ))}
             </ul>
           </FooterColumn>
 
-          <FooterColumn title="Contact">
+          <FooterColumn title={t.footer.contact}>
             <ul className="space-y-2">
               {contactInfo.map((item) => (
                 <li key={item.label} className="text-sm">
@@ -128,7 +140,7 @@ export default function Footer() {
 
         {/* Bottom Bar */}
         <div className="mt-10 pt-6 border-t border-white/10 text-xs text-[#64748B] text-center">
-          2026 4Sale New Cars. All rights reserved.
+          {t.footer.rights}
         </div>
       </div>
     </footer>

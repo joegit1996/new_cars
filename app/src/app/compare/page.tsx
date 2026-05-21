@@ -26,13 +26,15 @@ import LeadFormModal from "../../components/LeadFormModal";
 import { CompareProvider, useCompare } from "../../context/CompareContext";
 import type { CompareMode } from "../../context/CompareContext";
 import { useAppData } from "@/context/AppDataContext";
+import { useLanguage, tFormat } from "@/context/LanguageContext";
 import { useIsEmbedded } from "../../hooks/useIsEmbedded";
-import type { Trim, Model, ModelAggregateSpecs, SearchEntry, BodyType } from "../../data/types";
+import type { Trim, Model, ModelAggregateSpecs, BodyType } from "../../data/types";
+import type { Dictionary } from "@/i18n/dictionaries";
 
 /* ------------------------------------------------------------------ */
 /* 10 key equipment features to compare                               */
 /* ------------------------------------------------------------------ */
-const KEY_FEATURES = [
+const KEY_FEATURES: ReadonlyArray<keyof Dictionary["compare"]["features"]> = [
   "Adaptive Cruise Control",
   "Lane Departure Warning",
   "Blind Spot Monitor",
@@ -62,47 +64,66 @@ function sr(
   return { label, getValue, getRaw: getRaw ?? getValue };
 }
 
-function makeOverviewRows(getModelById: (id: string) => Model | undefined): SpecRow[] {
+type Ln = {
+  body: (n: string) => string;
+  fuel: (n: string) => string;
+  drive: (n: string) => string;
+  transmission: (n: string) => string;
+};
+
+function makeOverviewRows(
+  t: Dictionary,
+  ln: Ln,
+  getModelById: (id: string) => Model | undefined,
+): SpecRow[] {
   return [
-    sr("Body Type", (t) => getModelById(t.modelId)?.bodyType ?? "-"),
-    sr("Fuel Type", (t) => t.fuelType),
-    sr("Year", (t) => String(getModelById(t.modelId)?.year ?? "-")),
-    sr("Spec Region", (t) => t.specs.specRegion),
+    sr(t.compare.bodyType, (tr) => ln.body(getModelById(tr.modelId)?.bodyType ?? "-")),
+    sr(t.compare.fuelType, (tr) => ln.fuel(tr.fuelType)),
+    sr(t.compare.year, (tr) => String(getModelById(tr.modelId)?.year ?? "-")),
+    sr(t.compare.specRegion, (tr) => tr.specs.specRegion),
   ];
 }
 
-const engineRows: SpecRow[] = [
-  sr("Engine Type", (t) => t.specs.engineType),
-  sr("Displacement", (t) => (t.specs.displacement > 0 ? `${t.specs.displacement}L` : "N/A"), (t) => t.specs.displacement),
-  sr("Cylinders", (t) => (t.specs.cylinders > 0 ? String(t.specs.cylinders) : "N/A"), (t) => t.specs.cylinders),
-  sr("Horsepower", (t) => `${t.specs.horsepower} hp`, (t) => t.specs.horsepower),
-  sr("Torque", (t) => `${t.specs.torque} Nm`, (t) => t.specs.torque),
-  sr("0-100 km/h", (t) => `${t.specs.zeroToHundred}s`, (t) => t.specs.zeroToHundred),
-  sr("Top Speed", (t) => `${t.specs.topSpeed} km/h`, (t) => t.specs.topSpeed),
-  sr("Transmission", (t) => t.specs.transmission),
-  sr("Drive Type", (t) => t.specs.driveType),
-];
+function makeEngineRows(t: Dictionary, ln: Ln): SpecRow[] {
+  return [
+    sr(t.compare.engineType, (tr) => tr.specs.engineType),
+    sr(t.compare.displacement, (tr) => (tr.specs.displacement > 0 ? `${tr.specs.displacement}L` : t.compare.notAvailable), (tr) => tr.specs.displacement),
+    sr(t.compare.cylinders, (tr) => (tr.specs.cylinders > 0 ? String(tr.specs.cylinders) : t.compare.notAvailable), (tr) => tr.specs.cylinders),
+    sr(t.compare.horsepower, (tr) => `${tr.specs.horsepower} hp`, (tr) => tr.specs.horsepower),
+    sr(t.compare.torque, (tr) => `${tr.specs.torque} Nm`, (tr) => tr.specs.torque),
+    sr(t.compare.accelerationShort, (tr) => `${tr.specs.zeroToHundred}s`, (tr) => tr.specs.zeroToHundred),
+    sr(t.compare.topSpeed, (tr) => `${tr.specs.topSpeed} km/h`, (tr) => tr.specs.topSpeed),
+    sr(t.compare.transmission, (tr) => ln.transmission(tr.specs.transmission)),
+    sr(t.compare.driveType, (tr) => ln.drive(tr.specs.driveType)),
+  ];
+}
 
-const dimensionRows: SpecRow[] = [
-  sr("Length", (t) => `${t.specs.lengthMm} mm`, (t) => t.specs.lengthMm),
-  sr("Width", (t) => `${t.specs.widthMm} mm`, (t) => t.specs.widthMm),
-  sr("Height", (t) => `${t.specs.heightMm} mm`, (t) => t.specs.heightMm),
-  sr("Wheelbase", (t) => `${t.specs.wheelbaseMm} mm`, (t) => t.specs.wheelbaseMm),
-  sr("Trunk", (t) => `${t.specs.trunkVolumeLiters} L`, (t) => t.specs.trunkVolumeLiters),
-  sr("Seating", (t) => String(t.specs.seatingCapacity), (t) => t.specs.seatingCapacity),
-  sr("Curb Weight", (t) => `${t.specs.curbWeightKg} kg`, (t) => t.specs.curbWeightKg),
-];
+function makeDimensionRows(t: Dictionary): SpecRow[] {
+  return [
+    sr(t.compare.length, (tr) => `${tr.specs.lengthMm} mm`, (tr) => tr.specs.lengthMm),
+    sr(t.compare.width, (tr) => `${tr.specs.widthMm} mm`, (tr) => tr.specs.widthMm),
+    sr(t.compare.height, (tr) => `${tr.specs.heightMm} mm`, (tr) => tr.specs.heightMm),
+    sr(t.compare.wheelbase, (tr) => `${tr.specs.wheelbaseMm} mm`, (tr) => tr.specs.wheelbaseMm),
+    sr(t.compare.trunk, (tr) => `${tr.specs.trunkVolumeLiters} L`, (tr) => tr.specs.trunkVolumeLiters),
+    sr(t.compare.seating, (tr) => String(tr.specs.seatingCapacity), (tr) => tr.specs.seatingCapacity),
+    sr(t.compare.curbWeight, (tr) => `${tr.specs.curbWeightKg} kg`, (tr) => tr.specs.curbWeightKg),
+  ];
+}
 
-const fuelRows: SpecRow[] = [
-  sr("City", (t) => (t.specs.fuelEconomyCity > 0 ? `${t.specs.fuelEconomyCity} L/100km` : "Electric"), (t) => t.specs.fuelEconomyCity),
-  sr("Highway", (t) => (t.specs.fuelEconomyHighway > 0 ? `${t.specs.fuelEconomyHighway} L/100km` : "Electric"), (t) => t.specs.fuelEconomyHighway),
-  sr("Combined", (t) => (t.specs.fuelEconomyCombined > 0 ? `${t.specs.fuelEconomyCombined} L/100km` : "Electric"), (t) => t.specs.fuelEconomyCombined),
-];
+function makeFuelRows(t: Dictionary): SpecRow[] {
+  return [
+    sr(t.compare.city, (tr) => (tr.specs.fuelEconomyCity > 0 ? `${tr.specs.fuelEconomyCity} L/100km` : t.compare.electric), (tr) => tr.specs.fuelEconomyCity),
+    sr(t.compare.highway, (tr) => (tr.specs.fuelEconomyHighway > 0 ? `${tr.specs.fuelEconomyHighway} L/100km` : t.compare.electric), (tr) => tr.specs.fuelEconomyHighway),
+    sr(t.compare.combined, (tr) => (tr.specs.fuelEconomyCombined > 0 ? `${tr.specs.fuelEconomyCombined} L/100km` : t.compare.electric), (tr) => tr.specs.fuelEconomyCombined),
+  ];
+}
 
-const pricingRows: SpecRow[] = [
-  sr("Base Price", (t) => `${t.price.toLocaleString()} KWD`, (t) => t.price),
-  sr("Warranty", (t) => t.specs.warranty),
-];
+function makePricingRows(t: Dictionary): SpecRow[] {
+  return [
+    sr(t.compare.basePrice, (tr) => `${tr.price.toLocaleString()} ${t.common.kwd}`, (tr) => tr.price),
+    sr(t.compare.warranty, (tr) => tr.specs.warranty),
+  ];
+}
 
 /* ------------------------------------------------------------------ */
 /* Model-level spec row helpers                                       */
@@ -126,33 +147,41 @@ function msr(
   return { label, getValue, getRaw: getRaw ?? getValue };
 }
 
-const modelOverviewRows: ModelSpecRow[] = [
-  msr("Body Type", (m) => m.bodyType),
-  msr("Year", (m) => String(m.year)),
-  msr("Trims Available", (_m, agg) => String(agg.trimCount)),
-  msr("Fuel Types", (_m, agg) => agg.fuelTypes.join(", ")),
-  msr("Transmissions", (_m, agg) => agg.transmissions.join(", ")),
-  msr("Drive Types", (_m, agg) => agg.driveTypes.join(", ")),
-];
+function makeModelOverviewRows(t: Dictionary, ln: Ln): ModelSpecRow[] {
+  return [
+    msr(t.compare.bodyType, (m) => ln.body(m.bodyType)),
+    msr(t.compare.year, (m) => String(m.year)),
+    msr(t.compare.trimsAvailable, (_m, agg) => String(agg.trimCount)),
+    msr(t.compare.fuelTypes, (_m, agg) => agg.fuelTypes.map((f) => ln.fuel(f)).join("، ")),
+    msr(t.compare.transmissions, (_m, agg) => agg.transmissions.map((x) => ln.transmission(x)).join("، ")),
+    msr(t.compare.driveTypes, (_m, agg) => agg.driveTypes.map((x) => ln.drive(x)).join("، ")),
+  ];
+}
 
-const modelEngineRows: ModelSpecRow[] = [
-  msr("Engine Range", (m) => m.specsSummary.engineRange),
-  msr("Displacement", (_m, agg) => rangeStr(agg.displacementRange.min, agg.displacementRange.max, "L"), (_m, agg) => agg.displacementRange.max),
-  msr("Horsepower", (_m, agg) => rangeStr(agg.hpRange.min, agg.hpRange.max, " hp"), (_m, agg) => agg.hpRange.max),
-  msr("Torque", (_m, agg) => rangeStr(agg.torqueRange.min, agg.torqueRange.max, " Nm"), (_m, agg) => agg.torqueRange.max),
-];
+function makeModelEngineRows(t: Dictionary): ModelSpecRow[] {
+  return [
+    msr(t.compare.engineRange, (m) => m.specsSummary.engineRange),
+    msr(t.compare.displacement, (_m, agg) => rangeStr(agg.displacementRange.min, agg.displacementRange.max, "L"), (_m, agg) => agg.displacementRange.max),
+    msr(t.compare.horsepower, (_m, agg) => rangeStr(agg.hpRange.min, agg.hpRange.max, " hp"), (_m, agg) => agg.hpRange.max),
+    msr(t.compare.torque, (_m, agg) => rangeStr(agg.torqueRange.min, agg.torqueRange.max, " Nm"), (_m, agg) => agg.torqueRange.max),
+  ];
+}
 
-const modelDimensionRows: ModelSpecRow[] = [
-  msr("Length", (_m, agg) => rangeStr(agg.dimensionRanges.length.min, agg.dimensionRanges.length.max, " mm"), (_m, agg) => agg.dimensionRanges.length.max),
-  msr("Width", (_m, agg) => rangeStr(agg.dimensionRanges.width.min, agg.dimensionRanges.width.max, " mm"), (_m, agg) => agg.dimensionRanges.width.max),
-  msr("Height", (_m, agg) => rangeStr(agg.dimensionRanges.height.min, agg.dimensionRanges.height.max, " mm"), (_m, agg) => agg.dimensionRanges.height.max),
-  msr("Wheelbase", (_m, agg) => rangeStr(agg.dimensionRanges.wheelbase.min, agg.dimensionRanges.wheelbase.max, " mm"), (_m, agg) => agg.dimensionRanges.wheelbase.max),
-  msr("Seating", (_m, agg) => rangeStr(agg.seatingRange.min, agg.seatingRange.max, ""), (_m, agg) => agg.seatingRange.max),
-];
+function makeModelDimensionRows(t: Dictionary): ModelSpecRow[] {
+  return [
+    msr(t.compare.length, (_m, agg) => rangeStr(agg.dimensionRanges.length.min, agg.dimensionRanges.length.max, " mm"), (_m, agg) => agg.dimensionRanges.length.max),
+    msr(t.compare.width, (_m, agg) => rangeStr(agg.dimensionRanges.width.min, agg.dimensionRanges.width.max, " mm"), (_m, agg) => agg.dimensionRanges.width.max),
+    msr(t.compare.height, (_m, agg) => rangeStr(agg.dimensionRanges.height.min, agg.dimensionRanges.height.max, " mm"), (_m, agg) => agg.dimensionRanges.height.max),
+    msr(t.compare.wheelbase, (_m, agg) => rangeStr(agg.dimensionRanges.wheelbase.min, agg.dimensionRanges.wheelbase.max, " mm"), (_m, agg) => agg.dimensionRanges.wheelbase.max),
+    msr(t.compare.seating, (_m, agg) => rangeStr(agg.seatingRange.min, agg.seatingRange.max, ""), (_m, agg) => agg.seatingRange.max),
+  ];
+}
 
-const modelPricingRows: ModelSpecRow[] = [
-  msr("Price Range", (_m, agg) => `${agg.priceRange.min.toLocaleString()} - ${agg.priceRange.max.toLocaleString()} KWD`, (_m, agg) => agg.priceRange.min),
-];
+function makeModelPricingRows(t: Dictionary): ModelSpecRow[] {
+  return [
+    msr(t.compare.priceRange, (_m, agg) => `${agg.priceRange.min.toLocaleString()} - ${agg.priceRange.max.toLocaleString()} ${t.common.kwd}`, (_m, agg) => agg.priceRange.min),
+  ];
+}
 
 /* ------------------------------------------------------------------ */
 /* Shared sub-components                                              */
@@ -199,19 +228,23 @@ function CompareRow({
 
 function EquipmentRow({
   feature,
+  featureLabel,
   trims,
   highlight,
   hasAddCol,
+  optionalLabel,
 }: {
   feature: string;
+  featureLabel: string;
   trims: Trim[];
   highlight: boolean;
   hasAddCol: boolean;
+  optionalLabel: string;
 }) {
   return (
     <tr className="border-b border-[#E2E8F0]">
       <td className="sticky start-0 z-10 bg-[#F1F5F9] px-3 py-2.5 text-xs font-medium text-[#64748B]">
-        {feature}
+        {featureLabel}
       </td>
       {trims.map((t) => {
         const eq = t.equipment.find((e) => e.name === feature);
@@ -221,7 +254,7 @@ function EquipmentRow({
             {isStandard ? (
               <Check className="w-4 h-4 text-[#10B981] mx-auto" />
             ) : eq ? (
-              <span className="text-xs text-[#F59E0B] font-medium">Optional</span>
+              <span className="text-xs text-[#F59E0B] font-medium">{optionalLabel}</span>
             ) : (
               <Minus className="w-4 h-4 text-[#EF4444]/50 mx-auto" />
             )}
@@ -235,19 +268,23 @@ function EquipmentRow({
 
 function ModelEquipmentRow({
   feature,
+  featureLabel,
   aggregates,
   highlight,
   hasAddCol,
+  someTrimsLabel,
 }: {
   feature: string;
+  featureLabel: string;
   aggregates: ModelAggregateSpecs[];
   highlight: boolean;
   hasAddCol: boolean;
+  someTrimsLabel: string;
 }) {
   return (
     <tr className="border-b border-[#E2E8F0]">
       <td className="sticky start-0 z-10 bg-[#F1F5F9] px-3 py-2.5 text-xs font-medium text-[#64748B]">
-        {feature}
+        {featureLabel}
       </td>
       {aggregates.map((agg, i) => {
         const status = agg.equipmentMap[feature];
@@ -256,7 +293,7 @@ function ModelEquipmentRow({
             {status === "standard" ? (
               <Check className="w-4 h-4 text-[#10B981] mx-auto" />
             ) : status === "some" ? (
-              <span className="text-xs text-[#F59E0B] font-medium">Some trims</span>
+              <span className="text-xs text-[#F59E0B] font-medium">{someTrimsLabel}</span>
             ) : (
               <Minus className="w-4 h-4 text-[#EF4444]/50 mx-auto" />
             )}
@@ -282,6 +319,7 @@ function InlinePicker({
   onSelect: (id: string) => void;
 }) {
   const { searchModelsDeduped, searchTrims } = useAppData();
+  const { t, ln } = useLanguage();
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -309,9 +347,9 @@ function InlinePicker({
         </div>
         {/* Text area matching card padding */}
         <div className="p-3 w-full text-start">
-          <p className="text-xs text-[#94A3B8]">Add to comparison</p>
+          <p className="text-xs text-[#94A3B8]">{t.compare.addToComparison}</p>
           <p className="font-semibold text-sm text-[#64748B] group-hover:text-[#1A56DB] transition-colors">
-            Select a vehicle
+            {t.compare.selectVehicle}
           </p>
         </div>
       </button>
@@ -327,13 +365,13 @@ function InlinePicker({
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder={mode === "models" ? "Search models..." : "Search trims..."}
+          placeholder={mode === "models" ? t.compare.searchModels : t.compare.searchTrims}
           className="w-full ps-7 pe-7 py-3 text-sm text-[#1E293B] placeholder:text-[#94A3B8] focus:outline-none"
         />
         <button
           onClick={() => setIsOpen(false)}
           className="absolute end-2 top-1/2 -translate-y-1/2 text-[#94A3B8] hover:text-[#1E293B]"
-          aria-label="Close picker"
+          aria-label={t.compare.closePicker}
         >
           <X className="w-4 h-4" />
         </button>
@@ -341,9 +379,9 @@ function InlinePicker({
 
       <div className="flex-1 overflow-y-auto max-h-[300px]">
         {query.length < 2 ? (
-          <p className="text-xs text-[#94A3B8] text-center py-6">Type to search...</p>
+          <p className="text-xs text-[#94A3B8] text-center py-6">{t.compare.typeToSearch}</p>
         ) : results.length === 0 ? (
-          <p className="text-xs text-[#64748B] text-center py-6">No results</p>
+          <p className="text-xs text-[#64748B] text-center py-6">{t.compare.noResults}</p>
         ) : (
           <ul>
             {results.slice(0, 10).map((entry) => {
@@ -367,16 +405,16 @@ function InlinePicker({
                       <PlaceholderImage aspectRatio="4/3" className="w-full h-full" bodyType={entry.bodyType as BodyType} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[10px] text-[#64748B]">{entry.brandName}</p>
+                      <p className="text-[10px] text-[#64748B]">{ln.brand(entry.brandName)}</p>
                       <p className="text-xs font-semibold text-[#1E293B] truncate">
-                        {entry.modelName}
+                        {ln.model(entry.modelName)}
                         {mode === "trims" && (
-                          <span className="font-normal text-[#64748B]"> {entry.trimName}</span>
+                          <span className="font-normal text-[#64748B]"> {ln.trim(entry.trimName)}</span>
                         )}
                       </p>
                     </div>
                     <span className="text-[10px] font-bold text-[#F59E0B] shrink-0">
-                      {entry.price.toLocaleString()} KWD
+                      {entry.price.toLocaleString()} {t.common.kwd}
                     </span>
                   </button>
                 </li>
@@ -390,7 +428,7 @@ function InlinePicker({
             href="/browse"
             className="block text-center py-2.5 text-xs font-semibold text-[#1A56DB] hover:bg-[#F8FAFC]"
           >
-            Browse All
+            {t.compare.browseAll}
           </EmbedLink>
         </div>
       </div>
@@ -437,7 +475,8 @@ function CompareContent() {
   const searchParams = useSearchParams();
   const compare = useCompare();
   const isEmbedded = useIsEmbedded();
-  const { getTrimById, getTrimsByModel, getBrandByModelId, getModelById, getBrandById, getModelAggregateSpecs, searchTrims, searchModelsDeduped, loading } = useAppData();
+  const { t, dir, ln } = useLanguage();
+  const { getTrimById, getBrandByModelId, getModelById, getModelAggregateSpecs, loading } = useAppData();
 
   // Determine initial tab from URL
   const initialTab = (searchParams.get("tab") as CompareMode) || "models";
@@ -482,13 +521,13 @@ function CompareContent() {
 
   // Resolve trims
   const selectedTrims = useMemo(
-    () => activeTrimIds.map((id) => getTrimById(id)).filter((t): t is Trim => t !== undefined),
+    () => activeTrimIds.map((id) => getTrimById(id)).filter((tr): tr is Trim => tr !== undefined),
     [activeTrimIds, getTrimById],
   );
-  const trimInfo = selectedTrims.map((t) => {
-    const model = getModelById(t.modelId);
+  const trimInfo = selectedTrims.map((tr) => {
+    const model = getModelById(tr.modelId);
     const brand = model ? getBrandByModelId(model.id) : undefined;
-    return { trim: t, model, brand };
+    return { trim: tr, model, brand };
   });
 
   // Add handlers
@@ -531,11 +570,21 @@ function CompareContent() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const overviewRows = useMemo(() => makeOverviewRows(getModelById), [getModelById]);
+  // Localized rows
+  const overviewRows = useMemo(() => makeOverviewRows(t, ln, getModelById), [t, ln, getModelById]);
+  const engineRows = useMemo(() => makeEngineRows(t, ln), [t, ln]);
+  const dimensionRows = useMemo(() => makeDimensionRows(t), [t]);
+  const fuelRows = useMemo(() => makeFuelRows(t), [t]);
+  const pricingRows = useMemo(() => makePricingRows(t), [t]);
+  const modelOverviewRows = useMemo(() => makeModelOverviewRows(t, ln), [t, ln]);
+  const modelEngineRows = useMemo(() => makeModelEngineRows(t), [t]);
+  const modelDimensionRows = useMemo(() => makeModelDimensionRows(t), [t]);
+  const modelPricingRows = useMemo(() => makeModelPricingRows(t), [t]);
 
   const currentItems = activeTab === "models" ? activeModelIds : activeTrimIds;
   const hasAddCol = currentItems.length < 4;
   const isEmpty = currentItems.length === 0;
+  const rtlFlip = dir === "rtl" ? "rotate-180" : "";
 
   if (loading) {
     return (
@@ -556,25 +605,25 @@ function CompareContent() {
             <nav className="hidden md:flex items-center gap-1.5 text-xs text-[#64748B] mb-4">
               <EmbedLink href="/" className="flex items-center gap-1 hover:text-[#1A56DB] transition-colors">
                 <Home className="w-3.5 h-3.5" />
-                <span>Home</span>
+                <span>{t.common.home}</span>
               </EmbedLink>
-              <ChevronRight className="w-3 h-3" />
-              <span className="text-[#1E293B] font-medium">Compare</span>
+              <ChevronRight className={`w-3 h-3 ${rtlFlip}`} />
+              <span className="text-[#1E293B] font-medium">{t.common.compare}</span>
             </nav>
             <div className="md:hidden mb-3">
               <EmbedLink href="/" className="inline-flex items-center gap-1.5 text-xs text-[#64748B] hover:text-[#1A56DB] transition-colors">
-                <ArrowLeft className="w-3.5 h-3.5" />
-                <span>Back to Home</span>
+                <ArrowLeft className={`w-3.5 h-3.5 ${rtlFlip}`} />
+                <span>{t.common.backToHome}</span>
               </EmbedLink>
             </div>
 
             {/* Tabs */}
             <div className="flex border-b border-[#E2E8F0] mb-8">
               <TabButton active={activeTab === "models"} onClick={() => setActiveTab("models")}>
-                Compare Models
+                {t.compare.compareModels}
               </TabButton>
               <TabButton active={activeTab === "trims"} onClick={() => setActiveTab("trims")}>
-                Compare Trims
+                {t.compare.compareTrims}
               </TabButton>
             </div>
 
@@ -584,12 +633,12 @@ function CompareContent() {
                 <Scale className="w-8 h-8 text-[#1A56DB]" />
               </div>
               <h1 className="text-2xl md:text-3xl font-bold text-[#1E293B] mb-2">
-                Compare {activeTab === "models" ? "Models" : "Trims"} Side by Side
+                {tFormat(t.compare.compareSideBySide, {
+                  what: activeTab === "models" ? t.compare.models : t.compare.trims,
+                })}
               </h1>
               <p className="text-sm text-[#64748B] max-w-md mx-auto">
-                {activeTab === "models"
-                  ? "Compare models to see aggregate specs, price ranges, and available features across all trims."
-                  : "Compare specific trims for exact specs, equipment, and pricing."}
+                {activeTab === "models" ? t.compare.modelsSubtitle : t.compare.trimsSubtitle}
               </p>
             </div>
 
@@ -604,12 +653,12 @@ function CompareContent() {
 
             {/* Popular comparisons */}
             <div className="mb-10">
-              <h2 className="text-lg font-bold text-[#1E293B] mb-4">Popular Comparisons</h2>
+              <h2 className="text-lg font-bold text-[#1E293B] mb-4">{t.compare.popularComparisons}</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 {[
-                  { title: "C-Class vs 3 Series", subtitle: "Luxury sedan showdown", ids: "merc-c200,bmw-320i", tab: "trims" as CompareMode },
-                  { title: "Land Cruiser vs X5", subtitle: "Premium SUV battle", ids: "toyota-lc-gxr,bmw-x5-40i", tab: "trims" as CompareMode },
-                  { title: "Camry vs 3 Series", subtitle: "Mid-size value pick", ids: "toyota-camry-le,bmw-320i", tab: "trims" as CompareMode },
+                  { title: t.compare.popularComparison1Title, subtitle: t.compare.popularComparison1Subtitle, ids: "merc-c200,bmw-320i", tab: "trims" as CompareMode },
+                  { title: t.compare.popularComparison2Title, subtitle: t.compare.popularComparison2Subtitle, ids: "toyota-lc-gxr,bmw-x5-40i", tab: "trims" as CompareMode },
+                  { title: t.compare.popularComparison3Title, subtitle: t.compare.popularComparison3Subtitle, ids: "toyota-camry-le,bmw-320i", tab: "trims" as CompareMode },
                 ].map((comp) => (
                   <EmbedLink
                     key={comp.ids}
@@ -634,7 +683,7 @@ function CompareContent() {
                 href="/browse"
                 className="inline-flex items-center gap-2 px-6 py-3 bg-[#1A56DB] text-white font-bold rounded-xl hover:bg-[#1A56DB]/90 transition-colors"
               >
-                Browse Cars to Compare
+                {t.compare.browseCarsToCompare}
               </EmbedLink>
             </div>
           </div>
@@ -660,15 +709,15 @@ function CompareContent() {
         <nav className="hidden md:flex items-center gap-1.5 text-xs text-[#64748B] mb-4">
           <EmbedLink href="/" className="flex items-center gap-1 hover:text-[#1A56DB] transition-colors">
             <Home className="w-3.5 h-3.5" />
-            <span>Home</span>
+            <span>{t.common.home}</span>
           </EmbedLink>
-          <ChevronRight className="w-3 h-3" />
-          <span className="text-[#1E293B] font-medium">Compare</span>
+          <ChevronRight className={`w-3 h-3 ${rtlFlip}`} />
+          <span className="text-[#1E293B] font-medium">{t.common.compare}</span>
         </nav>
         <div className="md:hidden mb-3">
           <EmbedLink href="/" className="inline-flex items-center gap-1.5 text-xs text-[#64748B] hover:text-[#1A56DB] transition-colors">
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Back to Home</span>
+            <ArrowLeft className={`w-3.5 h-3.5 ${rtlFlip}`} />
+            <span>{t.common.backToHome}</span>
           </EmbedLink>
         </div>
 
@@ -676,16 +725,16 @@ function CompareContent() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div className="flex border-b border-[#E2E8F0]">
             <TabButton active={activeTab === "models"} onClick={() => setActiveTab("models")}>
-              Compare Models
+              {t.compare.compareModels}
             </TabButton>
             <TabButton active={activeTab === "trims"} onClick={() => setActiveTab("trims")}>
-              Compare Trims
+              {t.compare.compareTrims}
             </TabButton>
           </div>
           <div className="flex items-center gap-4 flex-wrap">
             {/* Highlight Differences Toggle */}
             <label className="flex items-center gap-2 cursor-pointer select-none">
-              <span className="text-sm text-[#64748B]">Highlight Differences</span>
+              <span className="text-sm text-[#64748B]">{t.compare.highlightDifferences}</span>
               <button
                 type="button"
                 role="switch"
@@ -708,7 +757,7 @@ function CompareContent() {
               className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-[#1A56DB] border border-[#1A56DB] rounded-xl hover:bg-[#1A56DB]/5 transition-colors"
             >
               {copied ? <Check className="w-4 h-4 text-[#10B981]" /> : <Share2 className="w-4 h-4" />}
-              {copied ? "Copied!" : "Share"}
+              {copied ? t.compare.copied : t.compare.share}
             </button>
           </div>
         </div>
@@ -736,24 +785,24 @@ function CompareContent() {
                             className="bg-white rounded-xl border border-[#E2E8F0] overflow-hidden shadow-sm"
                           >
                             <div className="relative">
-                              <PlaceholderImage aspectRatio="16/10" label={model.name} bodyType={model.bodyType} imageUrl={model.imageUrl} />
+                              <PlaceholderImage aspectRatio="16/10" label={ln.model(model.name)} bodyType={model.bodyType} imageUrl={model.imageUrl} />
                               <button
                                 onClick={() => removeModel(model.id)}
                                 className="absolute top-2 end-2 p-1 bg-white/90 rounded-full text-[#64748B] hover:text-[#EF4444] transition-colors shadow-sm"
-                                aria-label={`Remove ${model.name}`}
+                                aria-label={tFormat(t.compare.removeItem, { name: ln.model(model.name) })}
                               >
                                 <X className="w-4 h-4" />
                               </button>
                             </div>
                             <div className="p-3 text-start">
-                              <p className="text-xs text-[#64748B]">{brand?.name}</p>
-                              <p className="font-bold text-sm text-[#1E293B] leading-tight">{model.name}</p>
+                              <p className="text-xs text-[#64748B]">{brand ? ln.brand(brand.name) : ""}</p>
+                              <p className="font-bold text-sm text-[#1E293B] leading-tight">{ln.model(model.name)}</p>
                               <p className="text-[#F59E0B] font-bold text-sm mt-1">
                                 {agg.priceRange.min === agg.priceRange.max
-                                  ? `${agg.priceRange.min.toLocaleString()} KWD`
-                                  : `${agg.priceRange.min.toLocaleString()} - ${agg.priceRange.max.toLocaleString()} KWD`}
+                                  ? `${agg.priceRange.min.toLocaleString()} ${t.common.kwd}`
+                                  : `${agg.priceRange.min.toLocaleString()} - ${agg.priceRange.max.toLocaleString()} ${t.common.kwd}`}
                               </p>
-                              <p className="text-[10px] text-[#94A3B8] mt-0.5">{agg.trimCount} trims</p>
+                              <p className="text-[10px] text-[#94A3B8] mt-0.5">{tFormat(t.compare.trimsCount, { count: agg.trimCount })}</p>
                             </div>
                           </motion.div>
                         </th>
@@ -768,7 +817,7 @@ function CompareContent() {
 
                   <tbody>
                     {/* Overview */}
-                    <SectionHeader title="Overview" colSpan={modelsTotalCols} />
+                    <SectionHeader title={t.compare.overview} colSpan={modelsTotalCols} />
                     {modelOverviewRows.map((row) => {
                       const rawVals = modelAggregates.map(({ model, agg }) => row.getRaw(model, agg));
                       return (
@@ -783,7 +832,7 @@ function CompareContent() {
                     })}
 
                     {/* Engine & Performance */}
-                    <SectionHeader title="Engine & Performance" colSpan={modelsTotalCols} />
+                    <SectionHeader title={t.compare.enginePerformance} colSpan={modelsTotalCols} />
                     {modelEngineRows.map((row) => {
                       const rawVals = modelAggregates.map(({ model, agg }) => row.getRaw(model, agg));
                       return (
@@ -798,7 +847,7 @@ function CompareContent() {
                     })}
 
                     {/* Dimensions */}
-                    <SectionHeader title="Dimensions & Capacity" colSpan={modelsTotalCols} />
+                    <SectionHeader title={t.compare.dimensionsCapacity} colSpan={modelsTotalCols} />
                     {modelDimensionRows.map((row) => {
                       const rawVals = modelAggregates.map(({ model, agg }) => row.getRaw(model, agg));
                       return (
@@ -813,22 +862,24 @@ function CompareContent() {
                     })}
 
                     {/* Equipment Highlights */}
-                    <SectionHeader title="Equipment Highlights" colSpan={modelsTotalCols} />
+                    <SectionHeader title={t.compare.equipmentHighlights} colSpan={modelsTotalCols} />
                     {KEY_FEATURES.map((feature) => {
                       const rawVals = modelAggregates.map(({ agg }) => agg.equipmentMap[feature] || "none");
                       return (
                         <ModelEquipmentRow
                           key={feature}
                           feature={feature}
+                          featureLabel={t.compare.features[feature]}
                           aggregates={modelAggregates.map(({ agg }) => agg)}
                           highlight={isDiff(rawVals)}
                           hasAddCol={hasAddCol}
+                          someTrimsLabel={t.compare.someTrims}
                         />
                       );
                     })}
 
                     {/* Pricing */}
-                    <SectionHeader title="Pricing" colSpan={modelsTotalCols} />
+                    <SectionHeader title={t.compare.pricing} colSpan={modelsTotalCols} />
                     {modelPricingRows.map((row) => {
                       const rawVals = modelAggregates.map(({ model, agg }) => row.getRaw(model, agg));
                       return (
@@ -852,13 +903,15 @@ function CompareContent() {
                               href={`/model/${model.id}`}
                               className="block w-full py-2.5 bg-[#1A56DB] text-white text-sm font-bold rounded-xl hover:bg-[#1A56DB]/90 transition-colors text-center"
                             >
-                              View {model.name}
+                              {tFormat(t.compare.viewModel, { name: model.name })}
                             </EmbedLink>
                             <a
                               href="#"
                               className="flex items-center justify-center gap-1.5 w-full py-2 text-sm font-medium text-[#64748B] border border-[#E2E8F0] rounded-xl hover:border-[#1A56DB] hover:text-[#1A56DB] transition-colors"
                             >
-                              Visit {brand?.name ?? "Brand"} Website
+                              {brand?.name
+                                ? tFormat(t.compare.visitBrandWebsite, { brand: brand.name })
+                                : t.compare.visitWebsite}
                               <ExternalLink className="w-3.5 h-3.5" />
                             </a>
                           </div>
@@ -894,11 +947,11 @@ function CompareContent() {
                             className="bg-white rounded-xl border border-[#E2E8F0] overflow-hidden shadow-sm"
                           >
                             <div className="relative">
-                              <PlaceholderImage aspectRatio="16/10" label={trim.name} />
+                              <PlaceholderImage aspectRatio="16/10" label={ln.trim(trim.name)} />
                               <button
                                 onClick={() => removeTrim(trim.id)}
                                 className="absolute top-2 end-2 p-1 bg-white/90 rounded-full text-[#64748B] hover:text-[#EF4444] transition-colors shadow-sm"
-                                aria-label={`Remove ${trim.name}`}
+                                aria-label={tFormat(t.compare.removeItem, { name: ln.trim(trim.name) })}
                               >
                                 <X className="w-4 h-4" />
                               </button>
@@ -907,12 +960,12 @@ function CompareContent() {
                               </div>
                             </div>
                             <div className="p-3 text-start">
-                              <p className="text-xs text-[#64748B]">{brand?.name}</p>
+                              <p className="text-xs text-[#64748B]">{brand ? ln.brand(brand.name) : ""}</p>
                               <p className="font-bold text-sm text-[#1E293B] leading-tight">
-                                {model?.name} {trim.name}
+                                {model ? ln.model(model.name) : ""} {ln.trim(trim.name)}
                               </p>
                               <p className="text-[#F59E0B] font-bold text-sm mt-1">
-                                {trim.price.toLocaleString()} KWD
+                                {trim.price.toLocaleString()} {t.common.kwd}
                               </p>
                             </div>
                           </motion.div>
@@ -927,40 +980,50 @@ function CompareContent() {
                   </thead>
 
                   <tbody>
-                    <SectionHeader title="Overview" colSpan={trimsTotalCols} />
+                    <SectionHeader title={t.compare.overview} colSpan={trimsTotalCols} />
                     {overviewRows.map((row) => {
                       const rawVals = selectedTrims.map(row.getRaw);
                       return <CompareRow key={row.label} label={row.label} values={selectedTrims.map(row.getValue)} highlight={isDiff(rawVals)} hasAddCol={hasAddCol} />;
                     })}
 
-                    <SectionHeader title="Engine & Performance" colSpan={trimsTotalCols} />
+                    <SectionHeader title={t.compare.enginePerformance} colSpan={trimsTotalCols} />
                     {engineRows.map((row) => {
                       const rawVals = selectedTrims.map(row.getRaw);
                       return <CompareRow key={row.label} label={row.label} values={selectedTrims.map(row.getValue)} highlight={isDiff(rawVals)} hasAddCol={hasAddCol} />;
                     })}
 
-                    <SectionHeader title="Dimensions & Capacity" colSpan={trimsTotalCols} />
+                    <SectionHeader title={t.compare.dimensionsCapacity} colSpan={trimsTotalCols} />
                     {dimensionRows.map((row) => {
                       const rawVals = selectedTrims.map(row.getRaw);
                       return <CompareRow key={row.label} label={row.label} values={selectedTrims.map(row.getValue)} highlight={isDiff(rawVals)} hasAddCol={hasAddCol} />;
                     })}
 
-                    <SectionHeader title="Fuel Economy" colSpan={trimsTotalCols} />
+                    <SectionHeader title={t.compare.fuelEconomy} colSpan={trimsTotalCols} />
                     {fuelRows.map((row) => {
                       const rawVals = selectedTrims.map(row.getRaw);
                       return <CompareRow key={row.label} label={row.label} values={selectedTrims.map(row.getValue)} highlight={isDiff(rawVals)} hasAddCol={hasAddCol} />;
                     })}
 
-                    <SectionHeader title="Equipment Highlights" colSpan={trimsTotalCols} />
+                    <SectionHeader title={t.compare.equipmentHighlights} colSpan={trimsTotalCols} />
                     {KEY_FEATURES.map((feature) => {
-                      const rawVals = selectedTrims.map((t) => {
-                        const eq = t.equipment.find((e) => e.name === feature);
+                      const rawVals = selectedTrims.map((tr) => {
+                        const eq = tr.equipment.find((e) => e.name === feature);
                         return eq?.isStandard ? "standard" : eq ? "optional" : "none";
                       });
-                      return <EquipmentRow key={feature} feature={feature} trims={selectedTrims} highlight={isDiff(rawVals)} hasAddCol={hasAddCol} />;
+                      return (
+                        <EquipmentRow
+                          key={feature}
+                          feature={feature}
+                          featureLabel={t.compare.features[feature]}
+                          trims={selectedTrims}
+                          highlight={isDiff(rawVals)}
+                          hasAddCol={hasAddCol}
+                          optionalLabel={t.compare.optional}
+                        />
+                      );
                     })}
 
-                    <SectionHeader title="Pricing" colSpan={trimsTotalCols} />
+                    <SectionHeader title={t.compare.pricing} colSpan={trimsTotalCols} />
                     {pricingRows.map((row) => {
                       const rawVals = selectedTrims.map(row.getRaw);
                       return <CompareRow key={row.label} label={row.label} values={selectedTrims.map(row.getValue)} highlight={isDiff(rawVals)} hasAddCol={hasAddCol} />;
@@ -976,13 +1039,15 @@ function CompareContent() {
                               onClick={() => setLeadModal({ open: true, trim })}
                               className="w-full py-2.5 bg-[#1A56DB] text-white text-sm font-bold rounded-xl hover:bg-[#1A56DB]/90 transition-colors"
                             >
-                              I&apos;m Interested
+                              {t.compare.iAmInterested}
                             </button>
                             <a
                               href="#"
                               className="flex items-center justify-center gap-1.5 w-full py-2 text-sm font-medium text-[#64748B] border border-[#E2E8F0] rounded-xl hover:border-[#1A56DB] hover:text-[#1A56DB] transition-colors"
                             >
-                              Visit {brand?.name ?? "Brand"} Website
+                              {brand?.name
+                                ? tFormat(t.compare.visitBrandWebsite, { brand: brand.name })
+                                : t.compare.visitWebsite}
                               <ExternalLink className="w-3.5 h-3.5" />
                             </a>
                           </div>
@@ -1007,9 +1072,9 @@ function CompareContent() {
           isOpen={leadModal.open}
           onClose={() => setLeadModal({ open: false, trim: null })}
           vehicle={{
-            brandName: getBrandByModelId(leadModal.trim.modelId)?.name || "",
-            modelName: getModelById(leadModal.trim.modelId)?.name || "",
-            trimName: leadModal.trim.name,
+            brandName: ln.brand(getBrandByModelId(leadModal.trim.modelId)?.name || ""),
+            modelName: ln.model(getModelById(leadModal.trim.modelId)?.name || ""),
+            trimName: ln.trim(leadModal.trim.name),
           }}
         />
       )}
@@ -1021,16 +1086,19 @@ function CompareContent() {
 /* Page export                                                        */
 /* ------------------------------------------------------------------ */
 
+function CompareLoadingFallback() {
+  const { t, ln } = useLanguage();
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC]">
+      <p className="text-[#64748B]">{t.compare.loadingComparison}</p>
+    </div>
+  );
+}
+
 export default function ComparePage() {
   return (
     <CompareProvider>
-      <Suspense
-        fallback={
-          <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC]">
-            <p className="text-[#64748B]">Loading comparison...</p>
-          </div>
-        }
-      >
+      <Suspense fallback={<CompareLoadingFallback />}>
         <CompareContent />
       </Suspense>
     </CompareProvider>

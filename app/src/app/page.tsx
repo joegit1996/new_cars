@@ -18,11 +18,14 @@ import Navbar from "@/components/Navbar";
 import MobileTabBar from "@/components/MobileTabBar";
 import Footer from "@/components/Footer";
 import ModelCard from "@/components/ModelCard";
+import DualRangeSlider from "@/components/DualRangeSlider";
 import PlaceholderImage from "@/components/PlaceholderImage";
 import { silhouetteMap } from "@/components/PlaceholderImage";
 import { BodyTypeIcon } from "@/components/BodyTypeIcon";
 
 import { useAppData } from "@/context/AppDataContext";
+import { useLanguage, tFormat } from "@/context/LanguageContext";
+import { FEATURED_BRAND_ORDER } from "@/data/api-mappers";
 import type { Brand } from "@/data/types";
 
 // ---------- Animation Helpers ----------
@@ -67,6 +70,7 @@ function SectionTitle({
   href?: string;
   linkLabel?: string;
 }) {
+  const { t, dir } = useLanguage();
   return (
     <div className="flex items-end justify-between gap-4 mb-6">
       <div>
@@ -80,7 +84,8 @@ function SectionTitle({
           href={href}
           className="shrink-0 flex items-center gap-1 text-sm font-medium text-[#1A56DB] hover:underline dim-link"
         >
-          {linkLabel || "View All"} <ArrowRight className="w-4 h-4" />
+          {linkLabel || t.common.viewAll}{" "}
+          <ArrowRight className={`w-4 h-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
         </EmbedLink>
       )}
     </div>
@@ -90,6 +95,8 @@ function SectionTitle({
 // ---------- Hero ----------
 
 function HeroSection() {
+  const { brands, models } = useAppData();
+  const { t, dir } = useLanguage();
   return (
     <BeamsBackground className="h-[100svh] min-h-0" intensity="medium">
       {/* 3D Model -- desktop only, bottom stops above the text zone */}
@@ -107,7 +114,7 @@ function HeroSection() {
             transition={{ delay: 0.1, duration: 0.7, ease: "easeOut" }}
           >
             <span className="block text-3xl md:text-4xl lg:text-5xl font-light tracking-wide text-white/90">
-              Find Your Perfect
+              {t.home.hero.preTitle}
             </span>
           </motion.div>
           <motion.div
@@ -116,7 +123,7 @@ function HeroSection() {
             transition={{ delay: 0.25, duration: 0.7, ease: "easeOut" }}
           >
             <span className="block text-6xl md:text-7xl lg:text-[8rem] lg:leading-[0.9] font-bold tracking-tight text-[#60A5FA]">
-              New Car
+              {t.home.hero.title}
             </span>
           </motion.div>
         </div>
@@ -146,7 +153,7 @@ function HeroSection() {
             transition={{ delay: 0.45, duration: 0.7, ease: "easeOut" }}
             className="text-sm md:text-base font-light tracking-[0.15em] uppercase text-white/60 max-w-lg mx-auto"
           >
-            Browse, compare &amp; configure across every brand in Kuwait
+            {t.home.hero.subtitle}
           </motion.p>
           <motion.div
             initial={{ opacity: 0, y: 16 }}
@@ -158,7 +165,8 @@ function HeroSection() {
               href="/browse"
               className="inline-flex items-center gap-2 px-6 py-3 bg-[#1A56DB] text-white text-sm font-medium rounded-xl hover:bg-[#1544B0] transition-colors"
             >
-              Browse All Cars <ArrowRight className="w-4 h-4" />
+              {t.home.hero.ctaBrowse}{" "}
+              <ArrowRight className={`w-4 h-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
             </EmbedLink>
           </motion.div>
           <motion.div
@@ -169,9 +177,9 @@ function HeroSection() {
           >
             <div className="flex flex-col items-center gap-3 md:flex-row md:justify-center md:gap-12 py-4 border-t border-white/10">
               {[
-                { value: "45+", label: "Brands" },
-                { value: "300+", label: "Models" },
-                { value: "Daily", label: "Updated" },
+                { value: `${brands.length}`, label: t.home.hero.statBrands },
+                { value: `${models.length}+`, label: t.home.hero.statModels },
+                { value: t.home.hero.statDaily, label: t.home.hero.statUpdated },
               ].map((stat) => (
                 <div key={stat.label} className="flex items-center gap-2 md:gap-3">
                   <span className="text-xl md:text-2xl font-bold text-white">
@@ -246,11 +254,28 @@ const brandGradients: Record<string, string> = {
     "radial-gradient(ellipse at 30% 20%, #7f1d1d 0%, #581c1c 50%, #2d0e0e 100%)",
   porsche:
     "radial-gradient(ellipse at 30% 20%, #6b2020 0%, #4a1515 50%, #2a0d0d 100%)",
+  mitsubishi:
+    "radial-gradient(ellipse at 30% 20%, #7f1d1d 0%, #581c1c 50%, #2d0e0e 100%)",
+  soueast:
+    "radial-gradient(ellipse at 30% 20%, #1b4332 0%, #14532d 50%, #0a2e1a 100%)",
 };
+
+// Brands whose logos extend to the edge of their PNG need extra inset in circular containers
+const tightLogoBrands = new Set(["mitsubishi"]);
 
 function FeaturedBrands() {
   const { brands, getModelsByBrand, brandColors } = useAppData();
-  const featuredBrands = useMemo(() => brands.filter((b) => b.featured), [brands]);
+  const { t, dir, ln } = useLanguage();
+  const featuredBrands = useMemo(() => {
+    const featured = brands.filter((b) => b.featured);
+    const orderMap = new Map(FEATURED_BRAND_ORDER.map((slug, i) => [slug, i]));
+    const findIdx = (b: Brand) =>
+      orderMap.get(b.slug ?? "") ??
+      orderMap.get(b.id) ??
+      orderMap.get(b.name.toLowerCase().replace(/[\s-]+/g, "-")) ??
+      999;
+    return featured.sort((a, b) => findIdx(a) - findIdx(b));
+  }, [brands]);
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
   const [mobileActiveIdx, setMobileActiveIdx] = useState(0);
   const mobileScrollRef = useRef<HTMLDivElement>(null);
@@ -337,6 +362,7 @@ function FeaturedBrands() {
   const BrandLogo = ({ brandId, name, logoUrl, size = 44 }: { brandId: string; name: string; logoUrl?: string; size?: number }) => {
     const [imgError, setImgError] = useState(false);
     const hasLogo = logoUrl && !imgError;
+    const imgScale = tightLogoBrands.has(brandId) ? "w-[48%] h-[48%]" : "w-[60%] h-[60%]";
     return (
       <div
         className="rounded-full flex items-center justify-center shrink-0 border border-white/20 shadow-lg overflow-hidden"
@@ -350,7 +376,7 @@ function FeaturedBrands() {
           <img
             src={logoUrl}
             alt={`${name} logo`}
-            className="w-[70%] h-[70%] object-contain"
+            className={`${imgScale} object-contain`}
             onError={() => setImgError(true)}
           />
         ) : (
@@ -373,7 +399,7 @@ function FeaturedBrands() {
         <h2
           className="text-3xl md:text-[2.75rem] font-bold leading-tight text-[#1E293B] mb-6 md:mb-12"
         >
-          Featured Brands
+          {t.home.featured.title}
         </h2>
 
         {/* ---- Desktop: 2-col flex with hover expand/shrink ---- */}
@@ -445,10 +471,10 @@ function FeaturedBrands() {
                 <div className="absolute bottom-0 inset-x-0 h-[40%] bg-gradient-to-t from-black/70 via-black/35 to-transparent z-[5]" />
 
                 {/* Brand logo + name */}
-                <div className="absolute top-6 left-6 z-10 flex items-center gap-3">
+                <div className="absolute top-6 start-6 z-10 flex items-center gap-3">
                   <BrandLogo brandId={brand.id} name={brand.name} logoUrl={brand.logoUrl} size={48} />
                   <h3 className="text-[2rem] lg:text-[2.5rem] font-bold text-white italic leading-none">
-                    {brand.name}
+                    {ln.brand(brand.name)}
                   </h3>
                 </div>
 
@@ -456,13 +482,13 @@ function FeaturedBrands() {
                 <div className="absolute bottom-0 inset-x-0 p-6 z-10">
                   <div className="flex items-center gap-2 mb-2">
                     <span className="text-[11px] font-medium text-white/90 bg-white/[0.12] backdrop-blur-sm px-2.5 py-1 rounded-md">
-                      {brand.modelCount} models
+                      {brand.modelCount} {t.common.models}
                     </span>
                   </div>
 
                   <div className="flex items-end justify-between gap-4">
                     <p className="text-sm text-white/50 line-clamp-1">
-                      {brand.tagline || `Explore the ${brand.name} lineup`}
+                      {brand.tagline ? ln.tagline(brand.tagline) : tFormat(t.home.featured.exploreLineup, { brand: ln.brand(brand.name) })}
                     </p>
 
                     <span className="shrink-0 flex items-center gap-1.5 text-sm font-medium text-white">
@@ -473,9 +499,9 @@ function FeaturedBrands() {
                           opacity: isHovered ? 1 : 0,
                         }}
                       >
-                        Explore
+                        {t.home.featured.explore}
                       </span>
-                      <ArrowRight className="w-4 h-4" />
+                      <ArrowRight className={`w-4 h-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
                     </span>
                   </div>
                 </div>
@@ -542,10 +568,10 @@ function FeaturedBrands() {
                   <div className="absolute bottom-0 inset-x-0 h-[50%] bg-gradient-to-t from-black/80 via-black/40 to-transparent z-[5]" />
 
                   {/* Brand logo + name */}
-                  <div className="absolute top-5 left-5 z-10 flex items-center gap-3">
+                  <div className="absolute top-5 start-5 z-10 flex items-center gap-3">
                     <BrandLogo brandId={brand.id} name={brand.name} logoUrl={brand.logoUrl} size={40} />
                     <h3 className="text-3xl font-bold text-white italic leading-none">
-                      {brand.name}
+                      {ln.brand(brand.name)}
                     </h3>
                   </div>
 
@@ -553,18 +579,19 @@ function FeaturedBrands() {
                   <div className="absolute bottom-0 inset-x-0 p-5 z-10">
                     <div className="flex items-center gap-2 mb-3">
                       <span className="text-[11px] font-medium text-white/90 bg-white/[0.12] backdrop-blur-sm px-2.5 py-1 rounded-md">
-                        {brand.modelCount} models
+                        {brand.modelCount} {t.common.models}
                       </span>
                     </div>
 
                     {brand.tagline && (
                       <p className="text-sm text-white/50 mb-4">
-                        {brand.tagline}
+                        {ln.tagline(brand.tagline)}
                       </p>
                     )}
 
                     <div className="flex items-center justify-center gap-2 bg-white/[0.08] backdrop-blur-sm rounded-xl py-3.5 text-sm font-medium text-white border border-white/[0.08]">
-                      Explore <ArrowRight className="w-4 h-4" />
+                      {t.home.featured.explore}{" "}
+                      <ArrowRight className={`w-4 h-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
                     </div>
                   </div>
                 </EmbedLink>
@@ -602,6 +629,7 @@ function BrowseByBrandLogo({ brand }: { brand: Brand }) {
   const [imgError, setImgError] = useState(false);
   const { brandColors } = useAppData();
   const hasLogo = brand.logoUrl && !imgError;
+  const imgScale = tightLogoBrands.has(brand.id) ? "w-[48%] h-[48%]" : "w-[70%] h-[70%]";
   return (
     <div
       className="w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform"
@@ -611,7 +639,7 @@ function BrowseByBrandLogo({ brand }: { brand: Brand }) {
         <img
           src={brand.logoUrl}
           alt={`${brand.name} logo`}
-          className="w-[70%] h-[70%] object-contain"
+          className={`${imgScale} object-contain`}
           onError={() => setImgError(true)}
         />
       ) : (
@@ -625,13 +653,14 @@ function BrowseByBrandLogo({ brand }: { brand: Brand }) {
 
 function BrowseByBrand() {
   const { brands } = useAppData();
+  const { t, ln } = useLanguage();
   return (
     <AnimatedSection className="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-12">
       <SectionTitle
-        title="Browse by Brand"
-        subtitle="Explore cars from leading manufacturers"
+        title={t.home.browseByBrand.title}
+        subtitle={t.home.browseByBrand.subtitle}
         href="/browse?view=brands"
-        linkLabel="View All Brands"
+        linkLabel={t.home.browseByBrand.cta}
       />
       <div className="grid grid-cols-3 md:grid-cols-6 gap-3 md:gap-4">
         {brands.map((brand) => (
@@ -642,10 +671,10 @@ function BrowseByBrand() {
           >
             <BrowseByBrandLogo brand={brand} />
             <span className="text-sm font-bold text-[#1E293B] text-center leading-tight">
-              {brand.name}
+              {ln.brand(brand.name)}
             </span>
             <span className="text-[11px] font-medium text-[#64748B] bg-[#F1F5F9] px-2 py-0.5 rounded-full">
-              {brand.modelCount} models
+              {brand.modelCount} {t.common.models}
             </span>
           </EmbedLink>
         ))}
@@ -660,17 +689,19 @@ const bodyTypes = ["Sedan", "SUV", "Hatchback", "Coupe", "Pickup", "Van", "Conve
 
 function BrowseByBodyType() {
   const { getModelsByBodyType } = useAppData();
+  const { t } = useLanguage();
   return (
     <AnimatedSection className="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-12">
       <SectionTitle
-        title="Browse by Body Type"
-        subtitle="Find the shape that fits your style"
+        title={t.home.browseByBody.title}
+        subtitle={t.home.browseByBody.subtitle}
       />
-      {/* Clip the container on the right so the last card is cropped, hinting scroll */}
-      <div className="overflow-hidden -mr-4 md:-mr-6">
-        <div className="flex gap-3 overflow-x-auto pb-2 pr-4 md:pr-6 styled-scrollbar">
+      {/* Clip the container on the end side so the last card is cropped, hinting scroll */}
+      <div className="overflow-hidden -me-4 md:-me-6">
+        <div className="flex gap-3 overflow-x-auto pb-2 pe-4 md:pe-6 styled-scrollbar">
           {bodyTypes.map((type) => {
             const count = getModelsByBodyType(type).length;
+            const label = t.bodyTypes[type as keyof typeof t.bodyTypes] ?? type;
             return (
               <EmbedLink
                 key={type}
@@ -681,9 +712,9 @@ function BrowseByBodyType() {
                   type={type}
                   className="w-16 h-10 text-[#64748B] group-hover:text-[#1A56DB] transition-colors"
                 />
-                <span className="text-sm font-bold text-[#1E293B]">{type}</span>
+                <span className="text-sm font-bold text-[#1E293B]">{label}</span>
                 <span className="text-[11px] text-[#64748B]">
-                  {count} model{count !== 1 ? "s" : ""}
+                  {count} {count !== 1 ? t.common.models : t.common.model}
                 </span>
               </EmbedLink>
             );
@@ -698,6 +729,7 @@ function BrowseByBodyType() {
 
 function PopularModels() {
   const { models, getBrandById } = useAppData();
+  const { t } = useLanguage();
   const scrollRef = useRef<HTMLDivElement>(null);
   const { addItem } = useCompare();
   const popular = useMemo(() => models.slice(0, 8), [models]);
@@ -714,24 +746,24 @@ function PopularModels() {
   return (
     <AnimatedSection className="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-12">
       <SectionTitle
-        title="Popular Models"
-        subtitle="Most searched cars in Kuwait"
+        title={t.home.popular.title}
+        subtitle={t.home.popular.subtitle}
         href="/browse"
-        linkLabel="View All"
+        linkLabel={t.common.viewAll}
       />
 
       <div className="relative">
         <button
           onClick={() => scroll("left")}
           className="hidden md:flex absolute -left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 items-center justify-center bg-white rounded-full shadow-lg border border-[#E2E8F0] text-[#1E293B] hover:bg-[#F1F5F9] transition-colors"
-          aria-label="Scroll left"
+          aria-label={t.common.previous}
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
         <button
           onClick={() => scroll("right")}
           className="hidden md:flex absolute -right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 items-center justify-center bg-white rounded-full shadow-lg border border-[#E2E8F0] text-[#1E293B] hover:bg-[#F1F5F9] transition-colors"
-          aria-label="Scroll right"
+          aria-label={t.common.next}
         >
           <ChevronRight className="w-5 h-5" />
         </button>
@@ -753,6 +785,7 @@ function PopularModels() {
                     name: model.name,
                     brandId: model.brandId,
                     brandName: brand?.name || "",
+                    brandLogoUrl: brand?.logoUrl,
                     bodyType: model.bodyType,
                     startingPrice: model.startingPrice,
                     engineRange: model.specsSummary.engineRange,
@@ -790,19 +823,20 @@ function BrowseByBudget() {
   const [minPrice, setMinPrice] = useState(5000);
   const [maxPrice, setMaxPrice] = useState(30000);
   const [isMonthly, setIsMonthly] = useState(false);
+  const { t, dir } = useLanguage();
 
   const displayMin = isMonthly ? Math.round(minPrice / 60) : minPrice;
   const displayMax = isMonthly ? Math.round(maxPrice / 60) : maxPrice;
-  const unit = isMonthly ? "KWD/mo" : "KWD";
+  const unit = isMonthly ? t.common.kwdPerMonth : t.common.kwd;
 
   return (
     <AnimatedSection className="bg-[#0F1B2D]">
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-12">
         <h2 className="text-2xl md:text-3xl font-bold text-white mb-1">
-          Browse by Budget
+          {t.home.budget.title}
         </h2>
         <p className="text-sm text-white/50 mb-8">
-          Set your price range and discover what fits
+          {t.home.budget.subtitle}
         </p>
 
         <div className="max-w-xl space-y-6">
@@ -816,7 +850,7 @@ function BrowseByBudget() {
                   : "bg-white/10 text-white/60 hover:text-white"
               }`}
             >
-              Total Price
+              {t.common.totalPrice}
             </button>
             <button
               onClick={() => setIsMonthly(true)}
@@ -826,66 +860,41 @@ function BrowseByBudget() {
                   : "bg-white/10 text-white/60 hover:text-white"
               }`}
             >
-              Monthly
+              {t.common.perMonth}
             </button>
           </div>
 
           {/* Price display */}
           <div className="flex items-center gap-4">
             <div className="flex-1">
-              <span className="text-xs text-white/40 uppercase tracking-wider">From</span>
+              <span className="text-xs text-white/40 uppercase tracking-wider">{t.home.budget.from}</span>
               <p className="text-xl font-bold text-[#F59E0B]">
                 {displayMin.toLocaleString()} {unit}
               </p>
             </div>
             <div className="w-8 h-px bg-white/20" />
             <div className="flex-1">
-              <span className="text-xs text-white/40 uppercase tracking-wider">To</span>
+              <span className="text-xs text-white/40 uppercase tracking-wider">{t.home.budget.to}</span>
               <p className="text-xl font-bold text-[#F59E0B]">
                 {displayMax.toLocaleString()} {unit}
               </p>
             </div>
           </div>
 
-          {/* Dual range sliders */}
-          <div className="relative h-10 flex items-center">
-            {/* Track background */}
-            <div className="absolute inset-x-0 h-1.5 bg-white/10 rounded-full" />
-            {/* Active track */}
-            <div
-              className="absolute h-1.5 bg-[#1A56DB] rounded-full"
-              style={{
-                left: `${((minPrice - MIN_PRICE) / (MAX_PRICE - MIN_PRICE)) * 100}%`,
-                right: `${100 - ((maxPrice - MIN_PRICE) / (MAX_PRICE - MIN_PRICE)) * 100}%`,
-              }}
-            />
-            <input
-              type="range"
-              min={MIN_PRICE}
-              max={MAX_PRICE}
-              step={500}
-              value={minPrice}
-              onChange={(e) => {
-                const val = Number(e.target.value);
-                if (val < maxPrice - 1000) setMinPrice(val);
-              }}
-              className="absolute inset-x-0 w-full appearance-none bg-transparent pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-[#1A56DB] [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:shadow-md [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-[#1A56DB] [&::-moz-range-thumb]:cursor-pointer"
-              style={{ zIndex: minPrice > MAX_PRICE - 1000 ? 5 : 3 }}
-            />
-            <input
-              type="range"
-              min={MIN_PRICE}
-              max={MAX_PRICE}
-              step={500}
-              value={maxPrice}
-              onChange={(e) => {
-                const val = Number(e.target.value);
-                if (val > minPrice + 1000) setMaxPrice(val);
-              }}
-              className="absolute inset-x-0 w-full appearance-none bg-transparent pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-[#1A56DB] [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:shadow-md [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-[#1A56DB] [&::-moz-range-thumb]:cursor-pointer"
-              style={{ zIndex: 4 }}
-            />
-          </div>
+          {/* Dual range slider */}
+          <DualRangeSlider
+            min={MIN_PRICE}
+            max={MAX_PRICE}
+            value={[minPrice, maxPrice]}
+            onChange={([lo, hi]) => {
+              setMinPrice(lo);
+              setMaxPrice(hi);
+            }}
+            step={500}
+            minGap={1000}
+            variant="dark"
+            dir={dir}
+          />
 
           {/* Show results button */}
           <EmbedLink
@@ -893,7 +902,7 @@ function BrowseByBudget() {
             className="inline-flex items-center gap-2 px-6 py-3 bg-[#1A56DB] text-white font-medium rounded-xl hover:bg-[#1544B0] transition-colors"
           >
             <SlidersHorizontal className="w-4 h-4" />
-            Show Results
+            {t.common.showResults}
           </EmbedLink>
         </div>
       </div>
@@ -905,6 +914,7 @@ function BrowseByBudget() {
 
 function WhatsNew() {
   const { getNewModels, getBrandById } = useAppData();
+  const { t } = useLanguage();
   const scrollRef = useRef<HTMLDivElement>(null);
   const newModels = useMemo(() => getNewModels(), [getNewModels]);
   const { addItem } = useCompare();
@@ -921,10 +931,10 @@ function WhatsNew() {
   return (
     <AnimatedSection className="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-12">
       <SectionTitle
-        title="What's New"
-        subtitle="Latest arrivals and recently updated models"
+        title={t.home.whatsNew.title}
+        subtitle={t.home.whatsNew.subtitle}
         href="/browse?sort=newest"
-        linkLabel="See All"
+        linkLabel={t.common.seeAll}
       />
 
       <div className="relative">
@@ -932,14 +942,14 @@ function WhatsNew() {
         <button
           onClick={() => scroll("left")}
           className="hidden md:flex absolute -left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 items-center justify-center bg-white rounded-full shadow-lg border border-[#E2E8F0] text-[#1E293B] hover:bg-[#F1F5F9] transition-colors"
-          aria-label="Scroll left"
+          aria-label={t.common.previous}
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
         <button
           onClick={() => scroll("right")}
           className="hidden md:flex absolute -right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 items-center justify-center bg-white rounded-full shadow-lg border border-[#E2E8F0] text-[#1E293B] hover:bg-[#F1F5F9] transition-colors"
-          aria-label="Scroll right"
+          aria-label={t.common.next}
         >
           <ChevronRight className="w-5 h-5" />
         </button>
@@ -961,6 +971,7 @@ function WhatsNew() {
                     name: model.name,
                     brandId: model.brandId,
                     brandName: brand?.name || "",
+                    brandLogoUrl: brand?.logoUrl,
                     bodyType: model.bodyType,
                     startingPrice: model.startingPrice,
                     engineRange: model.specsSummary.engineRange,
@@ -992,29 +1003,31 @@ function WhatsNew() {
 
 // ---------- Explore by Lifestyle ----------
 
+type LifestyleLabelKey = "family" | "speed" | "luxury" | "value";
 const lifestyleThemes: {
   bg: string;
   text: string;
   accent: string;
-  label: string;
+  labelKey: LifestyleLabelKey;
   icon: string;
 }[] = [
-  { bg: "#0F1B2D", text: "#FFFFFF", accent: "#60A5FA", label: "Family", icon: "shield" },
-  { bg: "#7F1D1D", text: "#FFFFFF", accent: "#FCA5A5", label: "Speed", icon: "zap" },
-  { bg: "#1E293B", text: "#FFFFFF", accent: "#F59E0B", label: "Luxury", icon: "crown" },
-  { bg: "#064E3B", text: "#FFFFFF", accent: "#6EE7B7", label: "Value", icon: "tag" },
+  { bg: "#0F1B2D", text: "#FFFFFF", accent: "#60A5FA", labelKey: "family", icon: "shield" },
+  { bg: "#7F1D1D", text: "#FFFFFF", accent: "#FCA5A5", labelKey: "speed", icon: "zap" },
+  { bg: "#1E293B", text: "#FFFFFF", accent: "#F59E0B", labelKey: "luxury", icon: "crown" },
+  { bg: "#064E3B", text: "#FFFFFF", accent: "#6EE7B7", labelKey: "value", icon: "tag" },
 ];
 
 function ExploreByLifestyle() {
   const { lifestyleCollections } = useAppData();
+  const { t, dir, ln } = useLanguage();
   return (
     <AnimatedSection className="py-8 md:py-12">
       <div className="max-w-7xl mx-auto px-4 md:px-6 mb-6">
         <h2 className="text-2xl md:text-3xl font-bold text-[#1E293B]">
-          Explore by Lifestyle
+          {t.home.lifestyle.title}
         </h2>
         <p className="mt-1 text-sm text-[#64748B]">
-          Curated collections for every kind of driver
+          {t.home.lifestyle.subtitle}
         </p>
       </div>
 
@@ -1066,7 +1079,7 @@ function ExploreByLifestyle() {
                         color: theme.accent,
                       }}
                     >
-                      {theme.label}
+                      {t.home.lifestyle[theme.labelKey]}
                     </span>
                     <span
                       className={`font-bold tabular-nums ${
@@ -1088,21 +1101,21 @@ function ExploreByLifestyle() {
                       }`}
                       style={{ color: theme.text }}
                     >
-                      {collection.title}
+                      {ln.collectionTitle(collection.id, collection.title)}
                     </h3>
                     <p
                       className="mt-1.5 text-sm leading-relaxed opacity-60 line-clamp-2"
                       style={{ color: theme.text }}
                     >
-                      {collection.description}
+                      {ln.collectionDescription(collection.id, collection.description)}
                     </p>
 
                     <div
                       className="mt-4 inline-flex items-center gap-2 text-sm font-bold group-hover:gap-3 transition-all duration-300"
                       style={{ color: theme.accent }}
                     >
-                      Browse Collection
-                      <ArrowRight className="w-4 h-4" />
+                      {t.common.exploreCollection}
+                      <ArrowRight className={`w-4 h-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
                     </div>
                   </div>
                 </div>

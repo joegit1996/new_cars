@@ -31,6 +31,7 @@ import MobileTabBar from "@/components/MobileTabBar";
 import { CompareProvider, useCompare } from "@/context/CompareContext";
 import { EmbedAnchor } from "@/components/EmbedLink";
 import { FullScreenScrollFX } from "@/components/ui/full-screen-scroll-fx";
+import { useLanguage, tFormat } from "@/context/LanguageContext";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -78,6 +79,8 @@ function FadeSection({
 // ---------------------------------------------------------------------------
 
 function BrandHero({ brandName, logoUrl, heroMedia }: { brandName: string; logoUrl?: string; heroMedia?: { type: "video" | "image"; url: string } }) {
+  const { t, ln } = useLanguage();
+  const localizedBrand = ln.brand(brandName);
   return (
     <VideoHero media={heroMedia}>
       {/* Brand name overlay */}
@@ -94,10 +97,10 @@ function BrandHero({ brandName, logoUrl, heroMedia }: { brandName: string; logoU
           </div>
           <div>
             <h1 className="text-2xl md:text-4xl font-bold text-white drop-shadow-lg">
-              {brandName}
+              {localizedBrand}
             </h1>
             <p className="text-sm text-white/70 mt-0.5 hidden md:block">
-              Explore the full {brandName} lineup in Kuwait
+              {tFormat(t.brand.heroSubtitle, { brand: localizedBrand })}
             </p>
           </div>
         </div>
@@ -123,6 +126,11 @@ function FilterModal({
   onChange: (f: FilterState) => void;
   resultCount: number;
 }) {
+  const { t } = useLanguage();
+  const showLabel = tFormat(
+    resultCount !== 1 ? t.brand.showCountModelsPlural : t.brand.showCountModels,
+    { count: resultCount }
+  );
   return (
     <AnimatePresence>
       {open && (
@@ -149,8 +157,8 @@ function FilterModal({
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0]">
-                <h2 className="font-bold text-[#1E293B] text-lg">More Filters</h2>
-                <button onClick={onClose} className="p-1 text-[#64748B] hover:text-[#1E293B] transition-colors" aria-label="Close">
+                <h2 className="font-bold text-[#1E293B] text-lg">{t.brand.moreFilters}</h2>
+                <button onClick={onClose} className="p-1 text-[#64748B] hover:text-[#1E293B] transition-colors" aria-label={t.common.close}>
                   <X className="w-5 h-5" />
                 </button>
               </div>
@@ -173,13 +181,13 @@ function FilterModal({
                   }
                   className="text-sm text-[#64748B] hover:text-[#1E293B] transition-colors"
                 >
-                  Clear All
+                  {t.browse.clearAll}
                 </button>
                 <button
                   onClick={onClose}
                   className="px-6 py-2.5 bg-[#1A56DB] text-white font-bold text-sm rounded-xl hover:bg-[#1A56DB]/90 transition-colors"
                 >
-                  Show {resultCount} Model{resultCount !== 1 ? "s" : ""}
+                  {showLabel}
                 </button>
               </div>
             </div>
@@ -197,8 +205,8 @@ function FilterModal({
               <div className="w-10 h-1 rounded-full bg-[#E2E8F0]" />
             </div>
             <div className="flex items-center justify-between px-4 pb-3 border-b border-[#E2E8F0]">
-              <h2 className="font-bold text-[#1E293B]">More Filters</h2>
-              <button onClick={onClose} className="p-1 text-[#64748B]" aria-label="Close">
+              <h2 className="font-bold text-[#1E293B]">{t.brand.moreFilters}</h2>
+              <button onClick={onClose} className="p-1 text-[#64748B]" aria-label={t.common.close}>
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -210,7 +218,7 @@ function FilterModal({
                 onClick={onClose}
                 className="w-full py-3 bg-[#1A56DB] text-white font-bold text-sm rounded-xl"
               >
-                Show {resultCount} Model{resultCount !== 1 ? "s" : ""}
+                {showLabel}
               </button>
             </div>
           </motion.div>
@@ -252,6 +260,7 @@ function ModelShowcase({
   onFilterOpen: () => void;
 }) {
   const { getTrimsByModel } = useAppData();
+  const { t, dir, ln } = useLanguage();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(0);
   const touchStart = useRef(0);
@@ -334,7 +343,7 @@ function ModelShowcase({
                     : "text-[#64748B] hover:text-[#1E293B]"
                 }`}
               >
-                Body Type
+                {t.brand.bodyTypeFilter}
               </button>
               <button
                 onClick={() => onFilterModeChange("class")}
@@ -344,7 +353,7 @@ function ModelShowcase({
                     : "text-[#64748B] hover:text-[#1E293B]"
                 }`}
               >
-                Class
+                {t.brand.classFilter}
               </button>
             </div>
           )}
@@ -360,7 +369,7 @@ function ModelShowcase({
                     : "bg-white text-[#1E293B] border-[#E2E8F0] hover:border-[#1A56DB]"
                 }`}
               >
-                All
+                {t.common.all}
               </button>
               {chips.map((chip) => (
                 <button
@@ -372,7 +381,9 @@ function ModelShowcase({
                       : "bg-white text-[#1E293B] border-[#E2E8F0] hover:border-[#1A56DB]"
                   }`}
                 >
-                  {chip}
+                  {filterMode === "bodyType"
+                    ? (t.bodyTypes as Record<string, string>)[chip] ?? chip
+                    : ln.class(chip)}
                 </button>
               ))}
             </div>
@@ -384,7 +395,7 @@ function ModelShowcase({
             className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-lg border border-[#E2E8F0] bg-white text-[#64748B] hover:border-[#1A56DB] hover:text-[#1A56DB] transition-colors shrink-0"
           >
             <SlidersHorizontal className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">More Filters</span>
+            <span className="hidden sm:inline">{t.brand.moreFilters}</span>
           </button>
         </div>
 
@@ -402,10 +413,10 @@ function ModelShowcase({
             >
               <EmbedAnchor href={`/model/${current.id}`} className="hover:opacity-80 transition-opacity">
                 <h2 className="text-2xl md:text-4xl font-bold text-[#1E293B]">
-                  {current.name}
+                  {ln.model(current.name)}
                 </h2>
                 <p className="text-xs md:text-sm text-[#64748B] mt-1 uppercase tracking-widest">
-                  {current.bodyType}
+                  {(t.bodyTypes as Record<string, string>)[current.bodyType] ?? current.bodyType}
                 </p>
               </EmbedAnchor>
             </motion.div>
@@ -423,9 +434,9 @@ function ModelShowcase({
                 ? "border-[#E2E8F0] text-[#CBD5E1] cursor-default"
                 : "border-[#E2E8F0] text-[#1E293B] bg-white hover:shadow-md hover:border-[#CBD5E1]"
             }`}
-            aria-label="Previous model"
+            aria-label={t.brand.previousModel}
           >
-            <ChevronLeft className="w-5 h-5" />
+            <ChevronLeft className={`w-5 h-5 ${dir === "rtl" ? "rotate-180" : ""}`} />
           </button>
 
           {/* Car image */}
@@ -445,7 +456,7 @@ function ModelShowcase({
                     <PlaceholderImage
                       aspectRatio="16/9"
                       bodyType={current.bodyType}
-                      label={`${brandName} ${current.name}`}
+                      label={`${ln.brand(brandName)} ${ln.model(current.name)}`}
                       className="w-full"
                       imageUrl={current.imageUrl}
                     />
@@ -464,9 +475,9 @@ function ModelShowcase({
                 ? "border-[#E2E8F0] text-[#CBD5E1] cursor-default"
                 : "border-[#E2E8F0] text-[#1E293B] bg-white hover:shadow-md hover:border-[#CBD5E1]"
             }`}
-            aria-label="Next model"
+            aria-label={t.brand.nextModel}
           >
-            <ChevronRight className="w-5 h-5" />
+            <ChevronRight className={`w-5 h-5 ${dir === "rtl" ? "rotate-180" : ""}`} />
           </button>
         </div>
 
@@ -486,30 +497,30 @@ function ModelShowcase({
               <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6 mb-4">
                 <span className="flex items-center gap-1.5 text-xs md:text-sm text-[#64748B]">
                   <Gauge className="w-3.5 h-3.5" />
-                  {topTrim.horsepower} hp
+                  {topTrim.horsepower} {t.common.hp}
                 </span>
                 <span className="flex items-center gap-1.5 text-xs md:text-sm text-[#64748B]">
                   <Cog className="w-3.5 h-3.5" />
-                  {topTrim.engineSummary.split(",")[0]}
+                  {ln.engineSummary(topTrim.engineSummary.split(",")[0])}
                 </span>
                 <span className="flex items-center gap-1.5 text-xs md:text-sm text-[#64748B]">
                   <Fuel className="w-3.5 h-3.5" />
-                  {topTrim.fuelType}
+                  {(t.fuelTypes as Record<string, string>)[topTrim.fuelType] ?? topTrim.fuelType}
                 </span>
               </div>
             )}
 
-            <p className="text-xs text-[#94A3B8] uppercase tracking-wider mb-1">Starting from</p>
+            <p className="text-xs text-[#94A3B8] uppercase tracking-wider mb-1">{t.brand.startingFrom}</p>
             <p className="text-2xl md:text-3xl font-bold text-[#1E293B] mb-4">
-              {formatPrice(current.startingPrice)} <span className="text-lg font-normal text-[#64748B]">KWD</span>
+              {formatPrice(current.startingPrice)} <span className="text-lg font-normal text-[#64748B]">{t.common.kwd}</span>
             </p>
 
             <EmbedAnchor
               href={`/model/${current.id}`}
               className="inline-flex items-center gap-2 px-6 py-3 bg-[#1A56DB] text-white font-bold text-sm rounded-xl hover:bg-[#1A56DB]/90 transition-colors"
             >
-              View Details
-              <ArrowRight className="w-4 h-4" />
+              {t.common.viewDetails}
+              <ArrowRight className={`w-4 h-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
             </EmbedAnchor>
           </motion.div>
         </AnimatePresence>
@@ -546,6 +557,7 @@ function FeaturedModelsSection({
   brandId: string;
 }) {
   const { getTrimsByModel } = useAppData();
+  const { t, dir, ln } = useLanguage();
   const featured = useMemo(() => {
     const raw = models.filter((m) => m.featured);
     // Interleave so no two consecutive models share the same modelFamily / image
@@ -579,13 +591,13 @@ function FeaturedModelsSection({
           id: model.id,
           background: "",
           leftLabel: (
-            <span className="normal-case tracking-normal">{model.name}</span>
+            <span className="normal-case tracking-normal">{ln.model(model.name)}</span>
           ),
-          title: model.name,
+          title: ln.model(model.name),
           rightLabel: (
             <span className="normal-case tracking-normal text-right">
               {formatPrice(model.startingPrice)}{" "}
-              <span className="text-[0.7em] opacity-50">KWD</span>
+              <span className="text-[0.7em] opacity-50">{t.common.kwd}</span>
             </span>
           ),
           bottomContent: (
@@ -593,29 +605,29 @@ function FeaturedModelsSection({
               <div className="flex items-center gap-3">
                 {(model.isNew || model.isUpdated) && (
                   <span className="px-3 py-1 bg-white text-[#111318] text-[10px] font-bold uppercase tracking-wider rounded-md">
-                    {model.isNew ? "New" : "Updated"}
+                    {model.isNew ? t.common.new : t.common.updated}
                   </span>
                 )}
                 <span className="text-[11px] text-white/50 uppercase tracking-widest">
-                  {model.bodyType}
+                  {(t.bodyTypes as Record<string, string>)[model.bodyType] ?? model.bodyType}
                 </span>
               </div>
               {trim && (
                 <span className="text-sm text-white/60">
-                  {trim.horsepower} hp &middot;{" "}
-                  {trim.engineSummary.split(",")[0]}
+                  {trim.horsepower} {t.common.hp} &middot;{" "}
+                  {ln.engineSummary(trim.engineSummary.split(",")[0])}
                 </span>
               )}
               <div className="flex items-center gap-4 mt-1">
                 <span className="text-xl md:text-2xl font-bold text-white">
                   {formatPrice(model.startingPrice)}{" "}
-                  <span className="text-sm font-normal text-white/40">KWD</span>
+                  <span className="text-sm font-normal text-white/40">{t.common.kwd}</span>
                 </span>
                 <EmbedAnchor
                   href={`/model/${model.id}`}
                   className="inline-flex items-center gap-2 px-5 py-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white text-sm font-medium rounded-xl border border-white/10 transition-all duration-300"
                 >
-                  View Details <ArrowRight className="w-4 h-4" />
+                  {t.common.viewDetails} <ArrowRight className={`w-4 h-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
                 </EmbedAnchor>
               </div>
             </div>
@@ -655,9 +667,9 @@ function FeaturedModelsSection({
       <div className="bg-[#111318] text-white py-10">
         <div className="px-4 mb-6">
           <p className="text-xs text-white/50 font-bold uppercase tracking-wider mb-2 text-center">
-            Recommended
+            {t.brand.recommended}
           </p>
-          <h3 className="text-2xl font-bold text-center">Featured Models</h3>
+          <h3 className="text-2xl font-bold text-center">{t.brand.featuredModels}</h3>
         </div>
 
         <div className="relative">
@@ -675,33 +687,33 @@ function FeaturedModelsSection({
                 >
                   {(model.isNew || model.isUpdated) && (
                     <div className="absolute top-3 left-3 z-10 px-2.5 py-1 bg-white text-[#111318] text-[10px] font-bold uppercase tracking-wider rounded-md">
-                      {model.isNew ? "New" : "Updated"}
+                      {model.isNew ? t.common.new : t.common.updated}
                     </div>
                   )}
                   <PlaceholderImage
                     aspectRatio="3/2"
                     bodyType={model.bodyType}
-                    label={`${brandName} ${model.name}`}
+                    label={`${ln.brand(brandName)} ${ln.model(model.name)}`}
                     className="w-full"
                     imageUrl={model.imageUrl}
                   />
                   <div className="p-4">
                     <h4 className="font-bold text-white text-lg leading-tight">
-                      {model.name}
+                      {ln.model(model.name)}
                     </h4>
                     <p className="text-[11px] text-white/40 uppercase tracking-wider mt-0.5">
-                      {model.bodyType}
+                      {(t.bodyTypes as Record<string, string>)[model.bodyType] ?? model.bodyType}
                     </p>
                     {trim && (
                       <p className="text-xs text-white/50 mt-2">
-                        {trim.horsepower} hp &middot;{" "}
-                        {trim.engineSummary.split(",")[0]}
+                        {trim.horsepower} {t.common.hp} &middot;{" "}
+                        {ln.engineSummary(trim.engineSummary.split(",")[0])}
                       </p>
                     )}
                     <p className="text-base font-bold text-white mt-2">
                       {formatPrice(model.startingPrice)}{" "}
                       <span className="text-xs font-normal text-white/40">
-                        KWD
+                        {t.common.kwd}
                       </span>
                     </p>
                   </div>
@@ -720,10 +732,10 @@ function FeaturedModelsSection({
       header={
         <div className="flex flex-col items-center gap-2">
           <span className="text-xs text-white/50 font-bold uppercase tracking-wider block">
-            Recommended
+            {t.brand.recommended}
           </span>
           <span className="text-3xl md:text-4xl font-bold text-white block">
-            Featured Models
+            {t.brand.featuredModels}
           </span>
         </div>
       }
@@ -751,6 +763,7 @@ function DiscoverByBodyType({
   brandName: string;
   models: Model[];
 }) {
+  const { t, dir, ln } = useLanguage();
   const bodyTypes = useMemo(() => {
     const map = new Map<string, { count: number; imageUrl?: string }>();
     models.forEach((m) => {
@@ -768,44 +781,51 @@ function DiscoverByBodyType({
   return (
     <FadeSection>
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-10 md:py-16">
-        <p className="text-xs text-[#1A56DB] font-bold uppercase tracking-wider mb-2 text-center">Browse</p>
+        <p className="text-xs text-[#1A56DB] font-bold uppercase tracking-wider mb-2 text-center">{t.common.browse}</p>
         <h3 className="text-2xl md:text-3xl font-bold text-[#1E293B] mb-3 text-center">
-          Discover by Body Type
+          {t.brand.discoverByBodyType}
         </h3>
         <p className="text-sm text-[#64748B] text-center mb-8 max-w-lg mx-auto">
-          Find the perfect {brandName} for your lifestyle
+          {tFormat(t.brand.discoverByBodyTypeSubtitle, { brand: ln.brand(brandName) })}
         </p>
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {bodyTypes.map(([bt, info]) => (
-            <EmbedAnchor
-              key={bt}
-              href={`/browse?brand=${brandId}&bodyType=${bt}`}
-              className="group relative rounded-2xl overflow-hidden bg-[#F1F5F9] border border-[#E2E8F0] hover:border-[#1A56DB] hover:shadow-xl transition-all duration-300"
-            >
-              <div className="overflow-hidden">
-                <div className="transition-transform duration-500 ease-out group-hover:scale-110">
-                  <PlaceholderImage
-                    aspectRatio="4/3"
-                    bodyType={bt}
-                    label=""
-                    className="w-full"
-                    imageUrl={info.imageUrl}
-                  />
+          {bodyTypes.map(([bt, info]) => {
+            const localizedBt = (t.bodyTypes as Record<string, string>)[bt] ?? bt;
+            return (
+              <EmbedAnchor
+                key={bt}
+                href={`/browse?brand=${brandId}&bodyType=${bt}`}
+                className="group relative rounded-2xl overflow-hidden bg-[#F1F5F9] border border-[#E2E8F0] hover:border-[#1A56DB] hover:shadow-xl transition-all duration-300"
+              >
+                <div className="overflow-hidden">
+                  <div className="transition-transform duration-500 ease-out group-hover:scale-110">
+                    <PlaceholderImage
+                      aspectRatio="4/3"
+                      bodyType={bt}
+                      label=""
+                      className="w-full"
+                      imageUrl={info.imageUrl}
+                    />
+                  </div>
                 </div>
-              </div>
-              <div className="absolute inset-0 bg-gradient-to-t from-[#1E293B]/80 via-[#1E293B]/20 to-transparent" />
-              <div className="absolute bottom-0 inset-x-0 p-4 md:p-5 flex items-end justify-between">
-                <div>
-                  <h4 className="font-bold text-white text-xl md:text-2xl">{bt}s</h4>
-                  <p className="text-xs text-white/60 mt-0.5">{info.count} model{info.count !== 1 ? "s" : ""}</p>
+                <div className="absolute inset-0 bg-gradient-to-t from-[#1E293B]/80 via-[#1E293B]/20 to-transparent" />
+                <div className="absolute bottom-0 inset-x-0 p-4 md:p-5 flex items-end justify-between">
+                  <div>
+                    <h4 className="font-bold text-white text-xl md:text-2xl">
+                      {tFormat(t.brand.bodyTypePlural, { bodyType: localizedBt })}
+                    </h4>
+                    <p className="text-xs text-white/60 mt-0.5">
+                      {tFormat(info.count !== 1 ? t.brand.countModels : t.brand.countModel, { count: info.count })}
+                    </p>
+                  </div>
+                  <div className="w-9 h-9 rounded-full bg-white/10 group-hover:bg-white/25 flex items-center justify-center transition-all duration-300">
+                    <ArrowRight className={`w-4 h-4 text-white group-hover:translate-x-0.5 transition-transform duration-300 ${dir === "rtl" ? "rotate-180" : ""}`} />
+                  </div>
                 </div>
-                <div className="w-9 h-9 rounded-full bg-white/10 group-hover:bg-white/25 flex items-center justify-center transition-all duration-300">
-                  <ArrowRight className="w-4 h-4 text-white group-hover:translate-x-0.5 transition-transform duration-300" />
-                </div>
-              </div>
-            </EmbedAnchor>
-          ))}
+              </EmbedAnchor>
+            );
+          })}
         </div>
       </div>
     </FadeSection>
@@ -821,6 +841,7 @@ function BrowseByClass({
   brandName: string;
   models: Model[];
 }) {
+  const { t, ln } = useLanguage();
   const families = useMemo(() => {
     const map = new Map<string, { count: number; priceFrom: number; bodyType: string; imageUrl?: string }>();
     models.forEach((m) => {
@@ -844,13 +865,13 @@ function BrowseByClass({
       <div className="bg-[#111318] text-white">
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-12 md:py-20">
           <p className="text-xs text-white/50 font-bold uppercase tracking-wider mb-2 text-center">
-            Explore
+            {t.common.explore}
           </p>
           <h3 className="text-2xl md:text-3xl font-bold mb-3 text-center">
-            Browse by Class
+            {t.brand.browseByClass}
           </h3>
           <p className="text-sm text-white/60 text-center mb-10 max-w-lg mx-auto">
-            Each {brandName} class offers a distinct driving experience
+            {tFormat(t.brand.browseByClassSubtitle, { brand: ln.brand(brandName) })}
           </p>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
@@ -872,12 +893,12 @@ function BrowseByClass({
                   </div>
                 </div>
                 <div className="p-4">
-                  <h4 className="font-bold text-white text-lg mb-1">{family}</h4>
+                  <h4 className="font-bold text-white text-lg mb-1">{ln.class(family)}</h4>
                   <p className="text-xs text-white/40 mb-1.5">
-                    {info.count} model{info.count !== 1 ? "s" : ""}
+                    {tFormat(info.count !== 1 ? t.brand.countModels : t.brand.countModel, { count: info.count })}
                   </p>
                   <p className="text-xs text-white/60">
-                    From <span className="text-white font-bold">{formatPrice(info.priceFrom)}</span> KWD
+                    {t.common.from} <span className="text-white font-bold">{formatPrice(info.priceFrom)}</span> {t.common.kwd}
                   </p>
                 </div>
               </EmbedAnchor>
@@ -899,7 +920,9 @@ function BrandDetailsZone({
   allModels: Model[];
 }) {
   const { getBrandEditorial, getBrandById } = useAppData();
-  const editorial = getBrandEditorial(brandId);
+  const { t, dir, ln } = useLanguage();
+  const editorialEn = getBrandEditorial(brandId);
+  const editorial = ln.editorial(brandId, editorialEn);
   const brand = getBrandById(brandId);
   if (!editorial) return null;
 
@@ -921,7 +944,7 @@ function BrandDetailsZone({
                 {editorial.heritage.title}
               </p>
               <h3 className="text-2xl md:text-3xl font-bold text-[#1E293B] mb-4">
-                {brand?.tagline}
+                {brand?.tagline ? ln.tagline(brand.tagline) : null}
               </h3>
               <p className="text-base text-[#64748B] leading-relaxed mb-5">
                 {editorial.heritage.description}
@@ -954,7 +977,7 @@ function BrandDetailsZone({
           <div className="max-w-7xl mx-auto px-4 md:px-6 py-12 md:py-20">
             <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
               <div>
-                <p className="text-xs text-white/50 font-bold uppercase tracking-wider mb-2">Technology & Innovation</p>
+                <p className="text-xs text-white/50 font-bold uppercase tracking-wider mb-2">{t.brand.technologyInnovation}</p>
                 <h3 className="text-2xl md:text-3xl font-bold mb-4">{editorial.innovationTitle}</h3>
                 <p className="text-base text-white/70 leading-relaxed mb-6">
                   {editorial.innovationDescription}
@@ -963,7 +986,7 @@ function BrandDetailsZone({
                   <div className="p-4 rounded-xl bg-white/5 border border-white/10">
                     <div className="flex items-center gap-2 mb-2">
                       <Leaf className="w-4 h-4 text-emerald-400" />
-                      <span className="text-xs text-emerald-400 font-bold uppercase tracking-wider">Sustainability</span>
+                      <span className="text-xs text-emerald-400 font-bold uppercase tracking-wider">{t.brand.sustainability}</span>
                     </div>
                     <p className="text-sm text-white/60 leading-relaxed">
                       {editorial.sustainability}
@@ -982,8 +1005,8 @@ function BrandDetailsZone({
       {/* Services */}
       <FadeSection className="bg-white">
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-10 md:py-16">
-          <p className="text-xs text-[#1A56DB] font-bold uppercase tracking-wider mb-2 text-center">Get Started</p>
-          <h3 className="text-2xl md:text-3xl font-bold text-[#1E293B] mb-8 text-center">Services</h3>
+          <p className="text-xs text-[#1A56DB] font-bold uppercase tracking-wider mb-2 text-center">{t.common.getStarted}</p>
+          <h3 className="text-2xl md:text-3xl font-bold text-[#1E293B] mb-8 text-center">{t.brand.servicesShort}</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {editorial.serviceLinks.map((link, i) => (
               <a
@@ -998,7 +1021,7 @@ function BrandDetailsZone({
                   <h4 className="font-bold text-[#1E293B] mb-1">{link.title}</h4>
                   <p className="text-sm text-[#64748B] leading-relaxed">{link.description}</p>
                 </div>
-                <ArrowRight className="w-4 h-4 text-[#CBD5E1] group-hover:text-[#1A56DB] mt-1 ml-auto shrink-0 transition-colors" />
+                <ArrowRight className={`w-4 h-4 text-[#CBD5E1] group-hover:text-[#1A56DB] mt-1 ms-auto shrink-0 transition-colors ${dir === "rtl" ? "rotate-180" : ""}`} />
               </a>
             ))}
           </div>
@@ -1010,17 +1033,17 @@ function BrandDetailsZone({
         <div className="bg-[#F8FAFC] border-t border-[#E2E8F0]">
           <div className="max-w-7xl mx-auto px-4 md:px-6 py-10 md:py-14 text-center">
             <h3 className="text-xl md:text-2xl font-bold text-[#1E293B] mb-2">
-              Explore the Full {brandName} Lineup
+              {tFormat(t.brand.exploreFullLineup, { brand: ln.brand(brandName) })}
             </h3>
             <p className="text-sm text-[#64748B] mb-6">
-              View all models side by side with detailed specs, prices, and trims
+              {t.brand.exploreFullLineupSubtitle}
             </p>
             <EmbedAnchor
               href={`/browse?brand=${brandId}`}
               className="inline-flex items-center gap-2 px-6 py-3 bg-[#1A56DB] text-white font-bold text-sm rounded-xl hover:bg-[#1A56DB]/90 transition-colors"
             >
-              View All Models
-              <ArrowRight className="w-4 h-4" />
+              {t.brand.viewAllModels}
+              <ArrowRight className={`w-4 h-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
             </EmbedAnchor>
           </div>
         </div>
@@ -1037,6 +1060,7 @@ type FilterMode = "bodyType" | "class";
 
 function BrandShowcaseContent({ brandId }: { brandId: string }) {
   const { getBrandById, getModelsByBrandSegmentOrder, filterModels, loading } = useAppData();
+  const { t, dir, ln } = useLanguage();
   const brand = getBrandById(brandId);
   const compare = useCompare();
   const allBrandModels = useMemo(() => getModelsByBrandSegmentOrder(brandId), [brandId, getModelsByBrandSegmentOrder]);
@@ -1118,7 +1142,7 @@ function BrandShowcaseContent({ brandId }: { brandId: string }) {
   if (!brand) {
     return (
       <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">
-        <p className="text-[#64748B]">Brand not found</p>
+        <p className="text-[#64748B]">{t.brand.brandNotFound}</p>
       </div>
     );
   }
@@ -1128,22 +1152,22 @@ function BrandShowcaseContent({ brandId }: { brandId: string }) {
       <Navbar compareCount={compare.totalCount} />
 
       {/* Brand Hero */}
-      <BrandHero brandName={brand.name} logoUrl={brand.logoUrl} heroMedia={brand.heroMedia} />
+      <BrandHero brandName={ln.brand(brand.name)} logoUrl={brand.logoUrl} heroMedia={brand.heroMedia} />
 
       {/* Navigation bar (breadcrumb + back) */}
       <div className="max-w-7xl mx-auto w-full px-4 md:px-6 pt-4">
         <nav className="hidden md:flex items-center gap-1.5 text-xs text-[#64748B]">
           <EmbedAnchor href="/" className="flex items-center gap-1 hover:text-[#1A56DB] transition-colors">
             <Home className="w-3.5 h-3.5" />
-            <span>Home</span>
+            <span>{t.common.home}</span>
           </EmbedAnchor>
-          <ChevronRight className="w-3 h-3" />
-          <span className="text-[#1E293B] font-medium">{brand.name}</span>
+          <ChevronRight className={`w-3 h-3 ${dir === "rtl" ? "rotate-180" : ""}`} />
+          <span className="text-[#1E293B] font-medium">{ln.brand(brand.name)}</span>
         </nav>
         <div className="md:hidden">
           <EmbedAnchor href="/" className="inline-flex items-center gap-1.5 text-xs text-[#64748B] hover:text-[#1A56DB] transition-colors">
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Back to Home</span>
+            <ArrowLeft className={`w-3.5 h-3.5 ${dir === "rtl" ? "rotate-180" : ""}`} />
+            <span>{t.common.backToHome}</span>
           </EmbedAnchor>
         </div>
       </div>
@@ -1152,7 +1176,7 @@ function BrandShowcaseContent({ brandId }: { brandId: string }) {
       {filteredModels.length > 0 ? (
         <ModelShowcase
           models={filteredModels}
-          brandName={brand.name}
+          brandName={ln.brand(brand.name)}
           filterMode={filterMode}
           onFilterModeChange={handleFilterModeChange}
           availableBodyTypes={availableBodyTypes}
@@ -1169,8 +1193,8 @@ function BrandShowcaseContent({ brandId }: { brandId: string }) {
           <div className="w-24 h-24 mb-4 rounded-full bg-[#F1F5F9] flex items-center justify-center">
             <SlidersHorizontal className="w-10 h-10 text-[#64748B]" />
           </div>
-          <h2 className="font-bold text-lg text-[#1E293B] mb-2">No models match your filters</h2>
-          <p className="text-sm text-[#64748B] mb-4">Try adjusting your criteria</p>
+          <h2 className="font-bold text-lg text-[#1E293B] mb-2">{t.brand.noModelsMatch}</h2>
+          <p className="text-sm text-[#64748B] mb-4">{t.brand.tryAdjusting}</p>
           <button
             onClick={() => {
               setFilters({
@@ -1187,13 +1211,13 @@ function BrandShowcaseContent({ brandId }: { brandId: string }) {
             }}
             className="px-5 py-2.5 bg-[#1A56DB] text-white text-sm font-bold rounded-xl hover:bg-[#1A56DB]/90 transition-colors"
           >
-            Clear Filters
+            {t.brand.clearFilters}
           </button>
         </div>
       )}
 
       {/* Brand Details */}
-      <BrandDetailsZone brandId={brandId} brandName={brand.name} allModels={allBrandModels} />
+      <BrandDetailsZone brandId={brandId} brandName={ln.brand(brand.name)} allModels={allBrandModels} />
 
       {/* Filter Modal */}
       <FilterModal

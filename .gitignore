@@ -30,3 +30,9 @@ next-env.d.ts
 
 # screenshots (development only)
 *.png
+
+# root-level dev artifacts (ad-hoc screenshots, debug console logs, snapshot scratch files)
+/*.jpeg
+/*.log
+/snapshot.md
+/*-snapshot.md

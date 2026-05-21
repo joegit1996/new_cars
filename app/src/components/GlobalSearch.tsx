@@ -6,7 +6,10 @@ import { searchTrims } from "@/data/helpers";
 import type { SearchEntry } from "@/data/types";
 import PlaceholderImage from "./PlaceholderImage";
 import type { BodyType } from "@/data/types";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useLanguage, tFormat } from "@/context/LanguageContext";
+import { useIsEmbedded } from "@/hooks/useIsEmbedded";
+import { appendEmbedParam } from "@/hooks/useEmbedHref";
 
 const PREVIEW_COUNT = 6;
 
@@ -18,6 +21,10 @@ export default function GlobalSearch() {
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const sp = useSearchParams();
+  const isEmbedded = useIsEmbedded();
+  const lang = sp.get("lang");
+  const { t, ln } = useLanguage();
 
   // Search on query change
   useEffect(() => {
@@ -45,17 +52,17 @@ export default function GlobalSearch() {
     (entry: SearchEntry) => {
       setOpen(false);
       setQuery("");
-      router.push(`/model/${entry.modelId}?trim=${entry.trimId}`);
+      router.push(appendEmbedParam(`/model/${entry.modelId}?trim=${entry.trimId}`, isEmbedded, lang));
     },
-    [router]
+    [router, isEmbedded, lang]
   );
 
   const navigateToFullResults = useCallback(() => {
     setOpen(false);
     const q = query;
     setQuery("");
-    router.push(`/search?q=${encodeURIComponent(q)}`);
-  }, [router, query]);
+    router.push(appendEmbedParam(`/search?q=${encodeURIComponent(q)}`, isEmbedded, lang));
+  }, [router, query, isEmbedded, lang]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -125,7 +132,7 @@ export default function GlobalSearch() {
           }}
           onFocus={() => setOpen(true)}
           onKeyDown={handleKeyDown}
-          placeholder="Search brands, models, specs, features..."
+          placeholder={t.search.placeholderDesktop}
           className="w-full ps-10 pe-9 py-2.5 bg-white rounded-full text-sm text-[#1E293B] placeholder:text-[#64748B] focus:outline-none focus:ring-2 focus:ring-[#1A56DB]"
         />
         {query && (
@@ -136,7 +143,7 @@ export default function GlobalSearch() {
               inputRef.current?.focus();
             }}
             className="absolute end-3 top-1/2 -translate-y-1/2 text-[#94A3B8] hover:text-[#1E293B] transition-colors"
-            aria-label="Clear search"
+            aria-label={t.common.clear}
           >
             <X className="w-4 h-4" />
           </button>
@@ -148,7 +155,7 @@ export default function GlobalSearch() {
         <div className="absolute top-full mt-2 inset-x-0 bg-white rounded-2xl shadow-xl border border-[#E2E8F0] overflow-hidden z-[100]">
           {preview.length === 0 ? (
             <div className="px-4 py-6 text-center">
-              <p className="text-sm text-[#64748B]">No results for &quot;{query}&quot;</p>
+              <p className="text-sm text-[#64748B]">{t.search.noResultsFor} &quot;{query}&quot;</p>
             </div>
           ) : (
             <>
@@ -172,10 +179,10 @@ export default function GlobalSearch() {
                           />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs text-[#64748B]">{entry.brandName}</p>
+                          <p className="text-xs text-[#64748B]">{ln.brand(entry.brandName)}</p>
                           <p className="text-sm font-semibold text-[#1E293B] truncate">
-                            {entry.modelName}{" "}
-                            <span className="font-normal text-[#64748B]">{entry.trimName}</span>
+                            {ln.model(entry.modelName)}{" "}
+                            <span className="font-normal text-[#64748B]">{ln.trim(entry.trimName)}</span>
                           </p>
                         </div>
                         {tag && (
@@ -196,7 +203,7 @@ export default function GlobalSearch() {
                   onClick={navigateToFullResults}
                   className="w-full flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold text-[#1A56DB] border-t border-[#E2E8F0] hover:bg-[#F8FAFC] transition-colors"
                 >
-                  View all {results.length} results
+                  {tFormat(t.search.viewAllResults, { count: results.length })}
                   <ArrowRight className="w-4 h-4" />
                 </button>
               )}
@@ -220,6 +227,10 @@ export function MobileGlobalSearch({
   const [results, setResults] = useState<SearchEntry[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
+  const sp = useSearchParams();
+  const isEmbedded = useIsEmbedded();
+  const lang = sp.get("lang");
+  const { t, ln } = useLanguage();
 
   useEffect(() => {
     if (open) {
@@ -242,17 +253,17 @@ export function MobileGlobalSearch({
     (entry: SearchEntry) => {
       onClose();
       setQuery("");
-      router.push(`/model/${entry.modelId}?trim=${entry.trimId}`);
+      router.push(appendEmbedParam(`/model/${entry.modelId}?trim=${entry.trimId}`, isEmbedded, lang));
     },
-    [router, onClose]
+    [router, onClose, isEmbedded, lang]
   );
 
   const navigateToFullResults = useCallback(() => {
     const q = query;
     onClose();
     setQuery("");
-    router.push(`/search?q=${encodeURIComponent(q)}`);
-  }, [router, query, onClose]);
+    router.push(appendEmbedParam(`/search?q=${encodeURIComponent(q)}`, isEmbedded, lang));
+  }, [router, query, onClose, isEmbedded, lang]);
 
   if (!open) return null;
 
@@ -278,7 +289,7 @@ export function MobileGlobalSearch({
               }
             }
           }}
-          placeholder="Search brands, models, specs..."
+          placeholder={t.search.placeholderMobile}
           autoFocus
           className="w-full ps-10 pe-9 py-2.5 bg-white rounded-full text-sm text-[#1E293B] placeholder:text-[#64748B] focus:outline-none focus:ring-2 focus:ring-[#1A56DB]"
         />
@@ -289,7 +300,7 @@ export function MobileGlobalSearch({
               inputRef.current?.focus();
             }}
             className="absolute end-3 top-1/2 -translate-y-1/2 text-[#94A3B8] hover:text-[#1E293B]"
-            aria-label="Clear"
+            aria-label={t.common.clear}
           >
             <X className="w-4 h-4" />
           </button>
@@ -301,7 +312,7 @@ export function MobileGlobalSearch({
         <div className="bg-white rounded-2xl overflow-hidden max-h-[60vh] overflow-y-auto">
           {preview.length === 0 ? (
             <div className="px-4 py-6 text-center">
-              <p className="text-sm text-[#64748B]">No results for &quot;{query}&quot;</p>
+              <p className="text-sm text-[#64748B]">{t.search.noResultsFor} &quot;{query}&quot;</p>
             </div>
           ) : (
             <>
@@ -319,9 +330,9 @@ export function MobileGlobalSearch({
                     />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[10px] text-[#64748B] uppercase">{entry.brandName}</p>
+                    <p className="text-[10px] text-[#64748B] uppercase">{ln.brand(entry.brandName)}</p>
                     <p className="text-sm font-semibold text-[#1E293B] truncate">
-                      {entry.modelName} <span className="font-normal text-[#64748B]">{entry.trimName}</span>
+                      {ln.model(entry.modelName)} <span className="font-normal text-[#64748B]">{ln.trim(entry.trimName)}</span>
                     </p>
                   </div>
                   <span className="shrink-0 text-xs font-bold text-[#F59E0B]">
@@ -334,7 +345,7 @@ export function MobileGlobalSearch({
                   onClick={navigateToFullResults}
                   className="w-full flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold text-[#1A56DB] border-t border-[#E2E8F0] active:bg-[#F8FAFC]"
                 >
-                  View all {results.length} results
+                  {tFormat(t.search.viewAllResults, { count: results.length })}
                   <ArrowRight className="w-4 h-4" />
                 </button>
               )}

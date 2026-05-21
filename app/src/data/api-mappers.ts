@@ -45,6 +45,8 @@ import {
   EquipmentCategory,
 } from "./types";
 
+import { LOCAL_BRAND_LOGOS } from "./image-fallbacks";
+
 // ---------------------------------------------------------------------------
 // Enum mapping helpers
 // ---------------------------------------------------------------------------
@@ -124,6 +126,11 @@ function toEquipCategory(s: string): EquipmentCategory {
   return equipCategoryMap[s?.toLowerCase()] ?? EquipmentCategory.Technology;
 }
 
+// Client-side featured overrides (matched against slug or name_en, lowercase)
+// Also used for sort order in FeaturedBrands
+const ALWAYS_FEATURED = new Set(["mercedes-benz", "porsche", "mitsubishi", "soueast"]);
+export const FEATURED_BRAND_ORDER: string[] = ["mercedes-benz", "porsche", "mitsubishi", "soueast"];
+
 // ---------------------------------------------------------------------------
 // Brand mappers
 // ---------------------------------------------------------------------------
@@ -159,9 +166,9 @@ export function mapApiBrandToBrand(b: ApiBrand): Brand {
     id: String(b.id),
     slug: b.slug || undefined,
     name: b.name_en,
-    logoUrl: b.logo_url || "",
+    logoUrl: b.logo_url || LOCAL_BRAND_LOGOS[(b.slug || "").toLowerCase()] || "",
     modelCount: b.model_count ?? 0,
-    featured: b.is_featured ?? false,
+    featured: b.is_featured || ALWAYS_FEATURED.has((b.slug || "").toLowerCase()) || ALWAYS_FEATURED.has((b.name_en || "").toLowerCase()) || false,
     tagline: b.tagline_en || undefined,
     editorial,
     heroMedia,

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, CheckCircle } from "lucide-react";
 import PlaceholderImage from "./PlaceholderImage";
+import { useLanguage, tFormat } from "@/context/LanguageContext";
 
 interface VehicleContext {
   brandName: string;
@@ -26,11 +27,13 @@ function ChipSelect<T extends string>({
   selected,
   onChange,
   label,
+  optionLabels,
 }: {
   options: T[];
   selected: T | null;
   onChange: (val: T) => void;
   label: string;
+  optionLabels?: Record<string, string>;
 }) {
   return (
     <fieldset>
@@ -47,7 +50,7 @@ function ChipSelect<T extends string>({
                 : "bg-white text-[#64748B] border-[#E2E8F0] hover:border-[#1A56DB]"
             }`}
           >
-            {option}
+            {optionLabels?.[option] ?? option}
           </button>
         ))}
       </div>
@@ -216,20 +219,32 @@ function ModalContent({
   onSubmit: (e: React.FormEvent) => void;
   onClose: () => void;
 }) {
+  const { t } = useLanguage();
+  const methodLabels: Record<string, string> = {
+    Call: t.leadForm.methodCall,
+    WhatsApp: t.leadForm.methodWhatsApp,
+    Email: t.leadForm.methodEmail,
+  };
+  const timeLabels: Record<string, string> = {
+    Morning: t.leadForm.timeMorning,
+    Afternoon: t.leadForm.timeAfternoon,
+    Evening: t.leadForm.timeEvening,
+    Anytime: t.leadForm.timeAnytime,
+  };
+
   if (submitted) {
     return (
       <div className="p-6 text-center">
         <CheckCircle className="w-14 h-14 text-[#10B981] mx-auto mb-4" />
-        <h2 className="text-lg font-bold text-[#1E293B] mb-2">Interest Submitted</h2>
+        <h2 className="text-lg font-bold text-[#1E293B] mb-2">{t.leadForm.submitted}</h2>
         <p className="text-sm text-[#64748B] mb-6">
-          You&apos;ve expressed interest in the {vehicleLabel}. A representative will
-          contact you shortly.
+          {tFormat(t.leadForm.submittedMsg, { vehicle: vehicleLabel })}
         </p>
         <button
           onClick={onClose}
           className="px-6 py-2.5 bg-[#1A56DB] text-white text-sm font-bold rounded-xl hover:bg-[#1A56DB]/90 transition-colors"
         >
-          Close
+          {t.leadForm.close}
         </button>
       </div>
     );
@@ -239,11 +254,11 @@ function ModalContent({
     <div className="p-5">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-bold text-[#1E293B]">I&apos;m Interested</h2>
+        <h2 className="text-lg font-bold text-[#1E293B]">{t.leadForm.interested}</h2>
         <button
           onClick={onClose}
           className="p-1 text-[#64748B] hover:text-[#1E293B] transition-colors"
-          aria-label="Close"
+          aria-label={t.leadForm.close}
         >
           <X className="w-5 h-5" />
         </button>
@@ -270,13 +285,13 @@ function ModalContent({
         {/* Full Name */}
         <div>
           <label className="text-sm font-medium text-[#1E293B] mb-1 block">
-            Full Name <span className="text-[#EF4444]">*</span>
+            {t.leadForm.name} <span className="text-[#EF4444]">*</span>
           </label>
           <input
             type="text"
             value={fullName}
             onChange={(e) => onFullNameChange(e.target.value)}
-            placeholder="Enter your full name"
+            placeholder={t.leadForm.namePlaceholder}
             required
             className="w-full px-3 py-2.5 border border-[#E2E8F0] rounded-lg text-sm text-[#1E293B] placeholder:text-[#94A3B8] focus:outline-none focus:ring-2 focus:ring-[#1A56DB] focus:border-transparent"
           />
@@ -285,13 +300,13 @@ function ModalContent({
         {/* Phone */}
         <div>
           <label className="text-sm font-medium text-[#1E293B] mb-1 block">
-            Phone Number <span className="text-[#EF4444]">*</span>
+            {t.leadForm.phone} <span className="text-[#EF4444]">*</span>
           </label>
           <input
             type="tel"
             value={phone}
             onChange={(e) => onPhoneChange(e.target.value)}
-            placeholder="+965 XXXX XXXX"
+            placeholder={t.leadForm.phonePlaceholder}
             required
             className="w-full px-3 py-2.5 border border-[#E2E8F0] rounded-lg text-sm text-[#1E293B] placeholder:text-[#94A3B8] focus:outline-none focus:ring-2 focus:ring-[#1A56DB] focus:border-transparent"
           />
@@ -300,42 +315,44 @@ function ModalContent({
         {/* Email */}
         <div>
           <label className="text-sm font-medium text-[#1E293B] mb-1 block">
-            Email <span className="text-[#64748B] text-xs font-light">(optional)</span>
+            {t.leadForm.email} <span className="text-[#64748B] text-xs font-light">({t.leadForm.optional})</span>
           </label>
           <input
             type="email"
             value={email}
             onChange={(e) => onEmailChange(e.target.value)}
-            placeholder="your@email.com"
+            placeholder={t.leadForm.emailPlaceholder}
             className="w-full px-3 py-2.5 border border-[#E2E8F0] rounded-lg text-sm text-[#1E293B] placeholder:text-[#94A3B8] focus:outline-none focus:ring-2 focus:ring-[#1A56DB] focus:border-transparent"
           />
         </div>
 
         {/* Preferred Contact Method */}
         <ChipSelect
-          label="Preferred Contact Method *"
+          label={t.leadForm.contactMethod}
           options={["Call", "WhatsApp", "Email"] as ContactMethod[]}
           selected={contactMethod}
           onChange={onContactMethodChange}
+          optionLabels={methodLabels}
         />
 
         {/* Preferred Time */}
         <ChipSelect
-          label="Preferred Time"
+          label={t.leadForm.preferredTime}
           options={["Morning", "Afternoon", "Evening", "Anytime"] as PreferredTime[]}
           selected={preferredTime}
           onChange={onPreferredTimeChange}
+          optionLabels={timeLabels}
         />
 
         {/* Notes */}
         <div>
           <label className="text-sm font-medium text-[#1E293B] mb-1 block">
-            Notes <span className="text-[#64748B] text-xs font-light">(optional)</span>
+            {t.leadForm.notes} <span className="text-[#64748B] text-xs font-light">({t.leadForm.optional})</span>
           </label>
           <textarea
             value={notes}
             onChange={(e) => onNotesChange(e.target.value)}
-            placeholder="Any specific questions or preferences..."
+            placeholder={t.leadForm.notesPlaceholder}
             rows={3}
             className="w-full px-3 py-2.5 border border-[#E2E8F0] rounded-lg text-sm text-[#1E293B] placeholder:text-[#94A3B8] focus:outline-none focus:ring-2 focus:ring-[#1A56DB] focus:border-transparent resize-none"
           />
@@ -347,7 +364,7 @@ function ModalContent({
           disabled={!canSubmit}
           className="w-full py-3 bg-[#1A56DB] text-white text-sm font-bold rounded-xl hover:bg-[#1A56DB]/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
         >
-          Submit Interest
+          {t.leadForm.submit}
         </button>
       </form>
     </div>

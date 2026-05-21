@@ -11,6 +11,7 @@ import MobileTabBar from "../../components/MobileTabBar";
 import PlaceholderImage from "../../components/PlaceholderImage";
 import { CompareProvider } from "../../context/CompareContext";
 import { useAppData } from "@/context/AppDataContext";
+import { useLanguage, tFormat } from "@/context/LanguageContext";
 import type { BodyType } from "../../data/types";
 import ModelCard from "../../components/ModelCard";
 
@@ -20,6 +21,7 @@ function SearchPageContent() {
   const [query, setQuery] = useState(initialQuery);
   const [recentSearches] = useState(["Land Cruiser", "BMW X5", "V8", "AWD"]);
   const { brands, models, searchTrims, getBrandById, loading } = useAppData();
+  const { t, dir, ln } = useLanguage();
 
   // Sync from URL param on mount / param change
   useEffect(() => {
@@ -57,7 +59,7 @@ function SearchPageContent() {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search brands, models, specs, features..."
+            placeholder={t.search.placeholderDesktop}
             autoFocus
             className="w-full ps-12 pe-4 py-4 bg-white border border-[#E2E8F0] rounded-2xl text-base text-[#1E293B] placeholder:text-[#94A3B8] focus:outline-none focus:ring-2 focus:ring-[#1A56DB] focus:border-transparent shadow-sm"
           />
@@ -66,7 +68,7 @@ function SearchPageContent() {
               onClick={() => setQuery("")}
               className="absolute end-4 top-1/2 -translate-y-1/2 text-[#64748B] hover:text-[#1E293B]"
             >
-              Clear
+              {t.common.clear}
             </button>
           )}
         </div>
@@ -83,7 +85,7 @@ function SearchPageContent() {
               {recentSearches.length > 0 && (
                 <section className="mb-8">
                   <h2 className="text-sm font-bold text-[#1E293B] mb-3">
-                    Recent Searches
+                    {t.search.recentSearches}
                   </h2>
                   <div className="flex flex-wrap gap-2">
                     {recentSearches.map((s) => (
@@ -102,7 +104,7 @@ function SearchPageContent() {
               {/* Popular Brands */}
               <section className="mb-8">
                 <h2 className="text-sm font-bold text-[#1E293B] mb-3">
-                  Popular Brands
+                  {t.search.popularBrands}
                 </h2>
                 <div className="grid grid-cols-4 md:grid-cols-8 gap-3">
                   {brands.map((brand) => (
@@ -115,7 +117,7 @@ function SearchPageContent() {
                         {brand.name.substring(0, 2).toUpperCase()}
                       </div>
                       <span className="text-[10px] text-[#1E293B] font-medium text-center leading-tight">
-                        {brand.name}
+                        {ln.brand(brand.name)}
                       </span>
                     </EmbedLink>
                   ))}
@@ -125,7 +127,7 @@ function SearchPageContent() {
               {/* Popular Right Now */}
               <section>
                 <h2 className="text-sm font-bold text-[#1E293B] mb-3">
-                  Popular Right Now
+                  {t.search.popularRightNow}
                 </h2>
                 {/* Mobile compact list */}
                 <div className="md:hidden space-y-2">
@@ -141,8 +143,8 @@ function SearchPageContent() {
                           <PlaceholderImage aspectRatio="4/3" className="w-full h-full" bodyType={model.bodyType} imageUrl={model.imageUrl} />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-[10px] text-[#64748B] uppercase tracking-wide">{brand?.name}</p>
-                          <p className="text-sm font-bold text-[#1E293B] truncate">{model.name}</p>
+                          <p className="text-[10px] text-[#64748B] uppercase tracking-wide">{brand ? ln.brand(brand.name) : ""}</p>
+                          <p className="text-sm font-bold text-[#1E293B] truncate">{ln.model(model.name)}</p>
                           <p className="text-xs font-bold text-[#F59E0B]">{model.startingPrice.toLocaleString()} KWD</p>
                         </div>
                       </EmbedLink>
@@ -161,6 +163,7 @@ function SearchPageContent() {
                           name: model.name,
                           brandId: model.brandId,
                           brandName: brand?.name || "",
+                          brandLogoUrl: brand?.logoUrl,
                           bodyType: model.bodyType,
                           startingPrice: model.startingPrice,
                           engineRange: model.specsSummary.engineRange,
@@ -185,7 +188,7 @@ function SearchPageContent() {
               exit={{ opacity: 0 }}
             >
               <p className="text-sm text-[#64748B] mb-4">
-                {results.length} result{results.length !== 1 ? "s" : ""} for &quot;{query}&quot;
+                {tFormat(t.search.resultsFor, { count: results.length })} &quot;{query}&quot;
               </p>
               {/* Trim-level results */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -205,12 +208,12 @@ function SearchPageContent() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-[10px] text-[#64748B] uppercase tracking-wide">
-                        {entry.brandName}
+                        {ln.brand(entry.brandName)}
                       </p>
                       <p className="text-sm font-bold text-[#1E293B] truncate">
-                        {entry.modelName}
+                        {ln.model(entry.modelName)}
                       </p>
-                      <p className="text-xs text-[#64748B] truncate">{entry.trimName}</p>
+                      <p className="text-xs text-[#64748B] truncate">{ln.trim(entry.trimName)}</p>
                       <p className="text-xs font-bold text-[#F59E0B] mt-0.5">
                         {entry.price.toLocaleString()} KWD
                       </p>
@@ -229,17 +232,17 @@ function SearchPageContent() {
             >
               <Search className="w-12 h-12 text-[#E2E8F0] mx-auto mb-4" />
               <h3 className="text-lg font-bold text-[#1E293B] mb-2">
-                No matches for &quot;{query}&quot;
+                {t.search.noMatchesFor} &quot;{query}&quot;
               </h3>
               <p className="text-sm text-[#64748B] mb-4">
-                Try a different search term or browse all cars
+                {t.search.tryDifferent}
               </p>
               <EmbedLink
                 href="/browse"
                 className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#1A56DB] text-white text-sm font-bold rounded-xl hover:bg-[#1A56DB]/90 transition-colors"
               >
-                <ArrowLeft className="w-4 h-4" />
-                Browse All Cars
+                <ArrowLeft className={`w-4 h-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
+                {t.home.hero.ctaBrowse}
               </EmbedLink>
             </motion.div>
           )}

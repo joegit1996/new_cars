@@ -11,6 +11,8 @@ export const brandColors: Record<string, string> = {
   changan: "#1A56DB",
   haval: "#DC2626",
   mg: "#EF4444",
+  mitsubishi: "#CC0000",
+  soueast: "#00695C",
 };
 
 export function getBrandById(id: string): Brand | undefined {

@@ -10,6 +10,8 @@ export const LOCAL_BRAND_LOGOS: Record<string, string> = {
   changan: "/images/brands/changan.png",
   haval: "/images/brands/haval.png",
   mg: "/images/brands/mg.png",
+  mitsubishi: "/images/brands/mitsubishi.png",
+  soueast: "/images/brands/soueast.png",
 };
 
 // Pattern: [brandSlug, modelNameKeyword] → local image path
