@@ -142,16 +142,7 @@ const apiDataSource = {
 // Export the active data source
 // ---------------------------------------------------------------------------
 
-function isApiMode(): boolean {
-  if (typeof process !== "undefined" && process.env?.NEXT_PUBLIC_DATA_SOURCE === "api") {
-    return true;
-  }
-  // Also check window for client components
-  if (typeof window !== "undefined") {
-    return (window as unknown as Record<string, unknown>).__NEXT_DATA_SOURCE__ === "api";
-  }
-  return false;
-}
+const API_MODE = process.env.NEXT_PUBLIC_DATA_SOURCE === "api";
 
 export type DataSource = typeof mockDataSource | typeof apiDataSource;
 
@@ -161,11 +152,11 @@ export type DataSource = typeof mockDataSource | typeof apiDataSource;
  * - Default (mock): uses the existing mock-data.ts / helpers.ts
  * - API mode: set NEXT_PUBLIC_DATA_SOURCE="api" and NEXT_PUBLIC_API_BASE_URL
  */
-export const ds: DataSource = isApiMode() ? apiDataSource : mockDataSource;
+export const ds: DataSource = API_MODE ? apiDataSource : mockDataSource;
 
 /**
  * Check at runtime which source is active.
  */
 export function getDataSourceMode(): "mock" | "api" {
-  return isApiMode() ? "api" : "mock";
+  return API_MODE ? "api" : "mock";
 }
