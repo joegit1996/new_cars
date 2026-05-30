@@ -145,7 +145,7 @@ function SearchPageContent() {
                         <div className="flex-1 min-w-0">
                           <p className="text-[10px] text-[#64748B] uppercase tracking-wide">{brand ? ln.brand(brand.name) : ""}</p>
                           <p className="text-sm font-bold text-[#1E293B] truncate">{ln.model(model.name)}</p>
-                          <p className="text-xs font-bold text-[#F59E0B]">{model.startingPrice.toLocaleString()} KWD</p>
+                          <p className="text-xs font-bold text-[#F59E0B]">{model.priceOnRequest ? t.common.priceOnRequest : `${model.startingPrice.toLocaleString()} ${t.common.kwd}`}</p>
                         </div>
                       </EmbedLink>
                     );
@@ -166,6 +166,7 @@ function SearchPageContent() {
                           brandLogoUrl: brand?.logoUrl,
                           bodyType: model.bodyType,
                           startingPrice: model.startingPrice,
+                          priceOnRequest: model.priceOnRequest,
                           engineRange: model.specsSummary.engineRange,
                           hpRange: model.specsSummary.hpRange,
                           fuelType: model.specsSummary.fuelTypes.join(", "),

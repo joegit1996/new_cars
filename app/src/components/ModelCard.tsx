@@ -17,6 +17,7 @@ export interface ModelData {
   brandLogoUrl?: string;
   bodyType: string;
   startingPrice: number;
+  priceOnRequest?: boolean;
   engineRange?: string;
   hpRange?: string;
   fuelType?: string;
@@ -150,8 +151,14 @@ export default function ModelCard({
           {/* Price */}
           <div className="flex items-baseline justify-between">
             <p className="text-[#1E293B] font-bold text-base">
-              {model.startingPrice.toLocaleString()}{" "}
-              <span className="text-[#64748B] font-normal text-sm">{t.common.kwd}</span>
+              {model.priceOnRequest ? (
+                <span>{t.common.priceOnRequest}</span>
+              ) : (
+                <>
+                  {model.startingPrice.toLocaleString()}{" "}
+                  <span className="text-[#64748B] font-normal text-sm">{t.common.kwd}</span>
+                </>
+              )}
             </p>
             <span className="text-[11px] text-[#94A3B8] font-medium">
               {model.trimCount} {t.model.trims.toLowerCase()}

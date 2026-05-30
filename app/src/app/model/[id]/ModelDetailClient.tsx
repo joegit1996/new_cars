@@ -1091,6 +1091,7 @@ function PricingBreakdown({
   selectedVariant: TrimVariant | null;
 }) {
   const { t } = useLanguage();
+  const onRequest = trim.priceOnRequest === true;
   const basePrice = selectedVariant ? selectedVariant.price : trim.price;
   const regFees = Math.round(basePrice * 0.02);
   const insurance = Math.round(basePrice * 0.035);
@@ -1106,6 +1107,17 @@ function PricingBreakdown({
     tenure > 0
       ? Math.round((financed * (1 + rate * (tenure / 12))) / tenure)
       : 0;
+
+  if (onRequest) {
+    return (
+      <div className="space-y-6">
+        <div className="bg-[#F1F5F9] rounded-xl p-5">
+          <p className="text-sm text-[#64748B] mb-1">{t.model.basePriceLabel}</p>
+          <p className="text-3xl font-bold text-[#F59E0B]">{t.common.priceOnRequest}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -1266,7 +1278,9 @@ function AllTrimsComparison({
               <th key={tr.id} className="p-2 text-center min-w-[140px] md:min-w-[160px]">
                 <div className="w-full rounded-lg p-3 border border-[#E2E8F0] bg-white text-start">
                   <p className="font-bold text-sm text-[#1E293B]">{tr.name}</p>
-                  <p className="text-sm font-bold text-[#F59E0B] mt-0.5">{formatPrice(tr.price)} {t.common.kwd}</p>
+                  <p className="text-sm font-bold text-[#F59E0B] mt-0.5">
+                    {tr.priceOnRequest ? t.common.priceOnRequest : `${formatPrice(tr.price)} ${t.common.kwd}`}
+                  </p>
                 </div>
               </th>
             ))}

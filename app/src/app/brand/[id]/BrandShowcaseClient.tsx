@@ -512,7 +512,11 @@ function ModelShowcase({
 
             <p className="text-xs text-[#94A3B8] uppercase tracking-wider mb-1">{t.brand.startingFrom}</p>
             <p className="text-2xl md:text-3xl font-bold text-[#1E293B] mb-4">
-              {formatPrice(current.startingPrice)} <span className="text-lg font-normal text-[#64748B]">{t.common.kwd}</span>
+              {current.priceOnRequest ? (
+                t.common.priceOnRequest
+              ) : (
+                <>{formatPrice(current.startingPrice)} <span className="text-lg font-normal text-[#64748B]">{t.common.kwd}</span></>
+              )}
             </p>
 
             <EmbedAnchor
@@ -596,8 +600,11 @@ function FeaturedModelsSection({
           title: ln.model(model.name),
           rightLabel: (
             <span className="normal-case tracking-normal text-right">
-              {formatPrice(model.startingPrice)}{" "}
-              <span className="text-[0.7em] opacity-50">{t.common.kwd}</span>
+              {model.priceOnRequest ? (
+                t.common.priceOnRequest
+              ) : (
+                <>{formatPrice(model.startingPrice)}{" "}<span className="text-[0.7em] opacity-50">{t.common.kwd}</span></>
+              )}
             </span>
           ),
           bottomContent: (
@@ -620,8 +627,11 @@ function FeaturedModelsSection({
               )}
               <div className="flex items-center gap-4 mt-1">
                 <span className="text-xl md:text-2xl font-bold text-white">
-                  {formatPrice(model.startingPrice)}{" "}
-                  <span className="text-sm font-normal text-white/40">{t.common.kwd}</span>
+                  {model.priceOnRequest ? (
+                    t.common.priceOnRequest
+                  ) : (
+                    <>{formatPrice(model.startingPrice)}{" "}<span className="text-sm font-normal text-white/40">{t.common.kwd}</span></>
+                  )}
                 </span>
                 <EmbedAnchor
                   href={`/model/${model.id}`}
@@ -711,10 +721,11 @@ function FeaturedModelsSection({
                       </p>
                     )}
                     <p className="text-base font-bold text-white mt-2">
-                      {formatPrice(model.startingPrice)}{" "}
-                      <span className="text-xs font-normal text-white/40">
-                        {t.common.kwd}
-                      </span>
+                      {model.priceOnRequest ? (
+                        t.common.priceOnRequest
+                      ) : (
+                        <>{formatPrice(model.startingPrice)}{" "}<span className="text-xs font-normal text-white/40">{t.common.kwd}</span></>
+                      )}
                     </p>
                   </div>
                 </EmbedAnchor>
@@ -843,16 +854,19 @@ function BrowseByClass({
 }) {
   const { t, ln } = useLanguage();
   const families = useMemo(() => {
-    const map = new Map<string, { count: number; priceFrom: number; bodyType: string; imageUrl?: string }>();
+    const map = new Map<string, { count: number; priceFrom: number; allOnRequest: boolean; bodyType: string; imageUrl?: string }>();
     models.forEach((m) => {
       if (!m.modelFamily) return;
       const existing = map.get(m.modelFamily);
       if (existing) {
         existing.count++;
-        existing.priceFrom = Math.min(existing.priceFrom, m.startingPrice);
+        if (!m.priceOnRequest) {
+          existing.priceFrom = existing.allOnRequest ? m.startingPrice : Math.min(existing.priceFrom, m.startingPrice);
+          existing.allOnRequest = false;
+        }
         if (!existing.imageUrl && m.imageUrl) existing.imageUrl = m.imageUrl;
       } else {
-        map.set(m.modelFamily, { count: 1, priceFrom: m.startingPrice, bodyType: m.bodyType, imageUrl: m.imageUrl });
+        map.set(m.modelFamily, { count: 1, priceFrom: m.startingPrice, allOnRequest: m.priceOnRequest === true, bodyType: m.bodyType, imageUrl: m.imageUrl });
       }
     });
     return Array.from(map.entries());
@@ -898,7 +912,11 @@ function BrowseByClass({
                     {tFormat(info.count !== 1 ? t.brand.countModels : t.brand.countModel, { count: info.count })}
                   </p>
                   <p className="text-xs text-white/60">
-                    {t.common.from} <span className="text-white font-bold">{formatPrice(info.priceFrom)}</span> {t.common.kwd}
+                    {info.allOnRequest ? (
+                      <span className="text-white font-bold">{t.common.priceOnRequest}</span>
+                    ) : (
+                      <>{t.common.from} <span className="text-white font-bold">{formatPrice(info.priceFrom)}</span> {t.common.kwd}</>
+                    )}
                   </p>
                 </div>
               </EmbedAnchor>

@@ -103,6 +103,8 @@ export interface Model {
   bodyType: BodyType;
   year: number;
   startingPrice: number;
+  /** True when the dealer lists this model as "Price upon request"; startingPrice is unreliable for sort/display. */
+  priceOnRequest?: boolean;
   trimCount: number;
   isNew: boolean;
   isUpdated: boolean;
@@ -131,6 +133,8 @@ export interface Trim {
   modelId: string;
   name: string;
   price: number;
+  /** True when this trim is sold "Price upon request"; price is a placeholder and should display as such. */
+  priceOnRequest?: boolean;
   engineSummary: string;
   horsepower: number;
   torque: number;
