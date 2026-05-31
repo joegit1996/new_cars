@@ -35,6 +35,34 @@ const fadeUp = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: "easeOut" as const } },
 };
 
+/**
+ * Round-robin a list of models by brand so home-page sections show a diverse
+ * selection instead of stacking everything from the first brand. Stops at
+ * `limit` items.
+ */
+function interleaveByBrand<T extends { brandId: string }>(items: T[], limit: number): T[] {
+  if (items.length === 0) return items;
+  const buckets = new Map<string, T[]>();
+  for (const item of items) {
+    const arr = buckets.get(item.brandId) ?? [];
+    arr.push(item);
+    buckets.set(item.brandId, arr);
+  }
+  const queues = Array.from(buckets.values());
+  const out: T[] = [];
+  while (out.length < limit) {
+    let progressed = false;
+    for (const q of queues) {
+      if (q.length === 0) continue;
+      out.push(q.shift()!);
+      progressed = true;
+      if (out.length >= limit) break;
+    }
+    if (!progressed) break;
+  }
+  return out;
+}
+
 function AnimatedSection({
   children,
   className = "",
@@ -415,6 +443,7 @@ function FeaturedBrands() {
         >
           {featuredBrands.map((brand, idx) => {
             const topModel = getModelsByBrand(brand.id)[0];
+            const heroImage = brand.featuredImageUrl || topModel?.imageUrl;
             const isHovered = hoveredIdx === idx;
             const SilhouetteIcon =
               silhouetteMap[topModel?.bodyType || "Sedan"] ||
@@ -442,10 +471,10 @@ function FeaturedBrands() {
                     transform: isHovered ? "scale(1.08)" : "scale(1)",
                   }}
                 >
-                  {topModel?.imageUrl ? (
+                  {heroImage ? (
                     <img
-                      src={topModel.imageUrl}
-                      alt={`${brand.name} ${topModel.name}`}
+                      src={heroImage}
+                      alt={`${brand.name} ${topModel?.name ?? ""}`.trim()}
                       className="w-full h-full object-cover"
                     />
                   ) : (
@@ -520,6 +549,7 @@ function FeaturedBrands() {
           >
             {featuredBrands.map((brand) => {
               const topModel = getModelsByBrand(brand.id)[0];
+              const heroImage = brand.featuredImageUrl || topModel?.imageUrl;
               const SilhouetteIcon =
                 silhouetteMap[topModel?.bodyType || "Sedan"] ||
                 silhouetteMap["Sedan"];
@@ -537,10 +567,10 @@ function FeaturedBrands() {
                 >
                   {/* Car image */}
                   <div className="absolute inset-0">
-                    {topModel?.imageUrl ? (
+                    {heroImage ? (
                       <img
-                        src={topModel.imageUrl}
-                        alt={`${brand.name} ${topModel.name}`}
+                        src={heroImage}
+                        alt={`${brand.name} ${topModel?.name ?? ""}`.trim()}
                         className="w-full h-full object-cover"
                       />
                     ) : (
@@ -732,7 +762,7 @@ function PopularModels() {
   const { t } = useLanguage();
   const scrollRef = useRef<HTMLDivElement>(null);
   const { addItem } = useCompare();
-  const popular = useMemo(() => models.slice(0, 8), [models]);
+  const popular = useMemo(() => interleaveByBrand(models.filter((m) => m.featured), 12), [models]);
 
   const scroll = (dir: "left" | "right") => {
     if (!scrollRef.current) return;
@@ -917,7 +947,7 @@ function WhatsNew() {
   const { getNewModels, getBrandById } = useAppData();
   const { t } = useLanguage();
   const scrollRef = useRef<HTMLDivElement>(null);
-  const newModels = useMemo(() => getNewModels(), [getNewModels]);
+  const newModels = useMemo(() => interleaveByBrand(getNewModels(), 16), [getNewModels]);
   const { addItem } = useCompare();
 
   const scroll = (dir: "left" | "right") => {

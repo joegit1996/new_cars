@@ -93,6 +93,8 @@ export interface Brand {
     heritage?: string;
     innovation?: string;
   };
+  /** Optional override for the home-page Featured Brands card image. Defaults to the brand's first model's imageUrl. */
+  featuredImageUrl?: string;
 }
 
 export interface Model {
