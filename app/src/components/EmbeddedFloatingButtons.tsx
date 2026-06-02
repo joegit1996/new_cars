@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Search, X, ArrowRight, Scale } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { searchTrims } from "@/data/helpers";
+import { useAppData } from "@/context/AppDataContext";
 import type { SearchEntry, BodyType } from "@/data/types";
 import PlaceholderImage from "./PlaceholderImage";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
@@ -26,6 +26,7 @@ export default function EmbeddedFloatingButtons() {
   const sp = useSearchParams();
   const lang = sp.get("lang");
   const { t, ln } = useLanguage();
+  const { searchTrims } = useAppData();
 
   useEffect(() => {
     if (searchExpanded) {
@@ -44,7 +45,7 @@ export default function EmbeddedFloatingButtons() {
     }
     setResults(searchTrims(query));
     setHighlightIndex(-1);
-  }, [query]);
+  }, [query, searchTrims]);
 
   // Close on click outside
   useEffect(() => {

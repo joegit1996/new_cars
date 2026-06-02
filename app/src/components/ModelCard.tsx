@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import { Scale, Bookmark, ArrowRight } from "lucide-react";
 import PlaceholderImage from "./PlaceholderImage";
 import EmbedLink from "./EmbedLink";
-import { brandColors } from "@/data/helpers";
+import { brandColor } from "@/data/helpers";
 import { useLanguage } from "@/context/LanguageContext";
 
 export interface ModelData {
@@ -63,7 +63,7 @@ function BrandLogo({
   return (
     <div
       className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
-      style={{ backgroundColor: brandColors[brandId] || "#64748B" }}
+      style={{ backgroundColor: brandColor(brandName || brandId) }}
     >
       <span className="text-white font-semibold text-[10px]">
         {brandName.substring(0, 2).toUpperCase()}

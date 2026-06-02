@@ -334,7 +334,49 @@ function ApiDataProvider({ children }: { children: ReactNode }) {
       const resolvedId = model?.id ?? modelId;
       const modelTrims = trimsCache[resolvedId];
       if (!modelTrims || modelTrims.length === 0) return undefined;
-      return mockHelpers.getModelAggregateSpecs(resolvedId);
+
+      const mm = (vals: number[]) => ({
+        min: vals.length ? Math.min(...vals) : 0,
+        max: vals.length ? Math.max(...vals) : 0,
+      });
+
+      // Equipment: "standard" if every trim has it as standard, "some" if at least one, "none" otherwise.
+      const allEquip = new Set<string>();
+      for (const t of modelTrims) for (const e of t.equipment) allEquip.add(e.name);
+      const equipmentMap: Record<string, "standard" | "some" | "none"> = {};
+      for (const name of allEquip) {
+        const standardCount = modelTrims.filter((t) =>
+          t.equipment.some((e) => e.name === name && e.isStandard),
+        ).length;
+        const anyCount = modelTrims.filter((t) =>
+          t.equipment.some((e) => e.name === name),
+        ).length;
+        equipmentMap[name] =
+          standardCount === modelTrims.length
+            ? "standard"
+            : anyCount > 0
+              ? "some"
+              : "none";
+      }
+
+      return {
+        priceRange: mm(modelTrims.map((t) => t.price)),
+        hpRange: mm(modelTrims.map((t) => t.specs.horsepower)),
+        torqueRange: mm(modelTrims.map((t) => t.specs.torque)),
+        fuelTypes: [...new Set(modelTrims.map((t) => t.fuelType))],
+        transmissions: [...new Set(modelTrims.map((t) => t.specs.transmission))],
+        driveTypes: [...new Set(modelTrims.map((t) => t.specs.driveType))],
+        seatingRange: mm(modelTrims.map((t) => t.specs.seatingCapacity)),
+        displacementRange: mm(modelTrims.map((t) => t.specs.displacement)),
+        dimensionRanges: {
+          length: mm(modelTrims.map((t) => t.specs.lengthMm)),
+          width: mm(modelTrims.map((t) => t.specs.widthMm)),
+          height: mm(modelTrims.map((t) => t.specs.heightMm)),
+          wheelbase: mm(modelTrims.map((t) => t.specs.wheelbaseMm)),
+        },
+        equipmentMap,
+        trimCount: modelTrims.length,
+      };
     },
     [trimsCache, resolveModel]
   );

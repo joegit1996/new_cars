@@ -15,6 +15,21 @@ export const brandColors: Record<string, string> = {
   soueast: "#00695C",
 };
 
+/**
+ * Resolve a brand's accent color from either its mock ID ("mercedes") or its
+ * display name ("Mercedes Benz"). Used so cards work in both mock-mode (where
+ * brand IDs are slugs) and API-mode (where brand IDs are numeric strings).
+ */
+export function brandColor(brandIdOrName: string): string {
+  if (!brandIdOrName) return "#64748B";
+  const norm = brandIdOrName.toLowerCase().replace(/[^a-z0-9]/g, "");
+  if (brandColors[norm]) return brandColors[norm];
+  for (const key of Object.keys(brandColors)) {
+    if (norm.startsWith(key)) return brandColors[key];
+  }
+  return "#64748B";
+}
+
 export function getBrandById(id: string): Brand | undefined {
   return brands.find((b) => b.id === id);
 }

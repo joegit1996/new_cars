@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Search, X, ArrowRight } from "lucide-react";
-import { searchTrims } from "@/data/helpers";
+import { useAppData } from "@/context/AppDataContext";
 import type { SearchEntry } from "@/data/types";
 import PlaceholderImage from "./PlaceholderImage";
 import type { BodyType } from "@/data/types";
@@ -25,6 +25,7 @@ export default function GlobalSearch() {
   const isEmbedded = useIsEmbedded();
   const lang = sp.get("lang");
   const { t, ln } = useLanguage();
+  const { searchTrims } = useAppData();
 
   // Search on query change
   useEffect(() => {
@@ -35,7 +36,7 @@ export default function GlobalSearch() {
     const all = searchTrims(query);
     setResults(all);
     setHighlightIndex(-1);
-  }, [query]);
+  }, [query, searchTrims]);
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -231,6 +232,7 @@ export function MobileGlobalSearch({
   const isEmbedded = useIsEmbedded();
   const lang = sp.get("lang");
   const { t, ln } = useLanguage();
+  const { searchTrims } = useAppData();
 
   useEffect(() => {
     if (open) {
@@ -247,7 +249,7 @@ export function MobileGlobalSearch({
       return;
     }
     setResults(searchTrims(query));
-  }, [query]);
+  }, [query, searchTrims]);
 
   const navigateToResult = useCallback(
     (entry: SearchEntry) => {
