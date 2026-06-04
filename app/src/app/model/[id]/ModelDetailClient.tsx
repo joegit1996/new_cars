@@ -1408,7 +1408,7 @@ export default function ModelDetailClient({ id }: { id: string }) {
 
         {/* ---- Hero ---- */}
         <div ref={heroRef} className="relative w-full">
-          <HeroVideo heroMedia={brand.heroMedia} />
+          <HeroVideo heroMedia={model.heroMedia ?? brand.heroMedia} />
           <button
             onClick={() => setBookmarked(!bookmarked)}
             className={`absolute top-3 end-3 z-10 w-10 h-10 flex items-center justify-center rounded-full shadow transition-colors ${

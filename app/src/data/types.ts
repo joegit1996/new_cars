@@ -74,10 +74,12 @@ export interface BrandEditorial {
   serviceLinks: BrandServiceLink[];
 }
 
-export interface BrandHeroMedia {
+export interface HeroMedia {
   type: "video" | "image";
   url: string;
 }
+
+export type BrandHeroMedia = HeroMedia;
 
 export interface Brand {
   id: string;
@@ -122,6 +124,8 @@ export interface Model {
   };
   segmentOrder?: number;
   modelFamily?: string;
+  /** Optional per-model hero video/image. When set, the model detail page uses this instead of the brand's heroMedia. */
+  heroMedia?: HeroMedia;
 }
 
 export interface ModelSpecsSummary {
