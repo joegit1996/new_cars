@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -358,11 +358,7 @@ function Inner({ slug }: { slug: string }) {
               <h1 className="font-bold text-xl md:text-2xl text-[#1E293B] leading-tight">
                 {seller.name}
               </h1>
-              {description && (
-                <p className="text-sm text-[#64748B] mt-1 leading-relaxed">
-                  {description}
-                </p>
-              )}
+              {description && <ExpandableDescription text={description} />}
             </div>
           </div>
 
@@ -838,5 +834,59 @@ function MobileFilterSheet({
         </>
       )}
     </AnimatePresence>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Expandable description -- clamps to 2 lines on mobile, full on desktop.
+// Shows a "See more / See less" toggle only when the text actually overflows
+// in the clamped state.
+// ---------------------------------------------------------------------------
+
+function ExpandableDescription({ text }: { text: string }) {
+  const ref = useRef<HTMLParagraphElement>(null);
+  const [expanded, setExpanded] = useState(false);
+  const [overflows, setOverflows] = useState(false);
+  const { t } = useLanguage();
+
+  useEffect(() => {
+    const measure = () => {
+      const el = ref.current;
+      if (!el) return;
+      const mobile = window.matchMedia("(max-width: 767px)").matches;
+      if (!mobile) {
+        setOverflows(false);
+        return;
+      }
+      // Only trust the measurement while the clamp is actually applied.
+      if (el.classList.contains("line-clamp-2")) {
+        setOverflows(el.scrollHeight > el.clientHeight + 1);
+      }
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, [text]);
+
+  return (
+    <div className="mt-1">
+      <p
+        ref={ref}
+        className={`text-sm text-[#64748B] leading-relaxed ${
+          expanded ? "" : "line-clamp-2 md:line-clamp-none"
+        }`}
+      >
+        {text}
+      </p>
+      {overflows && (
+        <button
+          type="button"
+          onClick={() => setExpanded((v) => !v)}
+          className="md:hidden mt-1 text-xs font-bold text-[#1A56DB] hover:underline"
+        >
+          {expanded ? t.common.seeLess : t.common.seeMore}
+        </button>
+      )}
+    </div>
   );
 }

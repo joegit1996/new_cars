@@ -43,6 +43,8 @@ export const en = {
     hp: "hp",
     browse: "Browse",
     getStarted: "Get Started",
+    seeMore: "See more",
+    seeLess: "See less",
   },
   nav: {
     brand: "4Sale",
@@ -771,6 +773,8 @@ export const ar: Dictionary = {
     hp: "حصان",
     browse: "تصفح",
     getStarted: "ابدأ الآن",
+    seeMore: "عرض المزيد",
+    seeLess: "عرض أقل",
   },
   nav: {
     brand: "فورسيل",
