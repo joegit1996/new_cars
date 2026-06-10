@@ -11,6 +11,8 @@ interface PlaceholderImageProps {
   silhouetteSize?: "sm" | "md" | "lg";
   /** When provided, renders a real image instead of the SVG silhouette */
   imageUrl?: string;
+  /** How a real image should fit. Defaults to "cover". Use "contain" for studio thumbnails. */
+  imageFit?: "cover" | "contain";
 }
 
 function SedanSilhouette() {
@@ -156,6 +158,7 @@ export default function PlaceholderImage({
   bodyType,
   silhouetteSize = "sm",
   imageUrl,
+  imageFit = "cover",
 }: PlaceholderImageProps) {
   const [imgError, setImgError] = useState(false);
 
@@ -175,7 +178,7 @@ export default function PlaceholderImage({
         <img
           src={imageUrl}
           alt={label || "Car"}
-          className="absolute inset-0 w-full h-full object-cover"
+          className={`absolute inset-0 w-full h-full ${imageFit === "contain" ? "object-contain p-3" : "object-cover"}`}
           onError={() => setImgError(true)}
         />
       ) : (

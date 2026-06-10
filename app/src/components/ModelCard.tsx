@@ -33,6 +33,10 @@ interface ModelCardProps {
   onSelect?: (id: string) => void;
   onCompare?: (id: string) => void;
   onSave?: (id: string) => void;
+  /** Override the link target (defaults to `/model/${model.id}`). */
+  hrefOverride?: string;
+  /** How to fit the card image. Defaults to "cover". Use "contain" for studio thumbnails. */
+  imageFit?: "cover" | "contain";
 }
 
 function BrandLogo({
@@ -78,22 +82,25 @@ export default function ModelCard({
   onSelect,
   onCompare,
   onSave,
+  hrefOverride,
+  imageFit,
 }: ModelCardProps) {
   const { t, dir, ln } = useLanguage();
+  const href = hrefOverride ?? `/model/${model.id}`;
 
   return (
     <motion.div
       whileHover={{ y: -6, boxShadow: "0 20px 40px rgba(0,0,0,0.14)" }}
       whileTap={{ scale: 0.98 }}
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
-      className={`group relative cursor-pointer rounded-2xl overflow-hidden transition-colors ${
+      className={`group relative cursor-pointer rounded-2xl overflow-hidden transition-colors flex flex-col h-full ${
         isSelected
           ? "border-2 border-[#1A56DB] bg-[#1A56DB]/5"
           : "border border-[#E2E8F0] bg-gradient-to-b from-[#EEF2F7] to-[#DEE5EE]"
       }`}
     >
-      {/* Clickable area -- navigates to model detail */}
-      <EmbedLink href={`/model/${model.id}`} className="block">
+      {/* Clickable area -- navigates to model (or override) detail */}
+      <EmbedLink href={href} className="flex flex-col flex-1">
         {/* Image -- hero zone, car pops out over the content boundary */}
         <div className="relative">
           <div className="relative overflow-hidden">
@@ -104,14 +111,17 @@ export default function ModelCard({
                 bodyType={model.bodyType}
                 silhouetteSize="lg"
                 imageUrl={model.imageUrl}
+                imageFit={imageFit}
               />
             </div>
           </div>
 
         </div>
 
-        {/* Content -- white panel slides up over image to create pop-out effect */}
-        <div className="relative -mt-6 bg-white rounded-t-2xl px-4 pt-5 pb-3 space-y-2.5">
+        {/* Content -- white panel slides up over image to create pop-out effect.
+            flex-1 makes it absorb any extra grid height so the gradient parent
+            doesn't show through between this panel and the action row below. */}
+        <div className="relative -mt-6 bg-white rounded-t-2xl px-4 pt-5 pb-3 space-y-2.5 flex-1">
           {/* Brand logo + Name */}
           <div className="flex items-center gap-2.5">
             <BrandLogo
@@ -170,7 +180,7 @@ export default function ModelCard({
       {/* Actions -- outside the link to avoid nested interactive elements */}
       <div className="flex items-center gap-2 px-4 pb-3.5 pt-0 bg-white">
         <EmbedLink
-          href={`/model/${model.id}`}
+          href={href}
           className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-[#1E293B] text-white text-xs font-semibold rounded-lg hover:bg-[#0F172A] transition-colors"
         >
           {t.common.viewDetails}

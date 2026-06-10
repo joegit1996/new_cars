@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   ArrowRight,
@@ -26,7 +27,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import MobileTabBar from "@/components/MobileTabBar";
 import PlaceholderImage from "@/components/PlaceholderImage";
-import { EmbedAnchor } from "@/components/EmbedLink";
+import EmbedLink, { EmbedAnchor } from "@/components/EmbedLink";
 import { CompareProvider, useCompare } from "@/context/CompareContext";
 import { FinanceCalculator } from "@/components/FinanceCalculator";
 import { EquipmentCategory } from "@/data/types";
@@ -106,13 +107,13 @@ function Inner({ slug, trimId }: { slug: string; trimId: string }) {
               {seller.name}
             </p>
           </div>
-          <EmbedAnchor
-            href={`/sellers/${seller.slug}`}
+          <BackToSellerLink
+            slug={seller.slug}
             className="text-xs text-white/90 hover:text-white inline-flex items-center gap-1 whitespace-nowrap"
           >
             <ArrowLeft className={`w-3.5 h-3.5 ${dir === "rtl" ? "rotate-180" : ""}`} />
             {t.sellers.backToSeller}
-          </EmbedAnchor>
+          </BackToSellerLink>
         </div>
       </div>
 
@@ -544,5 +545,61 @@ function SpecChip({ icon, label, value }: { icon: React.ReactNode; label: string
       </div>
       <p className="text-sm font-bold text-[#1E293B]">{value}</p>
     </div>
+  );
+}
+
+// Renders as a regular link to the seller page (so middle-click / open-in-new-tab
+// still works), but on a plain left-click prefers browser back when the user
+// actually came from that seller page in this session — preserving the saved
+// scroll position and filter/sort state on the seller landing. Falls back to a
+// SPA push for deep-linked landings.
+// We can't use document.referrer because SPA navigation doesn't update it; we
+// rely on a tag the seller page writes to sessionStorage on mount.
+const SELLER_ORIGIN_KEY = "__sellerPageOrigin";
+const SELLER_ORIGIN_TTL_MS = 30 * 60 * 1000; // 30 minutes
+
+function BackToSellerLink({
+  slug,
+  className,
+  children,
+}: {
+  slug: string;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  const router = useRouter();
+  const [cameFromSeller, setCameFromSeller] = useState(false);
+  const href = `/sellers/${slug}`;
+
+  useEffect(() => {
+    try {
+      const v = sessionStorage.getItem(SELLER_ORIGIN_KEY);
+      if (!v) return;
+      const [savedSlug, tsStr] = v.split("|");
+      const ts = Number.parseInt(tsStr ?? "0", 10);
+      if (savedSlug === slug && Number.isFinite(ts) && Date.now() - ts < SELLER_ORIGIN_TTL_MS) {
+        setCameFromSeller(true);
+      }
+    } catch {
+      /* sessionStorage may be unavailable */
+    }
+  }, [slug]);
+
+  return (
+    <EmbedLink
+      href={href}
+      className={className}
+      onClick={(e) => {
+        // Allow open-in-new-tab and middle-click to use the href.
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+        if (e.button !== undefined && e.button !== 0) return;
+        if (cameFromSeller) {
+          e.preventDefault();
+          router.back();
+        }
+      }}
+    >
+      {children}
+    </EmbedLink>
   );
 }
