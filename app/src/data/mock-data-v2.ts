@@ -1,6 +1,7 @@
 import {
   type Brand, type Model, type Trim, type Branch, type LifestyleCollection,
   type BrandEditorial,
+  type Seller, type SellerListing,
   BodyType, FuelType, TransmissionType, DriveType, SpecRegion, EquipmentCategory,
 } from "./types";
 
@@ -470,4 +471,85 @@ export const lifestyleCollections: LifestyleCollection[] = [
   { id: "luxury-daily", title: "Luxury Daily Drivers", description: "Arrive in style every single day.", imageUrl: "/images/cars/merc-s500-front.jpg", modelIds: ["merc-s500", "merc-e200", "por-panamera", "por-macan", "por-taycan", "bmw-7", "bmw-5", "bmw-3"] },
   { id: "budget-friendly", title: "Budget-Friendly Under 8,000 KWD", description: "Great value cars perfect for every budget.", imageUrl: "/images/cars/mitsu-xforce-front.jpg", modelIds: ["mitsu-mirage", "mitsu-attrage", "mitsu-xforce", "mitsu-asx", "mitsu-xpander", "soueast-s06", "soueast-s07", "soueast-s09"] },
   { id: "electric-hybrid", title: "Electric & Hybrid", description: "The future of driving, available today.", imageUrl: "/images/cars/por-taycan-front.jpg", modelIds: ["merc-eqe350", "por-taycan", "por-macan-ev", "por-cayenne-ev", "bmw-m5", "soueast-s08"] },
+];
+
+// ============ SELLERS ============
+// Bank Boubyan -- Kuwait's leading Islamic bank, offers shariah-compliant auto
+// financing (Murabaha) up to 25,000 KWD with tenors of 12-60 months.
+export const sellers: Seller[] = [
+  {
+    id: "boubyan",
+    slug: "boubyan",
+    name: "Bank Boubyan",
+    type: "financier",
+    featured: true,
+    logoUrl: "https://www.bankboubyan.com/_next/static/media/logo.e3990994.svg",
+    brandColor: "#003B71",
+    brandColorDark: "#00264A",
+    tagline: "Making it easy with Boubyan",
+    websiteUrl: "https://www.bankboubyan.com/en/personal/finance/auto/boubyan-cars",
+    heroMedia: {
+      type: "image",
+      url: "https://www.bankboubyan.com/media/filer_public/22/48/22484cef-db73-45bb-be81-d63509110186/hp_banners-_boubyan.webp",
+    },
+    heroImages: [
+      "https://www.bankboubyan.com/media/filer_public/22/48/22484cef-db73-45bb-be81-d63509110186/hp_banners-_boubyan.webp",
+      "https://www.bankboubyan.com/media/filer_public/2d/37/2d3764eb-4b9b-45b9-8dbd-68603b9dc62a/finance_detail_page_copy_4.webp",
+      "https://www.bankboubyan.com/media/filer_public/f7/59/f75926d1-dc96-49f5-81a9-dc1db7986dd8/visual_container_29_1.webp",
+      "https://www.bankboubyan.com/media/filer_public/51/a3/51a366bf-9811-42a8-bb14-401e8e0c0d20/visual_container_10_4.webp",
+    ],
+    about: {
+      headline: "Kuwait's leading Islamic bank",
+      body: "Boubyan Bank delivers a complete suite of Shariah-compliant financial services -- from everyday banking and investments to insurance and real estate. Boubyan Auto Finance lets you drive home a new car with a structured Murabaha plan tailored to your monthly budget.",
+      imageUrl: "https://www.bankboubyan.com/media/filer_public/22/48/22484cef-db73-45bb-be81-d63509110186/hp_banners-_boubyan.webp",
+    },
+    financingIntro: {
+      headline: "Boubyan Cars Auto Finance",
+      body: "A Shariah-compliant Murabaha plan with flexible tenors and competitive profit rates, available for both salary transfer and non-salary transfer customers in Kuwait.",
+      bullets: [
+        "Shariah-compliant (Murabaha)",
+        "Finance amount up to 25,000 KWD",
+        "Tenor from 12 to 60 months",
+        "Down payment from 0%",
+        "Quick approval and digital application",
+      ],
+    },
+    calculator: {
+      paymentType: "installment",
+      downPayment: { minPct: 0, maxPct: 50, defaultPct: 10, stepPct: 5 },
+      tenure: { optionsMonths: [12, 24, 36, 48, 60], defaultMonths: 48 },
+      profitRate: 0.045,
+      adminFee: 0,
+      notes: "Shariah-compliant Murabaha plan. Profit rate is indicative and subject to Boubyan Bank approval.",
+      maxFinanceAmount: 25000,
+    },
+  },
+];
+
+// ============ SELLER LISTINGS ============
+// Boubyan finances the BMW models listed on bankboubyan.com/en/.../cars-list.
+// Thumbnails are sourced from their CDN (moteryapp.com) -- the same images used
+// on Boubyan's car-list cards.
+const BOUBYAN_THUMBS = {
+  bmw3: "https://moteryapp.com/downloads/carMain/11s.png?d=262510838",
+  bmw4: "https://moteryapp.com/downloads/carMain/12s.png?d=262510719",
+  bmw2: "https://moteryapp.com/downloads/carMain/13s.png?d=262510721",
+  bmw5: "https://moteryapp.com/downloads/carMain/14s.png?d=251880657",
+  bmwX1: "https://moteryapp.com/downloads/carMain/19s.png?d=262510841",
+} as const;
+
+export const sellerListings: SellerListing[] = [
+  // BMW 3 Series
+  { id: "boubyan-bmw-3-318i", sellerId: "boubyan", trimId: "bmw-3-318i", modelId: "bmw-3", price: 15999, paymentType: "installment", promoText: "From 315 KWD/month", thumbnailUrl: BOUBYAN_THUMBS.bmw3, listingUrl: "https://www.bankboubyan.com/en/personal/finance/auto/boubyan-cars/cars-list/11-3%20Series" },
+  { id: "boubyan-bmw-3-318i-msport", sellerId: "boubyan", trimId: "bmw-3-318i-msport", modelId: "bmw-3", price: 17450, paymentType: "installment", promoText: "Shariah-compliant Murabaha", thumbnailUrl: BOUBYAN_THUMBS.bmw3, listingUrl: "https://www.bankboubyan.com/en/personal/finance/auto/boubyan-cars/cars-list/11-3%20Series" },
+  // BMW 2 Series Coupe
+  { id: "boubyan-bmw-2c-230i", sellerId: "boubyan", trimId: "bmw-2c-230i", modelId: "bmw-2c", price: 18950, paymentType: "installment", promoText: "From 303 KWD/month", thumbnailUrl: BOUBYAN_THUMBS.bmw2, listingUrl: "https://www.bankboubyan.com/en/personal/finance/auto/boubyan-cars/cars-list" },
+  // BMW 4 Series Coupe
+  { id: "boubyan-bmw-4c-420", sellerId: "boubyan", trimId: "bmw-4c-420", modelId: "bmw-4c", price: 19750, paymentType: "installment", promoText: "From 389 KWD/month", thumbnailUrl: BOUBYAN_THUMBS.bmw4, listingUrl: "https://www.bankboubyan.com/en/personal/finance/auto/boubyan-cars/cars-list" },
+  // BMW 5 Series
+  { id: "boubyan-bmw-5-520", sellerId: "boubyan", trimId: "bmw-5-520", modelId: "bmw-5", price: 23900, paymentType: "installment", promoText: "From 470 KWD/month", thumbnailUrl: BOUBYAN_THUMBS.bmw5, listingUrl: "https://www.bankboubyan.com/en/personal/finance/auto/boubyan-cars/cars-list" },
+  // BMW X1
+  { id: "boubyan-bmw-x1-bl", sellerId: "boubyan", trimId: "bmw-x1-20i-bl", modelId: "bmw-x1", price: 11999, paymentType: "installment", promoText: "From 245 KWD/month", thumbnailUrl: BOUBYAN_THUMBS.bmwX1, listingUrl: "https://www.bankboubyan.com/en/personal/finance/auto/boubyan-cars/cars-list" },
+  { id: "boubyan-bmw-x1-xline", sellerId: "boubyan", trimId: "bmw-x1-20i-xline", modelId: "bmw-x1", price: 16250, paymentType: "installment", promoText: "From 320 KWD/month", thumbnailUrl: BOUBYAN_THUMBS.bmwX1, listingUrl: "https://www.bankboubyan.com/en/personal/finance/auto/boubyan-cars/cars-list" },
+  { id: "boubyan-bmw-x1-msport", sellerId: "boubyan", trimId: "bmw-x1-20i-msport", modelId: "bmw-x1", price: 18850, paymentType: "installment", promoText: "Shariah-compliant Murabaha", thumbnailUrl: BOUBYAN_THUMBS.bmwX1, listingUrl: "https://www.bankboubyan.com/en/personal/finance/auto/boubyan-cars/cars-list" },
 ];

@@ -202,6 +202,94 @@ export interface Branch {
   mapUrl: string;
 }
 
+// ---------------------------------------------------------------------------
+// Sellers (dealers, financiers) -- a model/trim can be sold by multiple sellers
+// ---------------------------------------------------------------------------
+
+export type SellerType = "dealer" | "financier";
+
+export type PaymentType = "cash" | "installment";
+
+export interface FinancierCalcConfig {
+  paymentType: PaymentType;
+  /** Down-payment slider config (used when paymentType === "installment"). */
+  downPayment?: {
+    minPct: number;
+    maxPct: number;
+    defaultPct: number;
+    stepPct: number;
+  };
+  /** Available tenure options in months. */
+  tenure?: {
+    optionsMonths: number[];
+    defaultMonths: number;
+  };
+  /** Annualised profit / interest rate (e.g. 0.039 = 3.9%). */
+  profitRate?: number;
+  /** Flat admin fee in KWD. */
+  adminFee?: number;
+  /** Optional caveat note shown under the calculator. */
+  notes?: string;
+  /** Cap on the financed amount, if any (KWD). */
+  maxFinanceAmount?: number;
+}
+
+export interface SellerHeroMedia {
+  type: "image" | "video";
+  url: string;
+  poster?: string;
+}
+
+export interface Seller {
+  id: string;
+  slug: string;
+  name: string;
+  type: SellerType;
+  /** Show on the home Featured Sellers section and elevate in the index. */
+  featured?: boolean;
+  logoUrl: string;
+  /** Primary brand colour for the seller (used for accents / branded calculator). */
+  brandColor: string;
+  brandColorDark?: string;
+  tagline?: string;
+  websiteUrl?: string;
+  heroMedia?: SellerHeroMedia;
+  /** Multiple images cycled in the seller landing hero (crossfade). */
+  heroImages?: string[];
+  /** Long-form copy for the seller landing page. */
+  about?: {
+    headline: string;
+    body: string;
+    imageUrl?: string;
+  };
+  /** Financing programme intro (financiers only). */
+  financingIntro?: {
+    headline: string;
+    body: string;
+    bullets: string[];
+  };
+  /** Default calculator config used by listings when they don't override. */
+  calculator?: FinancierCalcConfig;
+}
+
+export interface SellerListing {
+  id: string;
+  sellerId: string;
+  trimId: string;
+  modelId: string;
+  /** Listed price in KWD; may differ from trim.price. */
+  price: number;
+  paymentType: PaymentType;
+  /** Marketing text shown on the listing card. */
+  promoText?: string;
+  /** Deep link to the seller's own page for this car. */
+  listingUrl?: string;
+  /** Per-listing override on top of the seller's default calculator. */
+  calculatorOverride?: Partial<FinancierCalcConfig>;
+  /** Thumbnail image shown on the seller-listing card (overrides trim/model imagery). */
+  thumbnailUrl?: string;
+}
+
 export interface LifestyleCollection {
   id: string;
   title: string;

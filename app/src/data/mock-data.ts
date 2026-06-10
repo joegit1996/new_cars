@@ -12,3 +12,7 @@ export const trims = src.trims;
 export const models = src.models;
 export const branches = src.branches;
 export const lifestyleCollections = src.lifestyleCollections;
+// Sellers were introduced with v2. v1 falls back to empty arrays.
+import type { Seller, SellerListing } from "./types";
+export const sellers: Seller[] = ("sellers" in src ? (src as { sellers: Seller[] }).sellers : []) ?? [];
+export const sellerListings: SellerListing[] = ("sellerListings" in src ? (src as { sellerListings: SellerListing[] }).sellerListings : []) ?? [];

@@ -1,13 +1,13 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, useCallback, useRef, type ReactNode } from "react";
-import type { Brand, Model, Trim, LifestyleCollection, SearchEntry, ModelAggregateSpecs, BrandEditorial, SortBy } from "@/data/types";
+import type { Brand, Model, Trim, LifestyleCollection, SearchEntry, ModelAggregateSpecs, BrandEditorial, SortBy, Seller, SellerListing } from "@/data/types";
 import { type FilterState } from "@/components/FilterPanel";
 
 // ---------------------------------------------------------------------------
 // Mock data source (synchronous)
 // ---------------------------------------------------------------------------
-import { brands as mockBrands, models as mockModels, lifestyleCollections as mockCollections } from "@/data/mock-data";
+import { brands as mockBrands, models as mockModels, lifestyleCollections as mockCollections, sellers as mockSellers } from "@/data/mock-data";
 import * as mockHelpers from "@/data/helpers";
 
 // ---------------------------------------------------------------------------
@@ -30,6 +30,7 @@ interface AppData {
   brands: Brand[];
   models: Model[];
   lifestyleCollections: LifestyleCollection[];
+  sellers: Seller[];
   // Helpers
   getBrandById: (id: string) => Brand | undefined;
   getBrandByModelId: (modelId: string) => Brand | undefined;
@@ -51,6 +52,15 @@ interface AppData {
   filterModels: (allModels: Model[], filters: FilterState) => Model[];
   sortModels: (allModels: Model[], sortBy: SortBy) => Model[];
   getBranchesForModel: (modelId: string) => ReturnType<typeof mockHelpers.getBranchesForModel>;
+  // Sellers
+  getAllSellers: () => Seller[];
+  getSellerBySlug: (slug: string) => Seller | undefined;
+  getSellerById: (id: string) => Seller | undefined;
+  getListingsBySeller: (sellerId: string) => SellerListing[];
+  getListingById: (id: string) => SellerListing | undefined;
+  getListingForSellerTrim: (sellerId: string, trimId: string) => SellerListing | undefined;
+  getSellerListingsForTrim: (trimId: string) => Array<{ seller: Seller; listing: SellerListing }>;
+  getSellersForModel: (modelId: string) => Array<{ seller: Seller; listings: SellerListing[] }>;
   brandColors: Record<string, string>;
 }
 
@@ -64,6 +74,7 @@ const mockData: AppData = {
   brands: mockBrands,
   models: mockModels,
   lifestyleCollections: mockCollections,
+  sellers: mockSellers,
   getBrandById: mockHelpers.getBrandById,
   getBrandByModelId: mockHelpers.getBrandByModelId,
   getBrandEditorial: mockHelpers.getBrandEditorial,
@@ -84,6 +95,14 @@ const mockData: AppData = {
   filterModels: mockHelpers.filterModels,
   sortModels: mockHelpers.sortModels,
   getBranchesForModel: mockHelpers.getBranchesForModel,
+  getAllSellers: mockHelpers.getAllSellers,
+  getSellerBySlug: mockHelpers.getSellerBySlug,
+  getSellerById: mockHelpers.getSellerById,
+  getListingsBySeller: mockHelpers.getListingsBySeller,
+  getListingById: mockHelpers.getListingById,
+  getListingForSellerTrim: mockHelpers.getListingForSellerTrim,
+  getSellerListingsForTrim: mockHelpers.getSellerListingsForTrim,
+  getSellersForModel: mockHelpers.getSellersForModel,
   brandColors: mockHelpers.brandColors,
 };
 
@@ -443,6 +462,7 @@ function ApiDataProvider({ children }: { children: ReactNode }) {
     brands,
     models,
     lifestyleCollections: collections,
+    sellers: [],
     getBrandById,
     getBrandByModelId,
     getBrandEditorial,
@@ -463,6 +483,15 @@ function ApiDataProvider({ children }: { children: ReactNode }) {
     filterModels: mockHelpers.filterModels,
     sortModels: mockHelpers.sortModels,
     getBranchesForModel: () => [],
+    // Sellers are mock-only for now; API mode returns empty
+    getAllSellers: () => [],
+    getSellerBySlug: () => undefined,
+    getSellerById: () => undefined,
+    getListingsBySeller: () => [],
+    getListingById: () => undefined,
+    getListingForSellerTrim: () => undefined,
+    getSellerListingsForTrim: () => [],
+    getSellersForModel: () => [],
     brandColors: mockHelpers.brandColors,
   };
 

@@ -1,5 +1,5 @@
-import { brands, models, trims, branches, lifestyleCollections } from "./mock-data";
-import type { Model, Brand, Trim, LifestyleCollection, SortBy, BrandEditorial, SearchEntry, ModelAggregateSpecs } from "./types";
+import { brands, models, trims, branches, lifestyleCollections, sellers, sellerListings } from "./mock-data";
+import type { Model, Brand, Trim, LifestyleCollection, SortBy, BrandEditorial, SearchEntry, ModelAggregateSpecs, Seller, SellerListing } from "./types";
 import { type FilterState } from "../components/FilterPanel";
 
 export const brandColors: Record<string, string> = {
@@ -86,6 +86,59 @@ export function getModelsByLifestyleCollection(collectionId: string): Model[] {
 
 export function getCollectionById(id: string): LifestyleCollection | undefined {
   return lifestyleCollections.find((c) => c.id === id);
+}
+
+export function getAllSellers(): Seller[] {
+  return sellers;
+}
+
+export function getSellerBySlug(slug: string): Seller | undefined {
+  return sellers.find((s) => s.slug === slug);
+}
+
+export function getSellerById(id: string): Seller | undefined {
+  return sellers.find((s) => s.id === id);
+}
+
+export function getListingsBySeller(sellerId: string): SellerListing[] {
+  return sellerListings.filter((l) => l.sellerId === sellerId);
+}
+
+export function getListingById(id: string): SellerListing | undefined {
+  return sellerListings.find((l) => l.id === id);
+}
+
+/** Returns the listing for a given (seller, trim) pair, or undefined. */
+export function getListingForSellerTrim(sellerId: string, trimId: string): SellerListing | undefined {
+  return sellerListings.find((l) => l.sellerId === sellerId && l.trimId === trimId);
+}
+
+/** All sellers who offer a specific trim, with their listing. */
+export function getSellerListingsForTrim(trimId: string): Array<{ seller: Seller; listing: SellerListing }> {
+  return sellerListings
+    .filter((l) => l.trimId === trimId)
+    .map((listing) => {
+      const seller = sellers.find((s) => s.id === listing.sellerId);
+      return seller ? { seller, listing } : null;
+    })
+    .filter((x): x is { seller: Seller; listing: SellerListing } => x !== null);
+}
+
+/** Aggregated by seller across all trims of a model. */
+export function getSellersForModel(modelId: string): Array<{ seller: Seller; listings: SellerListing[] }> {
+  const grouped = new Map<string, SellerListing[]>();
+  for (const l of sellerListings) {
+    if (l.modelId !== modelId) continue;
+    const arr = grouped.get(l.sellerId) ?? [];
+    arr.push(l);
+    grouped.set(l.sellerId, arr);
+  }
+  const out: Array<{ seller: Seller; listings: SellerListing[] }> = [];
+  for (const [sellerId, listings] of grouped) {
+    const seller = sellers.find((s) => s.id === sellerId);
+    if (seller) out.push({ seller, listings });
+  }
+  return out;
 }
 
 export function getBranchesForModel(_modelId: string) {

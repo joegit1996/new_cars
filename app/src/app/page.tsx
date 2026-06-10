@@ -27,6 +27,7 @@ import { useAppData } from "@/context/AppDataContext";
 import { useLanguage, tFormat } from "@/context/LanguageContext";
 import { FEATURED_BRAND_ORDER } from "@/data/api-mappers";
 import type { Brand } from "@/data/types";
+import SellerCard from "@/components/SellerCard";
 
 // ---------- Animation Helpers ----------
 
@@ -681,6 +682,36 @@ function BrowseByBrandLogo({ brand }: { brand: Brand }) {
   );
 }
 
+function FeaturedSellers() {
+  const { sellers, getListingsBySeller } = useAppData();
+  const { t } = useLanguage();
+  const featured = useMemo(
+    () => sellers.filter((s) => s.featured),
+    [sellers]
+  );
+  if (featured.length === 0) return null;
+
+  return (
+    <AnimatedSection className="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-12">
+      <SectionTitle
+        title={t.home.featuredSellers.title}
+        subtitle={t.home.featuredSellers.subtitle}
+        href="/sellers"
+        linkLabel={t.home.featuredSellers.viewAll}
+      />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
+        {featured.map((seller) => (
+          <SellerCard
+            key={seller.id}
+            seller={seller}
+            listingCount={getListingsBySeller(seller.id).length}
+          />
+        ))}
+      </div>
+    </AnimatedSection>
+  );
+}
+
 function BrowseByBrand() {
   const { brands } = useAppData();
   const { t, ln } = useLanguage();
@@ -1181,6 +1212,7 @@ function HomePageContent() {
       <main className="flex-1 pb-20 md:pb-0">
         <HeroSection />
         <FeaturedBrands />
+        <FeaturedSellers />
         <BrowseByBrand />
         <BrowseByBodyType />
         <PopularModels />

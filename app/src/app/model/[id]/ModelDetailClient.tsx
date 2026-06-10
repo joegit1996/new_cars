@@ -44,6 +44,9 @@ import { CompareProvider } from "@/context/CompareContext";
 import { EmbedAnchor } from "@/components/EmbedLink";
 import { useIsEmbedded } from "@/hooks/useIsEmbedded";
 import { CardsParallax } from "@/components/ui/scroll-cards";
+import { FinanceCalculator } from "@/components/FinanceCalculator";
+import NextImage from "next/image";
+import type { FinancierCalcConfig, Seller, SellerListing } from "@/data/types";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -1091,22 +1094,50 @@ function PricingBreakdown({
   selectedVariant: TrimVariant | null;
 }) {
   const { t } = useLanguage();
+  const { getSellerListingsForTrim } = useAppData();
   const onRequest = trim.priceOnRequest === true;
   const basePrice = selectedVariant ? selectedVariant.price : trim.price;
   const regFees = Math.round(basePrice * 0.02);
   const insurance = Math.round(basePrice * 0.035);
   const totalEstimate = basePrice + regFees + insurance;
 
-  const [downPct, setDownPct] = useState(20);
-  const [tenure, setTenure] = useState(48);
+  const sellerOffers = getSellerListingsForTrim(trim.id);
+  // Default the calculator to the first available financier listing for this
+  // trim (e.g. Boubyan when it covers the car). Falls back to the generic
+  // calculator when no listing exists.
+  const defaultFinancierId = useMemo(
+    () =>
+      sellerOffers.find(
+        (o) => o.seller.type === "financier" && o.listing.paymentType === "installment"
+      )?.seller.id ?? null,
+    [sellerOffers]
+  );
+  const [selectedSellerId, setSelectedSellerId] = useState<string | null>(defaultFinancierId);
 
-  const downPayment = Math.round(totalEstimate * (downPct / 100));
-  const financed = totalEstimate - downPayment;
-  const rate = 0.039;
-  const monthly =
-    tenure > 0
-      ? Math.round((financed * (1 + rate * (tenure / 12))) / tenure)
-      : 0;
+  // When the user switches trims/variants, re-pick the default for the new trim.
+  useEffect(() => {
+    setSelectedSellerId(defaultFinancierId);
+  }, [defaultFinancierId, trim.id]);
+
+  const selectedOffer = selectedSellerId
+    ? sellerOffers.find((o) => o.seller.id === selectedSellerId) ?? null
+    : null;
+
+  const effectiveCalcConfig: FinancierCalcConfig | undefined = selectedOffer
+    ? {
+        ...(selectedOffer.seller.calculator ?? { paymentType: "installment" }),
+        ...selectedOffer.listing.calculatorOverride,
+      }
+    : undefined;
+
+  const effectiveAccent = selectedOffer
+    ? {
+        primary: selectedOffer.seller.brandColor,
+        primaryDark: selectedOffer.seller.brandColorDark,
+        logoUrl: selectedOffer.seller.logoUrl,
+        label: selectedOffer.seller.name,
+      }
+    : undefined;
 
   if (onRequest) {
     return (
@@ -1115,6 +1146,13 @@ function PricingBreakdown({
           <p className="text-sm text-[#64748B] mb-1">{t.model.basePriceLabel}</p>
           <p className="text-3xl font-bold text-[#F59E0B]">{t.common.priceOnRequest}</p>
         </div>
+        {sellerOffers.length > 0 && (
+          <SellerOffersList
+            offers={sellerOffers}
+            selectedSellerId={selectedSellerId}
+            onSelect={setSelectedSellerId}
+          />
+        )}
       </div>
     );
   }
@@ -1146,55 +1184,197 @@ function PricingBreakdown({
         </div>
       </div>
 
-      {/* Monthly Calculator */}
-      <div className="bg-[#F1F5F9] rounded-xl p-5 space-y-5">
-        <h4 className="font-bold text-[#1E293B] text-sm">{t.model.monthlyCalculator}</h4>
+      {/* Available sellers */}
+      {sellerOffers.length > 0 && (
+        <SellerOffersList
+          offers={sellerOffers}
+          selectedSellerId={selectedSellerId}
+          onSelect={setSelectedSellerId}
+        />
+      )}
 
-        <div>
-          <div className="flex justify-between text-sm mb-2">
-            <span className="text-[#64748B]">{t.model.downPayment}</span>
-            <span className="text-[#1E293B] font-medium">{downPct}% ({formatPrice(downPayment)} {t.common.kwd})</span>
-          </div>
-          <input
-            type="range"
-            min={10}
-            max={50}
-            step={5}
-            value={downPct}
-            onChange={(e) => setDownPct(Number(e.target.value))}
-            className="w-full accent-[#1A56DB]"
-          />
-          <div className="flex justify-between text-xs text-[#64748B] mt-1">
-            <span>10%</span>
-            <span>50%</span>
-          </div>
-        </div>
+      {/* Monthly Calculator (rebrands when a financier is selected) */}
+      <FinanceCalculator
+        totalEstimate={totalEstimate}
+        config={effectiveCalcConfig}
+        accent={effectiveAccent}
+        branded={!!selectedOffer}
+      />
+    </div>
+  );
+}
 
-        <div>
-          <div className="flex justify-between text-sm mb-2">
-            <span className="text-[#64748B]">{t.model.tenure}</span>
-            <span className="text-[#1E293B] font-medium">{tenure} {t.model.months}</span>
-          </div>
-          <input
-            type="range"
-            min={12}
-            max={60}
-            step={6}
-            value={tenure}
-            onChange={(e) => setTenure(Number(e.target.value))}
-            className="w-full accent-[#1A56DB]"
-          />
-          <div className="flex justify-between text-xs text-[#64748B] mt-1">
-            <span>12 {t.model.months}</span>
-            <span>60 {t.model.months}</span>
-          </div>
-        </div>
+function HeroSellerChips({ trimId }: { trimId: string }) {
+  const { t } = useLanguage();
+  const { getSellerListingsForTrim } = useAppData();
+  const offers = getSellerListingsForTrim(trimId);
+  if (offers.length === 0) return null;
 
-        <div className="bg-white rounded-lg p-4 text-center">
-          <p className="text-xs text-[#64748B] mb-1">{t.model.estimatedMonthly}</p>
-          <p className="text-2xl font-bold text-[#1A56DB]">{formatPrice(monthly)} {t.model.kwdPerMo}</p>
-        </div>
+  return (
+    <div className="mt-6">
+      <p className="text-[11px] uppercase tracking-wider text-[#64748B] font-bold mb-2">
+        {t.model.alsoAvailableFrom}
+      </p>
+      <div className="flex flex-wrap items-center justify-center gap-2">
+        {offers.map(({ seller, listing }) => (
+          <EmbedAnchor
+            key={listing.id}
+            href={`/sellers/${seller.slug}/listings/${listing.trimId}`}
+            className="group inline-flex items-center gap-2 rounded-full bg-white border pl-1.5 pr-3 py-1 transition-colors hover:shadow-sm"
+            style={{ borderColor: `${seller.brandColor}33` }}
+          >
+            <span
+              className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-white border"
+              style={{ borderColor: `${seller.brandColor}55` }}
+            >
+              <NextImage
+                src={seller.logoUrl}
+                alt={seller.name}
+                width={20}
+                height={20}
+                className="w-4 h-4 object-contain"
+                unoptimized
+              />
+            </span>
+            <span className="text-xs font-bold text-[#1E293B]">{seller.name}</span>
+            {listing.promoText && (
+              <span
+                className="text-[11px] font-semibold border-s ps-2"
+                style={{ color: seller.brandColor, borderColor: `${seller.brandColor}33` }}
+              >
+                {listing.promoText}
+              </span>
+            )}
+            <ArrowUpRight
+              className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5"
+              style={{ color: seller.brandColor }}
+            />
+          </EmbedAnchor>
+        ))}
       </div>
+    </div>
+  );
+}
+
+function SellerOffersList({
+  offers,
+  selectedSellerId,
+  onSelect,
+}: {
+  offers: Array<{ seller: Seller; listing: SellerListing }>;
+  selectedSellerId: string | null;
+  onSelect: (sellerId: string | null) => void;
+}) {
+  const { t } = useLanguage();
+  return (
+    <div className="bg-[#F1F5F9] rounded-xl p-5 space-y-3">
+      <div className="flex items-baseline justify-between">
+        <h4 className="font-bold text-[#1E293B] text-sm">
+          {t.model.availableFromTitle}
+        </h4>
+        <span className="text-xs text-[#64748B]">
+          {offers.length} {offers.length === 1 ? t.model.seller : t.model.sellers}
+        </span>
+      </div>
+      <div className="space-y-2">
+        {offers.map(({ seller, listing }) => {
+          const active = selectedSellerId === seller.id;
+          return (
+            <div
+              key={listing.id}
+              className="rounded-lg border bg-white p-3 sm:p-4 transition-colors"
+              style={{
+                borderColor: active ? seller.brandColor : "#E2E8F0",
+                boxShadow: active
+                  ? `0 0 0 1px ${seller.brandColor} inset`
+                  : undefined,
+              }}
+            >
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                <div
+                  className="inline-flex items-center justify-center rounded-md bg-white p-1.5 border self-start sm:self-auto"
+                  style={{ borderColor: `${seller.brandColor}33` }}
+                >
+                  <NextImage
+                    src={seller.logoUrl}
+                    alt={seller.name}
+                    width={80}
+                    height={24}
+                    className="h-6 w-auto object-contain"
+                    unoptimized
+                  />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="text-sm font-bold text-[#1E293B]">{seller.name}</p>
+                    <span
+                      className="inline-flex items-center text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded"
+                      style={{
+                        background: `${seller.brandColor}1A`,
+                        color: seller.brandColor,
+                      }}
+                    >
+                      {listing.paymentType === "installment"
+                        ? t.model.installment
+                        : t.model.cash}
+                    </span>
+                  </div>
+                  {listing.promoText && (
+                    <p className="text-xs text-[#64748B] mt-0.5 truncate">
+                      {listing.promoText}
+                    </p>
+                  )}
+                </div>
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="text-end">
+                    <p className="text-[11px] text-[#64748B] leading-tight">
+                      {t.model.priceLabel}
+                    </p>
+                    <p className="text-sm font-bold text-[#1E293B] leading-tight">
+                      {formatPrice(listing.price)} {t.common.kwd}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => onSelect(active ? null : seller.id)}
+                    className="px-3 py-1.5 rounded-lg text-xs font-bold transition-colors whitespace-nowrap"
+                    style={
+                      active
+                        ? {
+                            background: "#fff",
+                            color: seller.brandColor,
+                            border: `1px solid ${seller.brandColor}`,
+                          }
+                        : {
+                            background: seller.brandColor,
+                            color: "#fff",
+                          }
+                    }
+                  >
+                    {active ? t.model.usingCalculator : t.model.useCalculator}
+                  </button>
+                  <EmbedAnchor
+                    href={`/sellers/${seller.slug}/listings/${listing.trimId}`}
+                    className="text-xs font-semibold underline whitespace-nowrap"
+                    style={{ color: seller.brandColor }}
+                  >
+                    {t.model.viewSellerPage}
+                  </EmbedAnchor>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      {selectedSellerId && (
+        <button
+          type="button"
+          onClick={() => onSelect(null)}
+          className="text-xs text-[#64748B] hover:text-[#1E293B] underline"
+        >
+          {t.model.resetCalculator}
+        </button>
+      )}
     </div>
   );
 }
@@ -1500,6 +1680,9 @@ export default function ModelDetailClient({ id }: { id: string }) {
                     </a>
                   )}
                 </div>
+
+                {/* Sellers for this trim (compact chip row) */}
+                <HeroSellerChips trimId={selectedTrim.id} />
 
                 {/* Variant selector */}
                 {selectedTrim.variants.length > 0 && (

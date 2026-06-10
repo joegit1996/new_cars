@@ -65,6 +65,16 @@ const mockDataSource = {
   // Branches
   getBranchesForModel: (_modelId: string) => mockHelpers.getBranchesForModel(_modelId),
 
+  // Sellers
+  getAllSellers: async () => mockHelpers.getAllSellers(),
+  getSellerBySlug: async (slug: string) => mockHelpers.getSellerBySlug(slug),
+  getSellerById: async (id: string) => mockHelpers.getSellerById(id),
+  getListingsBySeller: async (sellerId: string) => mockHelpers.getListingsBySeller(sellerId),
+  getListingById: async (id: string) => mockHelpers.getListingById(id),
+  getListingForSellerTrim: async (sellerId: string, trimId: string) => mockHelpers.getListingForSellerTrim(sellerId, trimId),
+  getSellerListingsForTrim: async (trimId: string) => mockHelpers.getSellerListingsForTrim(trimId),
+  getSellersForModel: async (modelId: string) => mockHelpers.getSellersForModel(modelId),
+
   // Home page composite
   getHomePageData: async () => ({
     brands: mockBrands,
@@ -125,6 +135,16 @@ const apiDataSource = {
 
   // Branches
   getBranchesForModel: (_modelId: string) => apiHelpers.getBranchesForModel(_modelId),
+
+  // Sellers (not yet wired to the API -- empty stubs)
+  getAllSellers: async () => [],
+  getSellerBySlug: async (_slug: string) => undefined,
+  getSellerById: async (_id: string) => undefined,
+  getListingsBySeller: async (_sellerId: string) => [],
+  getListingById: async (_id: string) => undefined,
+  getListingForSellerTrim: async (_sellerId: string, _trimId: string) => undefined,
+  getSellerListingsForTrim: async (_trimId: string) => [],
+  getSellersForModel: async (_modelId: string) => [],
 
   // Home page composite
   getHomePageData: () => apiHelpers.getHomePageData(),
